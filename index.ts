@@ -16,6 +16,8 @@ osScriptExt.set("nix", "sh");
 const command = `${osMap.get(os)}${path}.${osScriptExt.get(os)}`;
 console.log(command);
 
+// TODO: open file, replace with {{args}} AND THEN execute
+
 const ls = exec(command);
 
 ls.stdout.on("data", (data: { toString: () => string; }) => {
