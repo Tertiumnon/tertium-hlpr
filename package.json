@@ -1,0 +1,17 @@
+{
+  "name": "chelper",
+  "description": "Windows and *Nix utility for usual activity",
+  "author": "Vitalii Balabanov",
+  "email": "tertiumnon@gmail.com",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.6.3"
+  },
+  "bin": {
+    "chelper": "./index.js"
+  }
+}
