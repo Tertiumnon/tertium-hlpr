@@ -1,17 +1,23 @@
 {
-  "name": "chelper",
-  "description": "Windows and *Nix utility for usual activity",
+  "name": "chlpr",
+  "version": "0.1.0",
+  "description": "Windows and *Nix utility for typical programming activity",
   "author": "Vitalii Balabanov",
   "email": "tertiumnon@gmail.com",
   "module": "index.ts",
   "type": "module",
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "release:minor": "bun run build && bun src/index release npm-release-minor"
+  },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/node": "^22.13.10"
   },
   "peerDependencies": {
     "typescript": "^5.6.3"
   },
   "bin": {
-    "chelper": "./index.js"
+    "chlpr": "./bin/index.js"
   }
 }

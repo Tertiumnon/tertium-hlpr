@@ -1,4 +1,3 @@
-#!/bin/bash 
 mkdir ~/.ssh
 touch ~/.ssh/known_hosts
 touch ~/.ssh/config

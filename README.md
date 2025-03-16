@@ -1,4 +1,18 @@
-# chelper
+# CoHelper (chlpr)
+
+## Usage
+
+```bash
+chlpr {{path/to/file-with-commands.sh}}
+```
+
+Example:
+
+```bash
+chlpr commands/common/hello/world.sh
+```
+
+## Development
 
 To install dependencies:
 
@@ -9,7 +23,5 @@ bun install
 To run:
 
 ```bash
-bun run index.ts
+bun index.ts {{path/to/file-with-commands.sh}}
 ```
-
-This project was created using `bun init` in bun v1.1.36. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.

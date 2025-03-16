@@ -1,33 +1,32 @@
-const exec = require("node:child_process").exec;
-// const ls = spawn("ls", ["-lh", "/usr"]);
+import { readFile } from "node:fs/promises";
+import { exec } from "node:child_process";
 
 const args = process.argv.slice(2);
-if (args.length !== 2) throw new Error("Invalid arguments.");
-const os = args[0];
-const path = args[1];
-if (os !== "nix") throw new Error("Invalid arguments.");
+const filePath = args[0];
 
-const osMap = new Map<string, string>();
-osMap.set("nix", "sh nix/");
+async function main() {
+  // const file = Bun.file(filePath);
+  // const text = await file.text();
+  const text = await readFile(filePath, "utf-8");
+  const lines = text.split("\n");
+  for await (const line of lines) {
+    if (!line) continue;
+    console.log(line);
+    const ls = exec(line);
+    if (ls.stdout) {
+      ls.stdout.on("data", (data: { toString: () => string }) => {
+        console.log(`${data.toString()}`);
+      });
+    }
+    if (ls.stderr) {
+      ls.stderr.on("data", (data: { toString: () => string }) => {
+        console.log(`${data.toString()}`);
+      });
+    }
+    ls.on("exit", (code: { toString: () => string }) => {
+      console.log(`child process exited with code ${code.toString()}`);
+    });
+  }
+}
 
-const osScriptExt = new Map<string, string>();
-osScriptExt.set("nix", "sh");
-
-const command = `${osMap.get(os)}${path}.${osScriptExt.get(os)}`;
-console.log(command);
-
-// TODO: open file, replace with {{args}} AND THEN execute
-
-const ls = exec(command);
-
-ls.stdout.on("data", (data: { toString: () => string; }) => {
-	console.log(`${data.toString()}`);
-});
-
-ls.stderr.on("data", (data: { toString: () => string; }) => {
-	console.log(`${data.toString()}`);
-});
-
-ls.on("exit", (code: { toString: () => string; }) => {
-	console.log(`child process exited with code ${code.toString()}`);
-});
+main();
