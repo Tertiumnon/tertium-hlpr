@@ -1,13 +1,14 @@
 {
   "name": "chlpr",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Windows and *Nix utility for typical programming activity",
   "author": "Vitalii Balabanov",
   "email": "tertiumnon@gmail.com",
-  "module": "index.ts",
+  "module": "index.js",
   "type": "module",
   "scripts": {
     "build": "tsc --project tsconfig.json",
+    "deploy": "npm run build && npm publish",
     "release:minor": "bun run build && bun src/index release npm-release-minor"
   },
   "devDependencies": {
@@ -18,6 +19,6 @@
     "typescript": "^5.6.3"
   },
   "bin": {
-    "chlpr": "./bin/index.js"
+    "chlpr": "./bin/chlpr.js"
   }
 }

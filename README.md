@@ -1,5 +1,13 @@
 # CoHelper (chlpr)
 
+Run CLI commands line by line.
+
+## Installation
+
+```bash
+npm i -g chlpr
+```
+
 ## Usage
 
 ```bash
