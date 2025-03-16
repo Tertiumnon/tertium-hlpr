@@ -1,11 +1,11 @@
 {
   "name": "chlpr",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Windows and *Nix utility for typical programming activity",
   "author": "Vitalii Balabanov",
   "email": "tertiumnon@gmail.com",
   "module": "index.js",
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
     "build": "tsc --project tsconfig.json",
     "deploy": "npm run build && npm publish",
