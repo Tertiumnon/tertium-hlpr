@@ -80,7 +80,10 @@ async function main() {
     
     // Join the rest of the arguments without hyphens
     const scriptName = restArgs.join("");
-    const scriptPath = path.join(process.cwd(), "commands", category, `${scriptName}.sh`);
+    
+    // Get the directory where the hlpr script is installed
+    const scriptDir = path.dirname(path.dirname(__dirname));
+    const scriptPath = path.join(scriptDir, "commands", category, `${scriptName}.sh`);
     
     // Check if the script exists
     if (!fs.existsSync(scriptPath)) {
