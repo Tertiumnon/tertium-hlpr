@@ -3,6 +3,19 @@ import { exec } from "node:child_process";
 import * as path from "node:path";
 import * as fs from "node:fs";
 import * as readline from "node:readline";
+import * as os from "node:os";
+
+// Package version from package.json
+const VERSION = "0.1.4";
+
+// Detect shell type
+function detectShell(): string {
+  const isWindows = os.platform() === "win32";
+  if (isWindows) {
+    return "powershell";
+  }
+  return "bash"; // Default to bash for Unix-like systems
+}
 
 // Parse command line arguments
 const args = process.argv.slice(2);
@@ -68,6 +81,12 @@ async function executeCommand(command: string, variables: Record<string, string>
 }
 
 async function main() {
+  // Check for version flag
+  if (commandArgs[0] === "--version" || commandArgs[0] === "-v") {
+    console.log(`hlpr version ${VERSION}`);
+    process.exit(0);
+  }
+  
   if (commandArgs.length === 0) {
     console.error("Please provide a command. Example: hlpr ssh init-dir");
     process.exit(1);
@@ -93,19 +112,16 @@ async function main() {
 
     // Read the script content
     const scriptContent = await readFile(scriptPath, "utf-8");
-    const lines = scriptContent.split("\n");
     
     // Extract variables from the script (anything in {{variable}})
     const variableRegex = /{{([^}]+)}}/g;
     const variables: Record<string, string> = {};
     const uniqueVars = new Set<string>();
     
-    lines.forEach(line => {
-      let match;
-      while ((match = variableRegex.exec(line)) !== null) {
-        uniqueVars.add(match[1]);
-      }
-    });
+    let match;
+    while ((match = variableRegex.exec(scriptContent)) !== null) {
+      uniqueVars.add(match[1]);
+    }
     
     // Prompt for each variable
     for (const varName of uniqueVars) {
@@ -113,20 +129,33 @@ async function main() {
       variables[varName] = value;
     }
     
-    // Execute each line of the script
-    for (const line of lines) {
-      if (!line.trim()) continue;
+    // Create a temporary script with variables substituted
+    let processedScript = scriptContent;
+    for (const [key, value] of Object.entries(variables)) {
+      processedScript = processedScript.replace(new RegExp(`{{${key}}}`, 'g'), value);
+    }
+    
+    const tempScriptPath = path.join(path.dirname(scriptPath), `_temp_${path.basename(scriptPath)}`);
+    fs.writeFileSync(tempScriptPath, processedScript);
+    
+    try {
+      // Execute the temporary script with appropriate shell
+      const shell = detectShell();
+      const command = shell === "powershell" 
+        ? `powershell -File "${tempScriptPath}"` 
+        : `bash "${tempScriptPath}"`;
+      const success = await executeCommand(command, {});
       
-      const success = await executeCommand(line, variables);
+      // Clean up the temporary script
+      fs.unlinkSync(tempScriptPath);
       
       // If command failed and force flag is not set, exit
       if (!success && !forceFlag) {
         console.error("Command failed, stopping execution.");
         process.exit(1);
       }
-    }
-    
-    console.log("Command completed successfully!");
+      
+      console.log("Command completed successfully!");
   } catch (error) {
     console.error("Error:", error);
     process.exit(1);
