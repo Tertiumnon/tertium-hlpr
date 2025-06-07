@@ -5,8 +5,17 @@ import * as fs from "node:fs";
 import * as readline from "node:readline";
 import * as os from "node:os";
 
-// Package version from package.json
-const VERSION = "0.1.6";
+// Get package version from package.json
+async function getVersion(): Promise<string> {
+  try {
+    const packagePath = path.join(path.dirname(path.dirname(__dirname)), 'package.json');
+    const packageJson = JSON.parse(await readFile(packagePath, 'utf-8'));
+    return packageJson.version;
+  } catch (error) {
+    console.error('Error reading package.json:', error);
+    return '0.0.0'; // Fallback version
+  }
+}
 
 // Detect shell type
 function detectShell(): string {
@@ -80,10 +89,11 @@ async function executeCommand(command: string, variables: Record<string, string>
   });
 }
 
-async function main() {
+export async function main() {
   // Check for version flag
   if (commandArgs[0] === "--version" || commandArgs[0] === "-v") {
-    console.log(`hlpr version ${VERSION}`);
+    const version = await getVersion();
+    console.log(`hlpr version ${version}`);
     process.exit(0);
   }
   
@@ -163,4 +173,7 @@ async function main() {
   }
 }
 
-main();
+// If this file is run directly, execute main
+if (require.main === module) {
+  main();
+}

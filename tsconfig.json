@@ -5,12 +5,12 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
     "outDir": "./bin",
-    "rootDir": "./src",
+    "rootDir": "./",
     "strict": true,
-    "declaration": true,
+    "declaration": false,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "bin"]
+  "exclude": ["node_modules", "dist"]
 }

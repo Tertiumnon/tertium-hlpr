@@ -1,13 +1,13 @@
 {
   "name": "@tertium/hlpr",
-  "version": "0.1.7",
+  "version": "0.1.6",
   "description": "Windows and *Nix utility for typical programming activity",
   "author": "Vitalii Balabanov",
   "email": "tertiumnon@gmail.com",
   "main": "bin/hlpr.js",
   "type": "commonjs",
   "scripts": {
-    "build": "tsc --project tsconfig.json",
+    "build": "bun build ./src/index.ts --outfile ./index.js --target node",
     "prepublishOnly": "npm run build",
     "release:minor": "node node_modules/@tertium/shared-js-configs-and-types/scripts/release.js minor",
     "release:patch": "node node_modules/@tertium/shared-js-configs-and-types/scripts/release.js patch",
@@ -24,8 +24,6 @@
     "hlpr": "./bin/hlpr.js"
   },
   "files": [
-    "dist",
-    "bin",
     "commands"
   ],
   "keywords": [
