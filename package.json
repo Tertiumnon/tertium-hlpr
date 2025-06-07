@@ -1,6 +1,6 @@
 {
   "name": "@tertium/hlpr",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "Windows and *Nix utility for typical programming activity",
   "author": "Vitalii Balabanov",
   "email": "tertiumnon@gmail.com",
