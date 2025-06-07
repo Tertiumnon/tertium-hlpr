@@ -4,7 +4,7 @@
   "description": "Windows and *Nix utility for typical programming activity",
   "author": "Vitalii Balabanov",
   "email": "tertiumnon@gmail.com",
-  "main": "bin/hlpr.js",
+  "main": "index.js",
   "type": "commonjs",
   "scripts": {
     "build": "bun build ./src/index.ts --outfile ./index.js --target node",
@@ -23,11 +23,6 @@
   "bin": {
     "hlpr": "./bin/hlpr.js"
   },
-  "files": [
-    "bin",
-    "commands",
-    "index.js"
-  ],
   "keywords": [
     "cli",
     "utility",
