@@ -1,6 +1,3 @@
-import { createRequire } from "node:module";
-var __require = /* @__PURE__ */ createRequire(import.meta.url);
-
 // src/index.ts
 import { readFile } from "node:fs/promises";
 import { exec } from "node:child_process";
@@ -8,10 +5,12 @@ import * as path from "node:path";
 import * as fs from "node:fs";
 import * as readline from "node:readline";
 import * as os from "node:os";
-var __dirname = "C:\\Users\\vitba\\Repos\\ext\\tertium-hlpr\\src";
+import { fileURLToPath } from "node:url";
 async function getVersion() {
   try {
-    const packagePath = path.join(path.dirname(path.dirname(__dirname)), "package.json");
+    const __filename2 = fileURLToPath(import.meta.url);
+    const __dirname2 = path.dirname(__filename2);
+    const packagePath = path.join(path.dirname(__dirname2), "package.json");
     const packageJson = JSON.parse(await readFile(packagePath, "utf-8"));
     return packageJson.version;
   } catch (error) {
@@ -40,9 +39,9 @@ var rl = readline.createInterface({
   output: process.stdout
 });
 function prompt(question) {
-  return new Promise((resolve) => {
+  return new Promise((resolve2) => {
     rl.question(question, (answer) => {
-      resolve(answer);
+      resolve2(answer);
     });
   });
 }
@@ -51,7 +50,7 @@ async function executeCommand(command, variables) {
   for (const [key, value] of Object.entries(variables)) {
     processedCommand = processedCommand.replace(new RegExp(`{{${key}}}`, "g"), value);
   }
-  return new Promise((resolve) => {
+  return new Promise((resolve2) => {
     console.log(`Executing: ${processedCommand}`);
     const childProcess = exec(processedCommand);
     if (childProcess.stdout) {
@@ -66,10 +65,10 @@ async function executeCommand(command, variables) {
     }
     childProcess.on("exit", (code) => {
       if (code === 0) {
-        resolve(true);
+        resolve2(true);
       } else {
         console.error(`Command failed with exit code ${code}`);
-        resolve(false);
+        resolve2(false);
       }
     });
   });
@@ -88,7 +87,9 @@ async function main() {
     const category = commandArgs[0];
     const restArgs = commandArgs.slice(1);
     const scriptName = restArgs.join("");
-    const scriptDir = path.dirname(path.dirname(__dirname));
+    const __filename2 = fileURLToPath(import.meta.url);
+    const __dirname2 = path.dirname(__filename2);
+    const scriptDir = path.resolve(__dirname2, "..");
     const scriptPath = path.join(scriptDir, "commands", category, `${scriptName}.sh`);
     if (!fs.existsSync(scriptPath)) {
       console.error(`Script not found: ${scriptPath}`);
@@ -128,7 +129,7 @@ async function main() {
     rl.close();
   }
 }
-if (__require.main == __require.module) {
+if (import.meta.url.startsWith("file:") && process.argv[1] && import.meta.url.endsWith(process.argv[1].replace(/\\/g, "/"))) {
   main();
 }
 export {

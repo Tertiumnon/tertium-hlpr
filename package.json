@@ -23,6 +23,11 @@
   "bin": {
     "hlpr": "./bin/hlpr.js"
   },
+  "files": [
+    "bin",
+    "index.js",
+    "package.json"
+  ],
   "keywords": [
     "cli",
     "utility",

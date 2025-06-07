@@ -4,11 +4,14 @@ import * as path from "node:path";
 import * as fs from "node:fs";
 import * as readline from "node:readline";
 import * as os from "node:os";
+import { fileURLToPath } from "node:url";
 
 // Get package version from package.json
 async function getVersion(): Promise<string> {
   try {
-    const packagePath = path.join(path.dirname(path.dirname(__dirname)), 'package.json');
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const packagePath = path.join(path.dirname(__dirname), 'package.json');
     const packageJson = JSON.parse(await readFile(packagePath, 'utf-8'));
     return packageJson.version;
   } catch (error) {
@@ -111,7 +114,10 @@ export async function main() {
     const scriptName = restArgs.join("");
     
     // Get the directory where the hlpr script is installed
-    const scriptDir = path.dirname(path.dirname(__dirname));
+    // Use import.meta.url to get the correct path in ESM
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const scriptDir = path.resolve(__dirname, '..');
     const scriptPath = path.join(scriptDir, "commands", category, `${scriptName}.sh`);
     
     // Check if the script exists
@@ -174,6 +180,6 @@ export async function main() {
 }
 
 // If this file is run directly, execute main
-if (require.main === module) {
+if (import.meta.url.startsWith('file:') && process.argv[1] && import.meta.url.endsWith(process.argv[1].replace(/\\/g, '/'))) {
   main();
 }
