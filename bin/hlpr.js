@@ -1,3 +1,4 @@
 #!/usr/bin/env node
 
-require('../index.js');
+import { main } from './index.js';
+main();
