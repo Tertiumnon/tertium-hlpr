@@ -24,7 +24,8 @@
     "hlpr": "./bin/hlpr.js"
   },
   "files": [
-    "commands"
+    "commands",
+    "index.js"
   ],
   "keywords": [
     "cli",
