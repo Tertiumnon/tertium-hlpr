@@ -24,6 +24,7 @@
     "hlpr": "./bin/hlpr.js"
   },
   "files": [
+    "bin",
     "commands",
     "index.js"
   ],
