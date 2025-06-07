@@ -1,24 +1,43 @@
 {
-  "name": "chlpr",
+  "name": "@tertium/hlpr",
   "version": "0.1.2",
   "description": "Windows and *Nix utility for typical programming activity",
   "author": "Vitalii Balabanov",
   "email": "tertiumnon@gmail.com",
-  "module": "index.js",
+  "main": "dist/hlpr.js",
   "type": "commonjs",
   "scripts": {
     "build": "tsc --project tsconfig.json",
-    "deploy": "npm run build && npm publish",
-    "release:minor": "bun run build && bun src/index release npm-release-minor"
+    "prepublishOnly": "npm run build",
+    "release:minor": "node_modules/@tertium/shared-js-configs-and-types/scripts/release.js --minor",
+    "release:patch": "node_modules/@tertium/shared-js-configs-and-types/scripts/release.js --patch",
+    "release:major": "node_modules/@tertium/shared-js-configs-and-types/scripts/release.js --major"
   },
   "devDependencies": {
-    "@types/bun": "latest",
-    "@types/node": "^22.13.10"
-  },
-  "peerDependencies": {
-    "typescript": "^5.6.3"
+    "@tertium/shared-js-configs-and-types": "^0.14.0",
+    "@types/node": "^22.13.10",
+    "typescript": "^5.8.3"
   },
   "bin": {
-    "chlpr": "./bin/chlpr.js"
-  }
+    "hlpr": "./bin/hlpr.js"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "commands"
+  ],
+  "keywords": [
+    "cli",
+    "utility",
+    "shell",
+    "scripts"
+  ],
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tertiumnon/hlpr.git"
+  },
+  "license": "MIT"
 }
