@@ -40,7 +40,7 @@ const fs = __importStar(require("node:fs"));
 const readline = __importStar(require("node:readline"));
 const os = __importStar(require("node:os"));
 // Package version from package.json
-const VERSION = "0.1.4";
+const VERSION = "0.1.6";
 // Detect shell type
 function detectShell() {
     const isWindows = os.platform() === "win32";

@@ -6,7 +6,7 @@ import * as readline from "node:readline";
 import * as os from "node:os";
 
 // Package version from package.json
-const VERSION = "0.1.4";
+const VERSION = "0.1.6";
 
 // Detect shell type
 function detectShell(): string {
