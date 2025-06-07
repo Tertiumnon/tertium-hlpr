@@ -9,9 +9,9 @@
   "scripts": {
     "build": "tsc --project tsconfig.json",
     "prepublishOnly": "npm run build",
-    "release:minor": "node_modules/@tertium/shared-js-configs-and-types/scripts/release.js --minor",
-    "release:patch": "node_modules/@tertium/shared-js-configs-and-types/scripts/release.js --patch",
-    "release:major": "node_modules/@tertium/shared-js-configs-and-types/scripts/release.js --major"
+    "release:minor": "node node_modules/@tertium/shared-js-configs-and-types/scripts/release.js minor",
+    "release:patch": "node node_modules/@tertium/shared-js-configs-and-types/scripts/release.js patch",
+    "release:major": "node node_modules/@tertium/shared-js-configs-and-types/scripts/release.js major"
   },
   "devDependencies": {
     "@tertium/shared-js-configs-and-types": "^0.14.0",
