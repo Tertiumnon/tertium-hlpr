@@ -138,24 +138,23 @@ async function main() {
     const tempScriptPath = path.join(path.dirname(scriptPath), `_temp_${path.basename(scriptPath)}`);
     fs.writeFileSync(tempScriptPath, processedScript);
     
-    try {
-      // Execute the temporary script with appropriate shell
-      const shell = detectShell();
-      const command = shell === "powershell" 
-        ? `powershell -File "${tempScriptPath}"` 
-        : `bash "${tempScriptPath}"`;
-      const success = await executeCommand(command, {});
-      
-      // Clean up the temporary script
-      fs.unlinkSync(tempScriptPath);
-      
-      // If command failed and force flag is not set, exit
-      if (!success && !forceFlag) {
-        console.error("Command failed, stopping execution.");
-        process.exit(1);
-      }
-      
-      console.log("Command completed successfully!");
+    // Execute the temporary script with appropriate shell
+    const shell = detectShell();
+    const command = shell === "powershell" 
+      ? `powershell -File "${tempScriptPath}"` 
+      : `bash "${tempScriptPath}"`;
+    const success = await executeCommand(command, {});
+    
+    // Clean up the temporary script
+    fs.unlinkSync(tempScriptPath);
+    
+    // If command failed and force flag is not set, exit
+    if (!success && !forceFlag) {
+      console.error("Command failed, stopping execution.");
+      process.exit(1);
+    }
+    
+    console.log("Command completed successfully!");
   } catch (error) {
     console.error("Error:", error);
     process.exit(1);
