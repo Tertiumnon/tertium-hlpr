@@ -79,9 +79,20 @@ async function main() {
     console.log(`hlpr version ${version}`);
     process.exit(0);
   }
-  if (commandArgs.length === 0) {
-    console.error("Please provide a command. Example: hlpr ssh init-dir");
-    process.exit(1);
+  if (commandArgs.length === 0 || commandArgs[0] === "help" || commandArgs[0] === "--help" || commandArgs[0] === "-h" || commandArgs[0] === "/help" || commandArgs[0] === "/h" || commandArgs[0] === "/?") {
+    const __filename2 = fileURLToPath(import.meta.url);
+    const __dirname2 = path.dirname(__filename2);
+    const helpScriptPath = path.join(__dirname2, "commands", "help", "help.ts");
+    if (fs.existsSync(helpScriptPath)) {
+      const helpCommand = `bun "${helpScriptPath}"`;
+      await executeCommand(helpCommand, {});
+      rl.close();
+      process.exit(0);
+    } else {
+      console.error("Please provide a command. Example: hlpr ssh init-dir");
+      console.error("Run 'hlpr help' for available commands.");
+      process.exit(1);
+    }
   }
   try {
     const category = commandArgs[0];
