@@ -39,9 +39,9 @@ var rl = readline.createInterface({
   output: process.stdout
 });
 function prompt(question) {
-  return new Promise((resolve2) => {
+  return new Promise((resolve) => {
     rl.question(question, (answer) => {
-      resolve2(answer);
+      resolve(answer);
     });
   });
 }
@@ -50,7 +50,7 @@ async function executeCommand(command, variables) {
   for (const [key, value] of Object.entries(variables)) {
     processedCommand = processedCommand.replace(new RegExp(`{{${key}}}`, "g"), value);
   }
-  return new Promise((resolve2) => {
+  return new Promise((resolve) => {
     console.log(`Executing: ${processedCommand}`);
     const childProcess = exec(processedCommand);
     if (childProcess.stdout) {
@@ -65,10 +65,10 @@ async function executeCommand(command, variables) {
     }
     childProcess.on("exit", (code) => {
       if (code === 0) {
-        resolve2(true);
+        resolve(true);
       } else {
         console.error(`Command failed with exit code ${code}`);
-        resolve2(false);
+        resolve(false);
       }
     });
   });
@@ -86,14 +86,50 @@ async function main() {
   try {
     const category = commandArgs[0];
     const restArgs = commandArgs.slice(1);
-    const scriptName = restArgs.join("");
     const __filename2 = fileURLToPath(import.meta.url);
     const __dirname2 = path.dirname(__filename2);
-    const scriptDir = path.resolve(__dirname2, "..");
-    const scriptPath = path.join(scriptDir, "commands", category, `${scriptName}.sh`);
-    if (!fs.existsSync(scriptPath)) {
-      console.error(`Script not found: ${scriptPath}`);
+    const scriptDir = __dirname2;
+    let scriptPath;
+    let isTypeScriptCommand = false;
+    if (restArgs.length > 0) {
+      const subcategory = restArgs[0];
+      const nestedTsPath = path.join(scriptDir, "commands", category, subcategory, `${subcategory}.ts`);
+      if (fs.existsSync(nestedTsPath)) {
+        scriptPath = nestedTsPath;
+        isTypeScriptCommand = true;
+      }
+    }
+    if (!isTypeScriptCommand) {
+      const tsPath = path.join(scriptDir, "commands", category, `${category}.ts`);
+      if (fs.existsSync(tsPath)) {
+        scriptPath = tsPath;
+        isTypeScriptCommand = true;
+      }
+    }
+    if (!isTypeScriptCommand && restArgs.length > 0) {
+      const scriptName = restArgs.join("");
+      scriptPath = path.join(scriptDir, "commands", category, `${scriptName}.sh`);
+      if (!fs.existsSync(scriptPath)) {
+        console.error(`Script not found: ${scriptPath}`);
+        process.exit(1);
+      }
+    }
+    if (!scriptPath) {
+      console.error(`Command not found. Usage: hlpr ${category} <args>`);
       process.exit(1);
+    }
+    if (isTypeScriptCommand) {
+      const tsArgs = restArgs.length > 0 && restArgs[0] && fs.existsSync(path.join(scriptDir, "commands", category, restArgs[0])) ? process.argv.slice(4) : process.argv.slice(3);
+      const finalCommand = `bun "${scriptPath}" ${tsArgs.join(" ")}`;
+      console.log(`Executing TypeScript command: ${finalCommand}`);
+      const success2 = await executeCommand(finalCommand, {});
+      if (!success2 && !forceFlag) {
+        console.error("Command failed, stopping execution.");
+        process.exit(1);
+      }
+      console.log("Command completed successfully!");
+      rl.close();
+      return;
     }
     const scriptContent = await readFile(scriptPath, "utf-8");
     const variableRegex = /{{([^}]+)}}/g;
