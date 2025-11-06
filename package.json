@@ -9,13 +9,13 @@
   "scripts": {
     "build": "bun build ./src/index.ts --outfile ./index.js --target node",
     "prepublishOnly": "npm run build",
-    "release:minor": "node node_modules/@tertium/shared-js-configs-and-types/scripts/release.js minor",
-    "release:patch": "node node_modules/@tertium/shared-js-configs-and-types/scripts/release.js patch",
-    "release:major": "node node_modules/@tertium/shared-js-configs-and-types/scripts/release.js major",
+    "release:minor": "node node_modules/@tertium/js/scripts/release.js minor",
+    "release:patch": "node node_modules/@tertium/js/scripts/release.js patch",
+    "release:major": "node node_modules/@tertium/js/scripts/release.js major",
     "prepare": "husky"
   },
   "devDependencies": {
-    "@tertium/shared-js-configs-and-types": "^0.14.0",
+    "@tertium/js": "^0.16.0",
     "@types/node": "^22.13.10",
     "husky": "^9.1.7",
     "typescript": "^5.8.3"
