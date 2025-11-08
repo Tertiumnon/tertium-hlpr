@@ -1,6 +1,5 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-echo "Running build before commit..."
-bun run build
-git add bin/hlpr.js
+echo "Running tests before commit..."
+bun test

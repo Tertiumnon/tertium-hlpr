@@ -4,10 +4,13 @@
   "description": "Windows and *Nix utility for typical programming activity",
   "author": "Vitalii Balabanov",
   "email": "tertiumnon@gmail.com",
-  "main": "index.js",
+  "main": "bin/index.js",
   "type": "module",
   "scripts": {
-    "build": "bun build ./src/index.ts --outfile ./index.js --target node",
+    "build:main": "bun build ./src/index.ts --outfile ./bin/index.js --target node",
+    "build:commands": "node build-commands.js",
+    "build": "bun run build:main && bun run build:commands",
+    "test": "bun test",
     "prepublishOnly": "npm run build",
     "release:minor": "node node_modules/@tertium/js/scripts/release.js minor",
     "release:patch": "node node_modules/@tertium/js/scripts/release.js patch",
@@ -21,11 +24,10 @@
     "typescript": "^5.8.3"
   },
   "bin": {
-    "hlpr": "./bin/hlpr.js"
+    "hlpr": "./bin/index.js"
   },
   "files": [
     "bin",
-    "index.js",
     "package.json"
   ],
   "keywords": [

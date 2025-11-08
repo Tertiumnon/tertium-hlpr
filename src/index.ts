@@ -29,6 +29,12 @@ function detectShell(): string {
   return "bash"; // Default to bash for Unix-like systems
 }
 
+// Get the directory where the commands are located
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+// Commands are in src/, so go to src/
+const scriptDir = path.join(__dirname, '..', 'src');
+
 // Parse command line arguments
 const args = process.argv.slice(2);
 let forceFlag = false;
@@ -103,12 +109,10 @@ export async function main() {
   // Check for help flag or no arguments
   if (commandArgs.length === 0 || commandArgs[0] === "help" || commandArgs[0] === "--help" || commandArgs[0] === "-h" || commandArgs[0] === "/help" || commandArgs[0] === "/h" || commandArgs[0] === "/?") {
     // Run help command
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
-    const helpScriptPath = path.join(__dirname, "commands", "help", "help.ts");
+    const helpScriptPath = path.join(__dirname, "..", "bin", "commands", "help", "help.js");
     
     if (fs.existsSync(helpScriptPath)) {
-      const helpCommand = `bun "${helpScriptPath}"`;
+      const helpCommand = `node "${helpScriptPath}"`;
       await executeCommand(helpCommand, {});
       rl.close();
       process.exit(0);
@@ -124,34 +128,27 @@ export async function main() {
     const category = commandArgs[0];
     const restArgs = commandArgs.slice(1);
     
-    // Get the directory where the hlpr script is installed
-    // Use import.meta.url to get the correct path in ESM
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
-    // Since index.js is in the project root, scriptDir is __dirname
-    const scriptDir = __dirname;
-    
-    // Check for TypeScript command first
+    // Check for TypeScript command first (now built as JS)
     let scriptPath: string;
     let isTypeScriptCommand = false;
     
-    // Try nested structure: commands/<category>/<subcategory>/<subcategory>.ts
-    // e.g., "hlpr file rename" -> commands/file/rename/rename.ts
+    // Try nested structure: bin/commands/<category>/<subcategory>/<subcategory>.js
+    // e.g., "hlpr file rename" -> bin/commands/file/rename/rename.js
     if (restArgs.length > 0) {
       const subcategory = restArgs[0];
-      const nestedTsPath = path.join(scriptDir, "commands", category, subcategory, `${subcategory}.ts`);
-      if (fs.existsSync(nestedTsPath)) {
-        scriptPath = nestedTsPath;
+      const nestedJsPath = path.join(__dirname, "..", "bin", "commands", category, subcategory, `${subcategory}.js`);
+      if (fs.existsSync(nestedJsPath)) {
+        scriptPath = nestedJsPath;
         isTypeScriptCommand = true;
       }
     }
     
-    // Try flat structure: commands/<category>/<category>.ts
-    // e.g., "hlpr rename" -> commands/rename/rename.ts
+    // Try flat structure: bin/commands/<category>/<category>.js
+    // e.g., "hlpr rename" -> bin/commands/rename/rename.js
     if (!isTypeScriptCommand) {
-      const tsPath = path.join(scriptDir, "commands", category, `${category}.ts`);
-      if (fs.existsSync(tsPath)) {
-        scriptPath = tsPath;
+      const jsPath = path.join(__dirname, "..", "bin", "commands", category, `${category}.js`);
+      if (fs.existsSync(jsPath)) {
+        scriptPath = jsPath;
         isTypeScriptCommand = true;
       }
     }
@@ -160,11 +157,17 @@ export async function main() {
     if (!isTypeScriptCommand && restArgs.length > 0) {
       // Join the rest of the arguments without hyphens for shell script name
       const scriptName = restArgs.join("");
-      scriptPath = path.join(scriptDir, "commands", category, `${scriptName}.sh`);
+      let scriptPathCandidate = path.join(scriptDir, "commands", category, `${scriptName}.sh`);
       
-      // Check if the script exists
-      if (!fs.existsSync(scriptPath)) {
-        console.error(`Script not found: ${scriptPath}`);
+      // If not found in scriptDir (src/), try in bin/ (for built version)
+      if (!fs.existsSync(scriptPathCandidate)) {
+        scriptPathCandidate = path.join(__dirname, "..", "bin", "commands", category, `${scriptName}.sh`);
+      }
+      
+      if (fs.existsSync(scriptPathCandidate)) {
+        scriptPath = scriptPathCandidate;
+      } else {
+        console.error(`Script not found: ${scriptPathCandidate}`);
         process.exit(1);
       }
     }
@@ -182,10 +185,10 @@ export async function main() {
         ? process.argv.slice(4) // Skip node, script, category, and subcategory
         : process.argv.slice(3); // Skip node, script, and category
       
-      // Use bun to run TypeScript files directly
-      const finalCommand = `bun "${scriptPath}" ${tsArgs.join(' ')}`;
+      // Use node to run built JavaScript files
+      const finalCommand = `node "${scriptPath}" ${tsArgs.join(' ')}`;
       
-      console.log(`Executing TypeScript command: ${finalCommand}`);
+      console.log(`Executing command: ${finalCommand}`);
       
       const success = await executeCommand(finalCommand, {});
       

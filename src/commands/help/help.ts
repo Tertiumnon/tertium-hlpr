@@ -64,29 +64,41 @@ async function discoverCommands(commandsDir: string): Promise<CommandInfo[]> {
       
       for (const item of items) {
         if (item.isDirectory()) {
-          // Check for nested TypeScript command (e.g., file/rename/rename.ts)
-          const nestedTsPath = path.join(categoryPath, item.name, `${item.name}.ts`);
-          if (fs.existsSync(nestedTsPath)) {
-            const description = await getCommandDescription(nestedTsPath);
-            commands.push({
-              category: category.name,
-              name: item.name,
-              type: 'typescript',
-              path: nestedTsPath,
-              description
-            });
+          // Check for nested command (e.g., file/rename/rename.js or .sh)
+          const nestedJsPath = path.join(categoryPath, item.name, `${item.name}.js`);
+          const nestedShPath = path.join(categoryPath, item.name, `${item.name}.sh`);
+          let commandPath: string;
+          let commandType: 'typescript' | 'shell';
+          
+          if (fs.existsSync(nestedJsPath)) {
+            commandPath = nestedJsPath;
+            commandType = 'typescript';
+          } else if (fs.existsSync(nestedShPath)) {
+            commandPath = nestedShPath;
+            commandType = 'shell';
+          } else {
+            continue;
           }
-        } else if (item.name.endsWith('.ts')) {
-          // Flat TypeScript command (e.g., help/help.ts)
-          const tsPath = path.join(categoryPath, item.name);
-          const commandName = path.basename(item.name, '.ts');
+          
+          const description = await getCommandDescription(commandPath);
+          commands.push({
+            category: category.name,
+            name: item.name,
+            type: commandType,
+            path: commandPath,
+            description
+          });
+        } else if (item.name.endsWith('.js')) {
+          // Flat JavaScript command (e.g., help/help.js)
+          const jsPath = path.join(categoryPath, item.name);
+          const commandName = path.basename(item.name, '.js');
           if (commandName !== 'test' && !commandName.endsWith('.test')) {
-            const description = await getCommandDescription(tsPath);
+            const description = await getCommandDescription(jsPath);
             commands.push({
               category: category.name,
               name: commandName,
               type: 'typescript',
-              path: tsPath,
+              path: jsPath,
               description
             });
           }
@@ -170,12 +182,22 @@ async function main() {
   try {
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = path.dirname(__filename);
-    const commandsDir = path.join(__dirname, '..');
+    // Look in both bin/commands (for built JS) and src/commands (for shell scripts)
+    const binCommandsDir = path.join(__dirname, '..');
+    const srcCommandsDir = path.join(__dirname, '..', '..', '..', 'src', 'commands');
     
     const version = await getVersion();
-    const commands = await discoverCommands(commandsDir);
+    const commands = [
+      ...(await discoverCommands(binCommandsDir)),
+      ...(await discoverCommands(srcCommandsDir))
+    ];
     
-    printHelp(commands, version);
+    // Remove duplicates (prefer built JS over source)
+    const uniqueCommands = commands.filter((cmd, index, self) => 
+      index === self.findIndex(c => c.category === cmd.category && c.name === cmd.name)
+    );
+    
+    printHelp(uniqueCommands, version);
   } catch (error) {
     console.error('Error:', error);
     process.exit(1);
