@@ -183,5 +183,4 @@ dist
 # Built files
 bin/
 index.js
-build-commands.js
 
