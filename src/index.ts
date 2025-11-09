@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { readFile } from "node:fs/promises";
 import { exec } from "node:child_process";
 import * as path from "node:path";
@@ -48,7 +49,7 @@ if (args[0] === "-f") {
   commandArgs = args;
 }
 
-// Create readline interface for user input
+// Create readline interface for user input (only for non-help commands)
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
@@ -98,29 +99,188 @@ async function executeCommand(command: string, variables: Record<string, string>
   });
 }
 
-export async function main() {
+// Show help information
+async function showHelp() {
+  interface CommandInfo {
+    category: string;
+    name: string;
+    type: 'typescript' | 'shell';
+    path: string;
+    description?: string;
+  }
+
+  async function getCommandDescription(filePath: string): Promise<string | undefined> {
+    try {
+      const content = await readFile(filePath, 'utf-8');
+      const descMatch = content.match(/(?:\/\/|#)\s*@description\s+(.+)/);
+      if (descMatch) {
+        return descMatch[1].trim();
+      }
+      
+      const dir = path.dirname(filePath);
+      const readmePath = path.join(dir, 'README.md');
+      if (fs.existsSync(readmePath)) {
+        const readme = await readFile(readmePath, 'utf-8');
+        const firstLine = readme.split('\n').find(line => line.trim() && !line.startsWith('#'));
+        if (firstLine) {
+          return firstLine.trim();
+        }
+      }
+    } catch (error) {
+      // Ignore errors
+    }
+    return undefined;
+  }
+
+  async function discoverCommands(commandsDir: string): Promise<CommandInfo[]> {
+    const commands: CommandInfo[] = [];
+    
+    try {
+      const categories = await fs.promises.readdir(commandsDir, { withFileTypes: true });
+      
+      for (const category of categories) {
+        if (!category.isDirectory()) continue;
+        
+        const categoryPath = path.join(commandsDir, category.name);
+        const items = await fs.promises.readdir(categoryPath, { withFileTypes: true });
+        
+        for (const item of items) {
+          if (item.isDirectory()) {
+            const nestedJsPath = path.join(categoryPath, item.name, `${item.name}.js`);
+            const nestedShPath = path.join(categoryPath, item.name, `${item.name}.sh`);
+            let commandPath: string;
+            let commandType: 'typescript' | 'shell';
+            
+            if (fs.existsSync(nestedJsPath)) {
+              commandPath = nestedJsPath;
+              commandType = 'typescript';
+            } else if (fs.existsSync(nestedShPath)) {
+              commandPath = nestedShPath;
+              commandType = 'shell';
+            } else {
+              continue;
+            }
+            
+            const description = await getCommandDescription(commandPath);
+            commands.push({
+              category: category.name,
+              name: item.name,
+              type: commandType,
+              path: commandPath,
+              description
+            });
+          } else if (item.name.endsWith('.js')) {
+            const jsPath = path.join(categoryPath, item.name);
+            const commandName = path.basename(item.name, '.js');
+            if (commandName !== 'test' && !commandName.endsWith('.test')) {
+              const description = await getCommandDescription(jsPath);
+              commands.push({
+                category: category.name,
+                name: commandName,
+                type: 'typescript',
+                path: jsPath,
+                description
+              });
+            }
+          } else if (item.name.endsWith('.sh')) {
+            const shPath = path.join(categoryPath, item.name);
+            const commandName = path.basename(item.name, '.sh');
+            const description = await getCommandDescription(shPath);
+            commands.push({
+              category: category.name,
+              name: commandName,
+              type: 'shell',
+              path: shPath,
+              description
+            });
+          }
+        }
+      }
+    } catch (error) {
+      // Ignore errors
+    }
+    
+    return commands;
+  }
+
+  const version = await getVersion();
+  const binCommandsDir = path.join(__dirname, "commands");
+  const srcCommandsDir = path.join(__dirname, '..', 'src', 'commands');
+  
+  const commands = [
+    ...(await discoverCommands(binCommandsDir)),
+    ...(await discoverCommands(srcCommandsDir))
+  ];
+  
+  const uniqueCommands = commands.filter((cmd, index, self) => 
+    index === self.findIndex(c => c.category === cmd.category && c.name === cmd.name)
+  );
+  
+  // Print help
+  console.log(`\n╔════════════════════════════════════════════════════════════╗`);
+  console.log(`║              hlpr - Helper CLI Tool v${version.padEnd(16)}║`);
+  console.log(`╚════════════════════════════════════════════════════════════╝\n`);
+  
+  console.log('USAGE:');
+  console.log('  hlpr [options] <category> <command> [args...]\n');
+  
+  console.log('OPTIONS:');
+  console.log('  -f              Force execution (continue on errors)');
+  console.log('  -v, --version   Show version information');
+  console.log('  help, -h, --help, /h, /help, /?');
+  console.log('                  Show this help message\n');
+  
+  console.log('AVAILABLE COMMANDS:\n');
+  
+  const grouped = uniqueCommands.reduce((acc, cmd) => {
+    if (!acc[cmd.category]) {
+      acc[cmd.category] = [];
+    }
+    acc[cmd.category].push(cmd);
+    return acc;
+  }, {} as Record<string, CommandInfo[]>);
+  
+  const sortedCategories = Object.keys(grouped).sort();
+  
+  for (const category of sortedCategories) {
+    console.log(`  ${category}:`);
+    const categoryCommands = grouped[category].sort((a, b) => a.name.localeCompare(b.name));
+    
+    for (const cmd of categoryCommands) {
+      const typeLabel = cmd.type === 'typescript' ? '(TS)' : '(sh)';
+      const cmdDisplay = cmd.category === cmd.name 
+        ? `hlpr ${cmd.name}`.padEnd(35)
+        : `hlpr ${cmd.category} ${cmd.name}`.padEnd(35);
+      
+      if (cmd.description) {
+        console.log(`    ${cmdDisplay} ${typeLabel.padEnd(6)} ${cmd.description}`);
+      } else {
+        console.log(`    ${cmdDisplay} ${typeLabel}`);
+      }
+    }
+    console.log('');
+  }
+  
+  console.log('EXAMPLES:');
+  console.log('  hlpr help');
+  console.log('  hlpr file rename --style kebab --dir ./src');
+  console.log('  hlpr ssh init-dir');
+  console.log('  hlpr -f git precommit\n');
+}
+
+async function main() {
   // Check for version flag
   if (commandArgs[0] === "--version" || commandArgs[0] === "-v") {
     const version = await getVersion();
     console.log(`hlpr version ${version}`);
     process.exit(0);
   }
-  
+
   // Check for help flag or no arguments
   if (commandArgs.length === 0 || commandArgs[0] === "help" || commandArgs[0] === "--help" || commandArgs[0] === "-h" || commandArgs[0] === "/help" || commandArgs[0] === "/h" || commandArgs[0] === "/?") {
-    // Run help command
-    const helpScriptPath = path.join(__dirname, "..", "bin", "commands", "help", "help.js");
-    
-    if (fs.existsSync(helpScriptPath)) {
-      const helpCommand = `node "${helpScriptPath}"`;
-      await executeCommand(helpCommand, {});
-      rl.close();
-      process.exit(0);
-    } else {
-      console.error("Please provide a command. Example: hlpr ssh init-dir");
-      console.error("Run 'hlpr help' for available commands.");
-      process.exit(1);
-    }
+    // Run help inline to avoid subprocess issues
+    await showHelp();
+    process.exit(0);
   }
 
   try {
@@ -256,7 +416,8 @@ export async function main() {
   }
 }
 
-// If this file is run directly, execute main
-if (import.meta.url.startsWith('file:') && process.argv[1] && import.meta.url.endsWith(process.argv[1].replace(/\\/g, '/'))) {
-  main();
-}
+// Execute main when this file is run
+main().catch((error) => {
+  console.error("Fatal error:", error);
+  process.exit(1);
+});
