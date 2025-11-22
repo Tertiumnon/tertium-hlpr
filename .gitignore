@@ -184,3 +184,6 @@ dist
 bin/
 index.js
 
+# Temporary files created during tests or local runs
+tmp/
+

@@ -341,9 +341,15 @@ async function main() {
     if (isTypeScriptCommand) {
       // For TypeScript commands, pass all args after category to the command
       // For nested commands (file rename), skip category and subcategory
-      const tsArgs = restArgs.length > 0 && restArgs[0] && fs.existsSync(path.join(scriptDir, "commands", category, restArgs[0]))
-        ? process.argv.slice(4) // Skip node, script, category, and subcategory
-        : process.argv.slice(3); // Skip node, script, and category
+      // Determine if this is a nested TypeScript command by checking the resolved scriptPath
+      let tsArgs: string[];
+      if (restArgs.length > 0 && restArgs[0] && scriptPath) {
+        const subcategory = restArgs[0];
+        const isNested = path.basename(scriptPath) === `${subcategory}.js` && path.basename(path.dirname(scriptPath)) === subcategory;
+        tsArgs = isNested ? process.argv.slice(4) : process.argv.slice(3);
+      } else {
+        tsArgs = process.argv.slice(3);
+      }
       
       // Use node to run built JavaScript files
       const finalCommand = `node "${scriptPath}" ${tsArgs.join(' ')}`;
@@ -352,7 +358,11 @@ async function main() {
       
       const success = await executeCommand(finalCommand, {});
       
-      if (!success && !forceFlag) {
+      // If this invocation was only to show help, don't treat non-zero exit as failure
+      const helpFlags = ['-h', '--help', 'help', '/h', '/help', '/?'];
+      const isHelpInvocation = tsArgs.some(arg => helpFlags.includes(arg));
+      
+      if (!success && !forceFlag && !isHelpInvocation) {
         console.error("Command failed, stopping execution.");
         process.exit(1);
       }

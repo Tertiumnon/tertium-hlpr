@@ -19,6 +19,7 @@ hlpr file rename <directory> <style> [--dry|-n]
 | Style | Description | Example |
 |-------|-------------|---------|
 | `title_underscore` | Title case with underscores | `File_Name` |
+| `pascal_underscore` | Pascal-style with underscores (alias `title_underscore`) | `File_Name` |
 | `snake` | Lowercase with underscores | `file_name` |
 | `kebab` | Lowercase with hyphens | `file-name` |
 | `camel` | Lowercase first word, capitalized rest | `fileName` |

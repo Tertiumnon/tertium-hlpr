@@ -1,5 +1,23 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-echo "Running tests before commit..."
+echo "Running all tests (unit + e2e) before commit..."
 bun test
+ret=$?
+if [ $ret -ne 0 ]; then
+	echo "Unit or integration tests failed; commit aborted."
+	exit $ret
+fi
+
+# Optionally skip the separate e2e script; bun test already runs e2e tests if present
+if [ -z "$SKIP_E2E" ]; then
+	echo "Running e2e script via npm (scripts/test-rename-e2e.js)..."
+	npm run test:e2e
+	ret=$?
+	if [ $ret -ne 0 ]; then
+		echo "E2E script failed; commit aborted."
+		exit $ret
+	fi
+else
+	echo "SKIP_E2E is set; skipping npm e2e script."
+fi

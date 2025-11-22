@@ -6,10 +6,16 @@ import path from 'path'
 describe('rename module', () => {
   test('transformBasename styles', () => {
     expect(transformBasename('file-name', 'title_underscore')).toBe('File_Name')
-    expect(transformBasename('file-name.md', 'snake')).toBe('file-name.md')
+    expect(transformBasename('file-name.md', 'snake')).toBe('file_name.md')
     // core name only
     expect(transformBasename('.gitignore', 'snake')).toBe('.gitignore')
     expect(transformBasename('mySampleFile', 'kebab')).toBe('my-sample-file')
+    // pascal_underscore should be PascalCase with underscores
+    expect(transformBasename('mySampleFile', 'pascal_underscore')).toBe('My_Sample_File')
+    // alias equivalence: pascal_underscore == title_underscore
+    expect(transformBasename('mySampleFile', 'pascal_underscore')).toBe(transformBasename('mySampleFile', 'title_underscore'))
+    // multi-extension: preserve last extension
+    expect(transformBasename('Deep File.testdata.js', 'kebab')).toBe('deep-file.testdata.js')
   })
 
   test('renameRecursive dry run returns planned renames', async () => {

@@ -7,6 +7,7 @@ type Style =
   | 'kebab'
   | 'camel'
   | 'pascal'
+  | 'pascal_underscore'
   | 'upper'
   | 'lower'
 
@@ -22,35 +23,40 @@ function splitWords(s: string): string[] {
 
 export function transformBasename(basename: string, style: Style): string {
   if (!basename) return basename
-  // If string contains an extension (e.g. "file-name.md"), don't try to
-  // transform it here — callers (renameRecursive) operate on the core name
-  // (without ext). Treat leading-dot files (like ".gitignore") specially
-  // and allow them through.
-  if (basename.includes('.') && !basename.startsWith('.')) return basename
   // handle leading dot files (like .gitignore) - keep leading dot in front of name
   const leadingDot = basename.startsWith('.') ? '.' : ''
-  const core = leadingDot ? basename.slice(1) : basename
+  let core = leadingDot ? basename.slice(1) : basename
+
+  // split on the first dot (to preserve multi-extensions like .test.js)
+  let ext = ''
+  const firstDot = core.indexOf('.')
+  if (firstDot !== -1) {
+    ext = core.slice(firstDot) // includes the dot and everything after
+    core = core.slice(0, firstDot)
+  }
 
   const words = splitWords(core)
   if (words.length === 0) return basename
 
   switch (style) {
     case 'title_underscore':
-      return leadingDot + words.map(cap).join('_')
+      return leadingDot + words.map(cap).join('_') + ext
     case 'snake':
-      return leadingDot + words.map((w) => w.toLowerCase()).join('_')
+      return leadingDot + words.map((w) => w.toLowerCase()).join('_') + ext
     case 'kebab':
-      return leadingDot + words.map((w) => w.toLowerCase()).join('-')
+      return leadingDot + words.map((w) => w.toLowerCase()).join('-') + ext
     case 'camel':
-      return leadingDot + words.map((w, i) => (i === 0 ? w.toLowerCase() : cap(w))).join('')
+      return leadingDot + words.map((w, i) => (i === 0 ? w.toLowerCase() : cap(w))).join('') + ext
     case 'pascal':
-      return leadingDot + words.map(cap).join('')
+      return leadingDot + words.map(cap).join('') + ext
+    case 'pascal_underscore':
+      return leadingDot + words.map(cap).join('_') + ext
     case 'upper':
-      return leadingDot + words.join('_').toUpperCase()
+      return leadingDot + words.join('_').toUpperCase() + ext
     case 'lower':
-      return leadingDot + words.join('_').toLowerCase()
+      return leadingDot + words.join('_').toLowerCase() + ext
     default:
-      return basename
+      return leadingDot + core + ext
   }
 }
 
@@ -164,11 +170,18 @@ if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
   const args = process.argv.slice(2)
   const rootArg = args[0]
   const styleArg = args[1] as Style | undefined
+
+  // If user asked for help, print usage and exit with success
+  if (args.includes('--help') || args.includes('-h') || args.includes('/help') || args.includes('/h') || args.includes('/?')) {
+    console.log('Usage: rename <root> <style> [--dry|-n]')
+    console.log('Styles: title_underscore, pascal_underscore, snake, kebab, camel, pascal, upper, lower')
+    process.exit(0)
+  }
   const dryRun = args.includes('--dry') || args.includes('-n')
 
   if (!rootArg || !styleArg) {
     console.error('Usage: rename <root> <style> [--dry|-n]')
-    console.error('Styles: title_underscore, snake, kebab, camel, pascal, upper, lower')
+    console.error('Styles: title_underscore, pascal_underscore, snake, kebab, camel, pascal, upper, lower')
     process.exit(1)
   }
 
