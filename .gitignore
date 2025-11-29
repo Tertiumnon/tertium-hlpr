@@ -187,3 +187,6 @@ index.js
 # Temporary files created during tests or local runs
 tmp/
 
+# Claude Code configuration
+.claude/
+
