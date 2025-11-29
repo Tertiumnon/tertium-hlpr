@@ -112,12 +112,97 @@ async function safeRename(oldPath: string, newPath: string) {
   }
 }
 
+async function updateFileReferences(
+  filePath: string,
+  renames: Array<{ from: string; to: string }>
+) {
+  // Read file content
+  const content = await fs.readFile(filePath, 'utf-8')
+  let updated = content
+
+  // For each rename, update references in the file
+  for (const { from, to } of renames) {
+    const fromBasename = path.basename(from)
+    const toBasename = path.basename(to)
+
+    // Skip if basenames are the same (case-only or path-only changes)
+    if (fromBasename === toBasename) continue
+
+    // Create regex patterns to match various import/require styles
+    const fromWithoutExt = fromBasename.replace(/\.[^.]+$/, '')
+    const toWithoutExt = toBasename.replace(/\.[^.]+$/, '')
+
+    // Pattern 1: import/export with quotes - match './path/filename' or '../path/filename' or 'filename'
+    // Handles: import X from './filename' or require('./filename')
+    const importPattern1 = new RegExp(
+      `(['"\`])([./]*(?:[^'"\`]*/)?)${escapeRegex(fromWithoutExt)}\\1`,
+      'g'
+    )
+    updated = updated.replace(importPattern1, (_match, quote, pathPart) => {
+      return `${quote}${pathPart}${toWithoutExt}${quote}`
+    })
+
+    // Pattern 2: import/export with file extension in quotes
+    const importPattern2 = new RegExp(
+      `(['"\`])([./]*(?:[^'"\`]*/)?)${escapeRegex(fromBasename)}\\1`,
+      'g'
+    )
+    updated = updated.replace(importPattern2, (_match, quote, pathPart) => {
+      return `${quote}${pathPart}${toBasename}${quote}`
+    })
+  }
+
+  // Only write if content changed
+  if (updated !== content) {
+    await fs.writeFile(filePath, updated, 'utf-8')
+    return true
+  }
+  return false
+}
+
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+async function isTextFile(filePath: string): Promise<boolean> {
+  try {
+    // Read first 512 bytes to check for binary content
+    const fd = await fs.open(filePath, 'r')
+    const buffer = Buffer.alloc(512)
+    const { bytesRead } = await fd.read(buffer, 0, 512, 0)
+    await fd.close()
+
+    if (bytesRead === 0) return true // Empty files are text
+
+    // Check for null bytes (common in binary files)
+    for (let i = 0; i < bytesRead; i++) {
+      if (buffer[i] === 0) return false
+    }
+
+    // Check for common text file patterns and high ratio of printable ASCII
+    let printableCount = 0
+    for (let i = 0; i < bytesRead; i++) {
+      const byte = buffer[i]
+      // Count printable ASCII, tabs, newlines, carriage returns
+      if ((byte >= 32 && byte <= 126) || byte === 9 || byte === 10 || byte === 13) {
+        printableCount++
+      }
+    }
+
+    // If more than 85% of bytes are printable, consider it text
+    return printableCount / bytesRead > 0.85
+  } catch {
+    return false
+  }
+}
+
 export async function renameRecursive(
   root: string,
   style: Style = 'title_underscore',
-  options: { dryRun?: boolean } = {}
+  options: { dryRun?: boolean; updateContent?: boolean } = {}
 ) {
   const performed: Array<{ from: string; to: string }> = []
+  const updateContentEnabled = options.updateContent ?? true // Default to true
 
   async function walk(current: string) {
     const entries = await fs.readdir(current, { withFileTypes: true })
@@ -162,6 +247,40 @@ export async function renameRecursive(
   }
 
   await walk(root)
+
+  // Update file contents with new references (only if not dry run and updateContent is enabled)
+  if (!options.dryRun && updateContentEnabled && performed.length > 0) {
+    // Get all files that might contain references
+    const filesToUpdate: string[] = []
+
+    async function collectFiles(dir: string) {
+      const entries = await fs.readdir(dir, { withFileTypes: true })
+      for (const e of entries) {
+        const full = path.join(dir, e.name)
+        if (e.isFile()) {
+          // Try to update all files - isTextFile will filter out binary files
+          filesToUpdate.push(full)
+        } else if (e.isDirectory()) {
+          await collectFiles(full)
+        }
+      }
+    }
+
+    await collectFiles(root)
+
+    // Update each file with the rename mappings
+    for (const file of filesToUpdate) {
+      try {
+        // Check if file is text-based before attempting to update
+        if (await isTextFile(file)) {
+          await updateFileReferences(file, performed)
+        }
+      } catch (err) {
+        // Ignore files that can't be read/written (e.g., permission issues)
+      }
+    }
+  }
+
   return performed
 }
 
@@ -173,19 +292,23 @@ if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
 
   // If user asked for help, print usage and exit with success
   if (args.includes('--help') || args.includes('-h') || args.includes('/help') || args.includes('/h') || args.includes('/?')) {
-    console.log('Usage: rename <root> <style> [--dry|-n]')
+    console.log('Usage: rename <root> <style> [--dry|-n] [--no-update-content]')
     console.log('Styles: title_underscore, pascal_underscore, snake, kebab, camel, pascal, upper, lower')
+    console.log('Options:')
+    console.log('  --dry, -n              Preview changes without applying them')
+    console.log('  --no-update-content    Skip updating import/require statements in files')
     process.exit(0)
   }
   const dryRun = args.includes('--dry') || args.includes('-n')
+  const updateContent = !args.includes('--no-update-content')
 
   if (!rootArg || !styleArg) {
-    console.error('Usage: rename <root> <style> [--dry|-n]')
+    console.error('Usage: rename <root> <style> [--dry|-n] [--no-update-content]')
     console.error('Styles: title_underscore, pascal_underscore, snake, kebab, camel, pascal, upper, lower')
     process.exit(1)
   }
 
-  renameRecursive(rootArg, styleArg, { dryRun })
+  renameRecursive(rootArg, styleArg, { dryRun, updateContent })
     .then((performed) => {
       if (dryRun) {
         console.log(`Dry run - would rename ${performed.length} items:`)

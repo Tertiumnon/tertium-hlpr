@@ -5,7 +5,7 @@ Recursively rename files and folders according to a specific case style.
 ## Usage
 
 ```bash
-hlpr file rename <directory> <style> [--dry|-n]
+hlpr file rename <directory> <style> [--dry|-n] [--no-update-content]
 ```
 
 ### Arguments
@@ -13,6 +13,7 @@ hlpr file rename <directory> <style> [--dry|-n]
 - `<directory>` - The root directory to recursively process
 - `<style>` - The target case style (see Supported Styles below)
 - `--dry` or `-n` - Optional dry-run mode (preview changes without applying)
+- `--no-update-content` - Skip updating import/require statements in files (content updates are enabled by default)
 
 ## Supported Styles
 
@@ -55,12 +56,48 @@ hlpr rename . snake
 
 ## Features
 
+### ✅ Automatic Content Updates
+
+**NEW:** By default, the rename command now automatically updates import and require statements in your code files when files are renamed!
+
+The tool intelligently detects and updates **all text-based files** by analyzing file content (not just extensions). This includes:
+
+- Source code: `.js`, `.ts`, `.jsx`, `.tsx`, `.py`, `.rb`, `.go`, `.rs`, etc.
+- Config files: `.json`, `.yml`, `.yaml`, `.toml`, `.xml`, `.ini`, etc.
+- Documentation: `.md`, `.txt`, `.rst`, etc.
+- Shell scripts: `.sh`, `.bash`, `.zsh`, etc.
+- And any other text file format!
+
+Binary files (images, executables, etc.) are automatically skipped.
+
+Example:
+
+```javascript
+// Before renaming from kebab-case to snake_case:
+import { helper } from './my-utils'
+const x = require('./my-utils')
+
+// After running: hlpr file rename . snake
+import { helper } from './my_utils'
+const x = require('./my_utils')
+```
+
+The feature supports:
+
+- Single quotes, double quotes, and backticks
+- Relative paths (`./`, `../`)
+- Files with and without extensions in import statements
+- Both ES6 imports and CommonJS require statements
+
+To disable this feature, use the `--no-update-content` flag.
+
 ### ✅ Recursive Processing
 
 The command walks through all subdirectories, renaming:
 
 1. Files first (so they don't interfere with directory renames)
 2. Directories after processing their contents
+3. Updates file content references after renaming (unless disabled)
 
 ### ✅ Extension Preservation
 
@@ -120,8 +157,17 @@ const newName = transformBasename('MyFileName', 'kebab')
 const changes = await renameRecursive('./my-project', 'snake', { dryRun: true })
 // Returns: [{ from: '...', to: '...' }, ...]
 
-// Apply changes
+// Apply changes with content updates (default)
 await renameRecursive('./my-project', 'kebab')
+
+// Apply changes without updating file contents
+await renameRecursive('./my-project', 'kebab', { updateContent: false })
+
+// Combine options
+await renameRecursive('./my-project', 'snake', {
+  dryRun: false,
+  updateContent: true
+})
 ```
 
 ## Technical Details
