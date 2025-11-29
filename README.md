@@ -2,6 +2,16 @@
 
 A CLI utility for running shell scripts with variable substitution and TypeScript-based commands.
 
+## Platform Support
+
+hlpr works on all major operating systems:
+
+- ✅ **Linux** - Fully supported
+- ✅ **macOS** - Fully supported
+- ✅ **Windows** - Requires [Git for Windows](https://git-scm.com/download/win) (includes Git Bash)
+
+**Note for Windows users:** Shell script commands (`.sh` files) require Bash, which is included with Git for Windows. TypeScript commands work on all platforms.
+
 ## Installation
 
 ```bash
