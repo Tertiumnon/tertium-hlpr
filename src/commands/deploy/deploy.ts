@@ -57,8 +57,8 @@ function deploy() {
       shell: true
     } as any);
 
-    // Restart service via SSH
-    const sshCmd = `ssh ${env.DEPLOY_USER}@${env.DEPLOY_HOST} "cd ${env.DEPLOY_PATH} && bun install --production && pm2 restart ${env.APP_NAME} --update-env"`;
+    // Restart service via SSH (use login shell to preserve environment)
+    const sshCmd = `ssh ${env.DEPLOY_USER}@${env.DEPLOY_HOST} "bash -l -c 'cd ${env.DEPLOY_PATH} && bun install --production && pm2 restart ${env.APP_NAME} --update-env'"`;
     console.log(`→ ${sshCmd}`);
     execSync(sshCmd, {
       stdio: 'inherit',
