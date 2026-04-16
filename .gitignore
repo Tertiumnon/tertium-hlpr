@@ -190,3 +190,4 @@ tmp/
 # Claude Code configuration
 .claude/
 
+.claude/settings.local.json
