@@ -12,7 +12,7 @@
     "build": "bun run build:main && bun run build:commands",
     "test": "bun test",
     "test:e2e": "node scripts/test-rename-e2e.cjs",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "bun run build",
     "release:minor": "node node_modules/@tertium/js/scripts/release.js minor",
     "release:patch": "node node_modules/@tertium/js/scripts/release.js patch",
     "release:major": "node node_modules/@tertium/js/scripts/release.js major",

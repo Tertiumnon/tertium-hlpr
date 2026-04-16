@@ -196,7 +196,7 @@ git clone https://github.com/tertiumnon/hlpr.git
 npm install
 
 # Build the project
-npm run build
+bun run build
 
 # Link for local development
 npm link
