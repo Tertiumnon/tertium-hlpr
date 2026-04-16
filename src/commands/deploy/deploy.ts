@@ -58,8 +58,9 @@ function executeScript(scriptContent: string, variables: Record<string, string>,
   for (const line of lines) {
     const trimmed = line.trim();
 
-    // Skip shebang, comments, and empty lines
+    // Skip shebang, comments, empty lines, and bash variable assignments
     if (!trimmed || trimmed.startsWith('#') || trimmed.startsWith('#!/')) continue;
+    if (/^[A-Z_][A-Z0-9_]*=/.test(trimmed)) continue; // Skip VAR="value" lines
 
     try {
       console.log(`→ ${trimmed}`);
