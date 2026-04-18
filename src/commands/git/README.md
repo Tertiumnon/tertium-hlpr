@@ -1,6 +1,6 @@
 # Git Commands
 
-Git utility commands for common workflows.
+Helpful git utilities for common development workflows.
 
 ## Platform Support
 
@@ -10,17 +10,68 @@ All Git commands work on:
 - ✅ **macOS** - Fully supported
 - ✅ **Windows** - Requires Git for Windows (includes Git Bash)
 
+---
+
+## fodd
+
+Fetch and update develop branch from origin.
+
+**Usage:**
+```bash
+hlpr git fodd
+```
+
+**What it does:**
+- Fetches the `develop` branch from origin
+- Updates your local `develop` branch to match the remote
+
+**When to use:**
+- Before starting work to ensure you have the latest develop branch
+- To sync your local develop with the remote
+
+**Command:**
+```bash
+git fetch origin develop:develop
+```
+
+---
+
+## precommit
+
+Run build and stage binaries before commit.
+
+**Usage:**
+```bash
+hlpr git precommit
+```
+
+**What it does:**
+1. Runs `bun run build` to compile your project
+2. Stages the `bin/` directory for commit
+
+**When to use:**
+- Before committing changes to ensure binaries are up-to-date
+- As a git pre-commit hook to automate the process
+
+**Example workflow:**
+```bash
+# Make changes to source files
+hlpr git precommit  # Build and stage bin/
+git commit -m "feat: add new feature"
+```
+
+---
+
 ## switch-clean
 
 Safely switch to a target branch and delete the previous branch (both local and remote).
 
-### Usage
-
+**Usage:**
 ```bash
 hlpr git switch-clean <target-branch>
 ```
 
-### What it does
+**What it does:**
 
 1. **Validates current state**
    - Checks you're on a branch (not detached HEAD)
@@ -42,10 +93,14 @@ hlpr git switch-clean <target-branch>
    - Deletes local branch: `git branch -d <old-branch>`
    - Deletes remote branch (if exists): `git push origin --delete <old-branch>`
 
-6. **Shows success message**
-   - One-line summary of what was done
+**Safety Features:**
 
-### Examples
+- ✅ **Uncommitted changes check** - Prevents switching if you have uncommitted work
+- ✅ **Unpushed commits check** - Ensures all work is pushed before deletion
+- ✅ **Remote existence check** - Only deletes remote branch if it exists
+- ✅ **Safe branch deletion** - Uses `git branch -d` (not `-D`), refuses to delete unmerged branches
+
+**Examples:**
 
 ```bash
 # Switch from feature branch to develop and clean up
@@ -57,7 +112,7 @@ hlpr git switch-clean main
 # ✓ Switched to 'main' and deleted 'develop' (local only)
 ```
 
-### Error Handling
+**Error Handling:**
 
 The command will fail and exit if:
 
@@ -68,29 +123,7 @@ The command will fail and exit if:
 - Current branch has unpushed commits
 - Target branch doesn't exist on remote
 
-### Safety Features
-
-- **Uncommitted changes check**: Prevents switching if you have uncommitted work
-- **Unpushed commits check**: Ensures all work on current branch is pushed before deletion
-- **Remote existence check**: Only tries to delete remote branch if it exists
-- **Safe branch deletion**: Uses `git branch -d` (not `-D`), which refuses to delete unmerged branches
-
-## Other Git Commands
-
-### fodd
-
-Fetch and update develop branch from origin.
-
-```bash
-hlpr git fodd
-```
-
-Runs: `git fetch origin develop:develop`
-
-### precommit
-
-Pre-commit hook script.
-
-```bash
-hlpr git precommit
-```
+**Solution:**
+- Commit or stash uncommitted changes
+- Push unpushed commits: `git push origin <branch>`
+- Ensure target branch exists on remote

@@ -8,18 +8,20 @@
   "type": "module",
   "scripts": {
     "build:main": "bun build ./src/index.ts --outfile ./bin/index.js --target node",
-    "build:commands": "node build-commands.js",
+    "build:commands": "bun build-commands.js",
     "build": "bun run build:main && bun run build:commands",
     "test": "bun test",
-    "test:e2e": "node scripts/test-rename-e2e.cjs",
+    "test:e2e": "bun scripts/test-rename-e2e.cjs",
     "prepublishOnly": "bun run build",
-    "release:minor": "node node_modules/@tertium/js/scripts/release.js minor",
-    "release:patch": "node node_modules/@tertium/js/scripts/release.js patch",
-    "release:major": "node node_modules/@tertium/js/scripts/release.js major",
+    "release:minor": "bun node_modules/@tertium/js/scripts/release.js minor",
+    "release:patch": "bun node_modules/@tertium/js/scripts/release.js patch",
+    "release:major": "bun node_modules/@tertium/js/scripts/release.js major",
     "prepare": "husky"
   },
+  "dependencies": {
+    "@tertium/js": "^1.4.3"
+  },
   "devDependencies": {
-    "@tertium/js": "^0.16.0",
     "@types/node": "^22.13.10",
     "husky": "^9.1.7",
     "typescript": "^5.8.3"

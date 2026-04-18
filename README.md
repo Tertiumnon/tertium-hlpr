@@ -45,24 +45,13 @@ hlpr -f ssh init dir
 
 ## Available Commands
 
-### Shell Script Commands
-
-Shell scripts support variable substitution using `{{variable}}` syntax.
-
-- `git fodd` - Git command
-- `hello world` - Hello world example
-- `ssh init dir` - SSH initialization
-
 ### TypeScript Commands
-
-TypeScript commands are implemented as `.ts` files and run directly with Bun.
 
 #### file rename
 
 Recursively rename files and folders according to a specific case style.
 
 **Supported styles:**
-
 - `title_underscore` - Title_Case_With_Underscores
 - `snake` - snake_case_lowercase
 - `kebab` - kebab-case-lowercase
@@ -71,8 +60,7 @@ Recursively rename files and folders according to a specific case style.
 - `upper` - UPPER_CASE_WITH_UNDERSCORES
 - `lower` - lower_case_with_underscores
 
-**Examples:**
-
+**Usage:**
 ```bash
 # Dry run (preview changes without applying)
 hlpr file rename ./my-project kebab --dry
@@ -84,15 +72,99 @@ hlpr file rename ./docs pascal
 ```
 
 **Features:**
-
 - ✅ Recursive directory traversal
-- ✅ Extension preservation (e.g., `file-name.md` core name only)
+- ✅ Extension preservation
 - ✅ Leading dot file support (e.g., `.gitignore`)
 - ✅ Case-only rename handling (Windows compatibility)
 - ✅ Conflict resolution (adds `_N` suffix)
 - ✅ Dry-run mode (`--dry` or `-n`)
 
-See `commands/file/rename/README.md` for detailed documentation.
+**See:** [`src/commands/file/rename/README.md`](src/commands/file/rename/README.md) for full documentation.
+
+---
+
+#### help
+
+Display help information about hlpr commands.
+
+**Usage:**
+```bash
+hlpr help
+```
+
+---
+
+### Shell Script Commands
+
+Shell scripts support variable substitution using `{{variable}}` syntax.
+
+#### git
+
+Helpful git utilities for common development workflows.
+
+**Usage:**
+```bash
+hlpr git <command>
+```
+
+**Commands:**
+- `fodd` - Fetch and update develop branch from origin
+- `precommit` - Run build and stage binaries before commit
+- `switch-clean` - Safely switch to a branch and delete the previous one (local & remote)
+
+**See:** [`src/commands/git/README.md`](src/commands/git/README.md) for full documentation.
+
+---
+
+#### hello
+
+Example/demo commands for testing the hlpr CLI tool.
+
+**Usage:**
+```bash
+hlpr hello world
+```
+
+Prompts for input and prints a personalized greeting with variable substitution.
+
+**See:** [`src/commands/hello/README.md`](src/commands/hello/README.md) for full documentation.
+
+---
+
+#### nvm
+
+Node Version Manager utilities for managing Node.js versions.
+
+**Usage:**
+```bash
+hlpr nvm <command>
+```
+
+**Commands:**
+- `install` - Install Node Version Manager (nvm)
+- `lts` - Install and use Node.js LTS version
+
+**See:** [`src/commands/nvm/README.md`](src/commands/nvm/README.md) for full documentation.
+
+---
+
+#### ssh
+
+SSH configuration and setup utilities.
+
+**Usage:**
+```bash
+hlpr ssh init-dir
+```
+
+Initializes SSH directory with proper permissions:
+- `~/.ssh/` directory with 700 permissions
+- `~/.ssh/known_hosts` with 644 permissions
+- `~/.ssh/config` with 644 permissions
+
+Portable across Unix/Linux/macOS and Git Bash on Windows.
+
+**See:** [`src/commands/ssh/README.md`](src/commands/ssh/README.md) for full documentation.
 
 ## How It Works
 

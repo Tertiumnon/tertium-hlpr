@@ -1,28 +1,31 @@
 #!/usr/bin/env node
+import fs from "node:fs";
+import path from "node:path";
 
-import fs from "fs";
-import path from "path";
-import { execSync } from "child_process";
+/**
+ * Build script to copy command files from src/commands to bin/commands
+ */
 
-function buildTsFiles(dir) {
-  const items = fs.readdirSync(dir);
+function buildCommands(srcDir) {
+  const items = fs.readdirSync(srcDir, { withFileTypes: true });
+
   for (const item of items) {
-    const fullPath = path.join(dir, item);
-    const stat = fs.statSync(fullPath);
-    if (stat.isDirectory()) {
-      buildTsFiles(fullPath);
-    } else if (item.endsWith(".ts") && !item.endsWith(".test.ts")) {
+    const fullPath = path.join(srcDir, item.name);
+
+    if (item.isDirectory()) {
+      buildCommands(fullPath);
+    } else if (item.name.endsWith(".sh") || item.name.endsWith(".cjs")) {
+      // Copy shell scripts and CommonJS files
       const relativePath = path.relative("src", fullPath);
-      const outPath = path.join("bin", relativePath.replace(".ts", ".js"));
+      const outPath = path.join("bin", relativePath);
       const outDir = path.dirname(outPath);
       if (!fs.existsSync(outDir)) {
         fs.mkdirSync(outDir, { recursive: true });
       }
-      console.log(`Building ${fullPath} -> ${outPath}`);
-      execSync(`bun build "${fullPath}" --outfile "${outPath}" --target node`, {
-        stdio: "inherit",
-      });
-    } else if (item.endsWith(".sh")) {
+      console.log(`Copying ${fullPath} -> ${outPath}`);
+      fs.copyFileSync(fullPath, outPath);
+    } else if (item.name.endsWith(".js")) {
+      // Copy .js files (e.g., deploy.js wrapper)
       const relativePath = path.relative("src", fullPath);
       const outPath = path.join("bin", relativePath);
       const outDir = path.dirname(outPath);
@@ -35,4 +38,4 @@ function buildTsFiles(dir) {
   }
 }
 
-buildTsFiles("src/commands");
+buildCommands("src/commands");
