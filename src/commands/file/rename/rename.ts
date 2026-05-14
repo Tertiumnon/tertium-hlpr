@@ -40,7 +40,7 @@ export function transformBasename(basename: string, style: Style): string {
 
   switch (style) {
     case 'title_underscore':
-      return leadingDot + words.map(cap).join('_') + ext
+      return leadingDot + titleCase(words).join('_') + ext
     case 'snake':
       return leadingDot + words.map((w) => w.toLowerCase()).join('_') + ext
     case 'kebab':
@@ -50,7 +50,7 @@ export function transformBasename(basename: string, style: Style): string {
     case 'pascal':
       return leadingDot + words.map(cap).join('') + ext
     case 'pascal_underscore':
-      return leadingDot + words.map(cap).join('_') + ext
+      return leadingDot + titleCase(words).join('_') + ext
     case 'upper':
       return leadingDot + words.join('_').toUpperCase() + ext
     case 'lower':
@@ -60,9 +60,41 @@ export function transformBasename(basename: string, style: Style): string {
   }
 }
 
+function isAllCaps(s: string): boolean {
+  return s.length > 0 && s === s.toUpperCase() && s !== s.toLowerCase()
+}
+
 function cap(s: string) {
   if (!s) return s
   return s[0].toUpperCase() + s.slice(1).toLowerCase()
+}
+
+function titleCase(words: string[]): string[] {
+  const smallWords = new Set([
+    'a', 'an', 'and', 'as', 'at', 'but', 'by', 'for',
+    'from', 'in', 'into', 'nor', 'of', 'on', 'or',
+    'the', 'to', 'with'
+  ])
+
+  return words.map((word, index) => {
+    // Preserve all-caps words (acronyms, Roman numerals)
+    if (isAllCaps(word)) {
+      return word
+    }
+
+    // First word is always capitalized
+    if (index === 0) {
+      return cap(word)
+    }
+
+    // Small words stay lowercase (unless first)
+    if (smallWords.has(word.toLowerCase())) {
+      return word.toLowerCase()
+    }
+
+    // Capitalize other words
+    return cap(word)
+  })
 }
 
 async function exists(p: string) {

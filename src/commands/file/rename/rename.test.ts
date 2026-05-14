@@ -18,6 +18,17 @@ describe('rename module', () => {
     expect(transformBasename('Deep File.testdata.js', 'kebab')).toBe('deep-file.testdata.js')
   })
 
+  test('transformBasename title case with small words and all-caps', () => {
+    // Small words like "of" should stay lowercase
+    expect(transformBasename('The_Curse_of_Seven_Hills_Part_III', 'title_underscore')).toBe('The_Curse_of_Seven_Hills_Part_III')
+    // All-caps words should be preserved
+    expect(transformBasename('API_for_HTML_Files', 'title_underscore')).toBe('API_for_HTML_Files')
+    // First word should always be capitalized
+    expect(transformBasename('the_quick_brown_fox', 'title_underscore')).toBe('The_Quick_Brown_Fox')
+    // Test with pascal_underscore (alias for title_underscore)
+    expect(transformBasename('The_Curse_of_Seven_Hills_Part_III', 'pascal_underscore')).toBe('The_Curse_of_Seven_Hills_Part_III')
+  })
+
   test('renameRecursive dry run returns planned renames', async () => {
     const tmp = fs.mkdtempSync(path.join(process.cwd(), 'test-tmp-'))
     try {
