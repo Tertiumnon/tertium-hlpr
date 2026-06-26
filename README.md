@@ -286,9 +286,13 @@ hlpr -f ssh init dir
 ```bash
 # Clone the repository
 git clone https://github.com/tertiumnon/hlpr.git
+cd hlpr
 
 # Install dependencies
 npm install
+
+# Setup git hooks (runs tests before commit)
+npm run setup:hooks
 
 # Build the project
 bun run build
@@ -296,6 +300,20 @@ bun run build
 # Link for local development
 npm link
 ```
+
+### Git Hooks
+
+This project uses native git hooks (`.githooks/pre-commit`) to run tests before each commit. After cloning or pulling, ensure hooks are configured:
+
+```bash
+npm run setup:hooks
+```
+
+The pre-commit hook:
+- Runs unit and integration tests
+- Runs end-to-end tests
+- Aborts commit if tests fail
+- Can be skipped with `SKIP_E2E=1 git commit` (not recommended)
 
 ## License
 

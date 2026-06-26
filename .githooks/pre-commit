@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+# Pre-commit hook: Build and test the project before committing
+
+echo "Building project..."
+bun run build
+ret=$?
+if [ $ret -ne 0 ]; then
+	echo "Build failed; commit aborted."
+	exit $ret
+fi
+
+echo "Running tests..."
+bun test
+ret=$?
+if [ $ret -ne 0 ]; then
+	echo "Tests failed; commit aborted."
+	exit $ret
+fi
