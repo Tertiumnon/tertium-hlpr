@@ -25,9 +25,9 @@ async function getVersion(): Promise<string> {
 function detectShell(): string {
   const isWindows = os.platform() === "win32";
   if (isWindows) {
-    // Try to find bash (Git Bash, WSL, etc.) on Windows
-    // Git Bash is commonly installed with Git for Windows
-    return "bash"; // Use bash for compatibility with shell scripts
+    // Use PowerShell on Windows (v7+ supports Unix-like commands natively)
+    // Fallback to bash if available (Git Bash, WSL, MSYS2, etc.)
+    return "powershell";
   }
   return "bash"; // Default to bash for Unix-like systems
 }

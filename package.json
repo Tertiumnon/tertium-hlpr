@@ -8,10 +8,10 @@
   "type": "module",
   "scripts": {
     "build:main": "bun build ./src/index.ts --outfile ./bin/index.js --target node",
-    "build:commands": "bun build-commands.js",
+    "build:commands": "bun scripts/build-commands/build-commands.ts",
     "build": "bun run build:main && bun run build:commands",
     "test": "bun test",
-    "test:e2e": "bun scripts/test-rename-e2e.cjs",
+    "test:e2e": "bun scripts/test-rename/test-rename.ts",
     "prepublishOnly": "bun run build",
     "release:minor": "bun node_modules/@tertium/js/scripts/release.js minor",
     "release:patch": "bun node_modules/@tertium/js/scripts/release.js patch",
