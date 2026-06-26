@@ -4,7 +4,6 @@ import { exec } from "node:child_process";
 import * as path from "node:path";
 import * as fs from "node:fs";
 import * as readline from "node:readline";
-import * as os from "node:os";
 import { fileURLToPath } from "node:url";
 
 // Get package version from package.json
@@ -19,17 +18,6 @@ async function getVersion(): Promise<string> {
     console.error('Error reading package.json:', error);
     return '0.0.0'; // Fallback version
   }
-}
-
-// Detect shell type
-function detectShell(): string {
-  const isWindows = os.platform() === "win32";
-  if (isWindows) {
-    // Use PowerShell on Windows (v7+ supports Unix-like commands natively)
-    // Fallback to bash if available (Git Bash, WSL, MSYS2, etc.)
-    return "powershell";
-  }
-  return "bash"; // Default to bash for Unix-like systems
 }
 
 // Get the directory where the commands are located
@@ -317,15 +305,15 @@ async function main() {
     
     // Try shell script: commands/<category>/<scriptname>.sh
     if (!isTypeScriptCommand && restArgs.length > 0) {
-      // Join the rest of the arguments without hyphens for shell script name
-      const scriptName = restArgs.join("");
+      // First argument is the command name
+      const scriptName = restArgs[0];
       let scriptPathCandidate = path.join(scriptDir, "commands", category, `${scriptName}.sh`);
-      
+
       // If not found in scriptDir (src/), try in bin/ (for built version)
       if (!fs.existsSync(scriptPathCandidate)) {
         scriptPathCandidate = path.join(__dirname, "..", "bin", "commands", category, `${scriptName}.sh`);
       }
-      
+
       if (fs.existsSync(scriptPathCandidate)) {
         scriptPath = scriptPathCandidate;
       } else {
@@ -376,38 +364,44 @@ async function main() {
 
     // Read the script content for shell scripts
     const scriptContent = await readFile(scriptPath, "utf-8");
-    
-    
+
+    // Get remaining arguments after the command name (for passing to script)
+    const scriptArgs = restArgs.slice(1);
+
     // Extract variables from the script (anything in {{variable}})
     const variableRegex = /{{([^}]+)}}/g;
     const variables: Record<string, string> = {};
     const uniqueVars = new Set<string>();
-    
+
     let match;
     while ((match = variableRegex.exec(scriptContent)) !== null) {
       uniqueVars.add(match[1]);
     }
-    
-    // Prompt for each variable
-    for (const varName of uniqueVars) {
-      const value = await prompt(`Enter ${varName}: `);
-      variables[varName] = value;
+
+    // Prompt for each variable (skip if help is requested)
+    const helpFlags = ['-h', '--help', 'help', '/h', '/help', '/?'];
+    const isHelpRequested = scriptArgs.some(arg => helpFlags.includes(arg));
+
+    if (!isHelpRequested) {
+      for (const varName of uniqueVars) {
+        const value = await prompt(`Enter ${varName}: `);
+        variables[varName] = value;
+      }
     }
-    
+
     // Create a temporary script with variables substituted
     let processedScript = scriptContent;
     for (const [key, value] of Object.entries(variables)) {
       processedScript = processedScript.replace(new RegExp(`{{${key}}}`, 'g'), value);
     }
-    
+
     const tempScriptPath = path.join(path.dirname(scriptPath), `_temp_${path.basename(scriptPath)}`);
     fs.writeFileSync(tempScriptPath, processedScript);
-    
-    // Execute the temporary script with appropriate shell
-    const shell = detectShell();
-    const command = shell === "powershell" 
-      ? `powershell -File "${tempScriptPath}"` 
-      : `bash "${tempScriptPath}"`;
+
+    // Execute the temporary script with bash and arguments
+    // (.sh files require bash, not PowerShell on Windows)
+    const argsStr = scriptArgs.map(arg => `"${arg}"`).join(' ');
+    const command = `bash "${tempScriptPath}" ${argsStr}`;
     const success = await executeCommand(command, {});
     
     // Clean up the temporary script

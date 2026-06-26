@@ -12,7 +12,7 @@ function buildCommands(srcDir: string): void {
 
     if (item.isDirectory()) {
       buildCommands(fullPath);
-    } else if (COPYABLE_EXTENSIONS.some((ext) => item.name.endsWith(ext))) {
+    } else if (item.name === "README.md" || COPYABLE_EXTENSIONS.some((ext) => item.name.endsWith(ext))) {
       const relativePath = path.relative("src", fullPath);
       const outPath = path.join(BIN_OUTPUT_DIR, relativePath);
       const outDir = path.dirname(outPath);
