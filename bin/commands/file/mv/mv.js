@@ -17,6 +17,15 @@ function pathsEqual(a, b) {
   const rb = path.resolve(b);
   return process.platform === "win32" ? ra.toLowerCase() === rb.toLowerCase() : ra === rb;
 }
+function namesEqual(a, b) {
+  return process.platform === "win32" ? a.toLowerCase() === b.toLowerCase() : a === b;
+}
+function stripKnownExt(p, ext) {
+  if (ext && p.toLowerCase().endsWith(ext.toLowerCase())) {
+    return { base: p.slice(0, p.length - ext.length), hadExt: true };
+  }
+  return { base: p, hadExt: false };
+}
 function toPosix(p) {
   return p.split(path.sep).join("/");
 }
@@ -58,6 +67,17 @@ async function collectFiles(dir, out = []) {
     }
   }
   return out;
+}
+async function findDefaultRoot(startDir) {
+  let dir = startDir;
+  while (true) {
+    if (await exists(path.join(dir, ".git")))
+      return dir;
+    const parent = path.dirname(dir);
+    if (parent === dir)
+      return startDir;
+    dir = parent;
+  }
 }
 async function performRename(oldAbs, newAbs, force) {
   await fs.mkdir(path.dirname(newAbs), { recursive: true });
@@ -104,18 +124,16 @@ function encodeLikeOriginal(newPathStr, original) {
   }
   return newPathStr;
 }
-function resolveTargetMatch(targetPath, fileDir, root, oldAbs, oldExt) {
-  const hadExt = !!path.extname(targetPath);
-  const withDefaultExt = (p) => hadExt ? [p] : [p, p + oldExt];
-  if (targetPath.startsWith("/")) {
-    const resolved = path.resolve(root, "." + targetPath);
-    return withDefaultExt(resolved).some((c) => pathsEqual(c, oldAbs)) ? "root-relative" : null;
+function resolveTargetMatch(candidatePath, fileDir, root, oldAbs) {
+  if (candidatePath.startsWith("/")) {
+    const resolved = path.resolve(root, "." + candidatePath);
+    return pathsEqual(resolved, oldAbs) ? "root-relative" : null;
   }
-  const fileResolved = path.resolve(fileDir, targetPath);
-  if (withDefaultExt(fileResolved).some((c) => pathsEqual(c, oldAbs)))
+  const fileResolved = path.resolve(fileDir, candidatePath);
+  if (pathsEqual(fileResolved, oldAbs))
     return "file-relative";
-  const rootResolved = path.resolve(root, targetPath);
-  if (withDefaultExt(rootResolved).some((c) => pathsEqual(c, oldAbs)))
+  const rootResolved = path.resolve(root, candidatePath);
+  if (pathsEqual(rootResolved, oldAbs))
     return "root-relative";
   return null;
 }
@@ -128,24 +146,29 @@ function tryRewriteTarget(rawTarget, fileDir, root, oldAbs, newAbs, allowBareBas
   const decoded = safeDecodeURIComponent(targetPath);
   const oldExt = path.extname(oldAbs);
   const newExt = path.extname(newAbs);
-  const hadExt = !!path.extname(decoded);
+  const oldBaseNoExt = path.basename(oldAbs, oldExt);
+  const newBaseNoExt = path.basename(newAbs, newExt);
   const hasSlash = decoded.includes("/") || decoded.includes("\\");
   let matchKind = null;
+  let hadExt = false;
   if (allowBareBasename && !hasSlash) {
-    const compareBase = hadExt ? decoded : decoded + oldExt;
-    if (pathsEqual(path.basename(compareBase), path.basename(oldAbs))) {
+    const stripped = stripKnownExt(decoded, oldExt);
+    if (namesEqual(stripped.base, oldBaseNoExt)) {
       matchKind = "bare-basename";
+      hadExt = stripped.hadExt;
     }
   }
   if (!matchKind) {
-    matchKind = resolveTargetMatch(decoded, fileDir, root, oldAbs, oldExt);
+    const stripped = stripKnownExt(decoded, oldExt);
+    hadExt = stripped.hadExt;
+    const candidate = hadExt ? decoded : decoded + oldExt;
+    matchKind = resolveTargetMatch(candidate, fileDir, root, oldAbs);
   }
   if (!matchKind)
     return null;
   let newTargetPath;
   if (matchKind === "bare-basename") {
-    const newBase = path.basename(newAbs, newExt);
-    newTargetPath = hadExt ? newBase + newExt : newBase;
+    newTargetPath = hadExt ? newBaseNoExt + newExt : newBaseNoExt;
   } else {
     const base = matchKind === "root-relative" ? root : fileDir;
     let rel = toPosix(path.relative(base, newAbs));
@@ -217,7 +240,7 @@ async function renameFile(oldPathArg, newPathArg, options = {}) {
   const oldAbs = path.resolve(oldPathArg);
   const hasDirSeparator = newPathArg.includes("/") || newPathArg.includes("\\");
   const newAbs = hasDirSeparator ? path.resolve(newPathArg) : path.join(path.dirname(oldAbs), newPathArg);
-  const root = path.resolve(options.root ?? process.cwd());
+  const root = path.resolve(options.root ?? await findDefaultRoot(path.dirname(oldAbs)));
   const updateContentEnabled = options.updateContent ?? true;
   const dryRun = options.dryRun ?? false;
   const force = options.force ?? false;
@@ -231,7 +254,7 @@ async function renameFile(oldPathArg, newPathArg, options = {}) {
   if (pathsEqual(oldAbs, newAbs) && oldAbs === newAbs) {
     throw new Error("Source and destination are the same path");
   }
-  const result = { from: oldAbs, to: newAbs, updatedFiles: [], bareBasenameAmbiguous: false };
+  const result = { from: oldAbs, to: newAbs, root, updatedFiles: [], bareBasenameAmbiguous: false };
   const allFiles = updateContentEnabled ? await collectFiles(root) : [];
   const oldBasenameLower = path.basename(oldAbs).toLowerCase();
   const sameBasenameElsewhere = allFiles.some((f) => !pathsEqual(f, oldAbs) && path.basename(f).toLowerCase() === oldBasenameLower);
@@ -263,9 +286,10 @@ if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, "/"))) {
   if (rawArgs.includes("--help") || rawArgs.includes("-h") || rawArgs.includes("/help") || rawArgs.includes("/h") || rawArgs.includes("/?")) {
     console.log("Usage: mv <oldPath> <newPath> [--root <dir>] [--dry|-n] [--force] [--no-update-content]");
     console.log("Renames/moves a single file and updates references to it (markdown links, wikilinks,");
-    console.log("imports, href/src) in every text file under <dir> (default: current directory), recursively.");
+    console.log("imports, href/src) in every text file under <dir>, recursively.");
     console.log("Options:");
-    console.log("  --root <dir>           Directory to scan for references (default: current directory)");
+    console.log("  --root <dir>           Directory to scan for references");
+    console.log("                         (default: nearest git repo root of <oldPath>, or its own directory)");
     console.log("  --dry, -n              Preview changes without applying them");
     console.log("  --force                Overwrite destination file if it already exists");
     console.log("  --no-update-content    Skip updating references in other files");
@@ -302,6 +326,7 @@ if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, "/"))) {
       console.log(`Renamed:
   ${result.from} \u2192 ${result.to}`);
     }
+    console.log(`Scanned for references under: ${result.root}`);
     if (result.updatedFiles.length > 0) {
       console.log(`
 ${dryRun ? "Would update" : "Updated"} ${result.updatedFiles.length} file(s):`);

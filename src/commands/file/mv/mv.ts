@@ -22,6 +22,20 @@ function pathsEqual(a: string, b: string): boolean {
   return process.platform === 'win32' ? ra.toLowerCase() === rb.toLowerCase() : ra === rb
 }
 
+function namesEqual(a: string, b: string): boolean {
+  return process.platform === 'win32' ? a.toLowerCase() === b.toLowerCase() : a === b
+}
+
+// Strips `ext` from the end of `p` only if `p` actually ends with it. Unlike
+// path.extname(), this won't mistake an embedded dot (e.g. the locale marker
+// in "name.ru.md") for the real extension.
+function stripKnownExt(p: string, ext: string): { base: string; hadExt: boolean } {
+  if (ext && p.toLowerCase().endsWith(ext.toLowerCase())) {
+    return { base: p.slice(0, p.length - ext.length), hadExt: true }
+  }
+  return { base: p, hadExt: false }
+}
+
 function toPosix(p: string): string {
   return p.split(path.sep).join('/')
 }
@@ -67,6 +81,16 @@ async function collectFiles(dir: string, out: string[] = []): Promise<string[]> 
     }
   }
   return out
+}
+
+async function findDefaultRoot(startDir: string): Promise<string> {
+  let dir = startDir
+  while (true) {
+    if (await exists(path.join(dir, '.git'))) return dir
+    const parent = path.dirname(dir)
+    if (parent === dir) return startDir
+    dir = parent
+  }
 }
 
 async function performRename(oldAbs: string, newAbs: string, force: boolean): Promise<void> {
@@ -121,26 +145,19 @@ function encodeLikeOriginal(newPathStr: string, original: string): string {
   return newPathStr
 }
 
-function resolveTargetMatch(
-  targetPath: string,
-  fileDir: string,
-  root: string,
-  oldAbs: string,
-  oldExt: string
-): MatchKind | null {
-  const hadExt = !!path.extname(targetPath)
-  const withDefaultExt = (p: string) => (hadExt ? [p] : [p, p + oldExt])
-
-  if (targetPath.startsWith('/')) {
-    const resolved = path.resolve(root, '.' + targetPath)
-    return withDefaultExt(resolved).some((c) => pathsEqual(c, oldAbs)) ? 'root-relative' : null
+// `candidatePath` is already extension-resolved by the caller (stripKnownExt-aware),
+// so this only needs to decide which base directory it resolves against.
+function resolveTargetMatch(candidatePath: string, fileDir: string, root: string, oldAbs: string): MatchKind | null {
+  if (candidatePath.startsWith('/')) {
+    const resolved = path.resolve(root, '.' + candidatePath)
+    return pathsEqual(resolved, oldAbs) ? 'root-relative' : null
   }
 
-  const fileResolved = path.resolve(fileDir, targetPath)
-  if (withDefaultExt(fileResolved).some((c) => pathsEqual(c, oldAbs))) return 'file-relative'
+  const fileResolved = path.resolve(fileDir, candidatePath)
+  if (pathsEqual(fileResolved, oldAbs)) return 'file-relative'
 
-  const rootResolved = path.resolve(root, targetPath)
-  if (withDefaultExt(rootResolved).some((c) => pathsEqual(c, oldAbs))) return 'root-relative'
+  const rootResolved = path.resolve(root, candidatePath)
+  if (pathsEqual(rootResolved, oldAbs)) return 'root-relative'
 
   return null
 }
@@ -161,20 +178,26 @@ function tryRewriteTarget(
   const decoded = safeDecodeURIComponent(targetPath)
   const oldExt = path.extname(oldAbs)
   const newExt = path.extname(newAbs)
-  const hadExt = !!path.extname(decoded)
+  const oldBaseNoExt = path.basename(oldAbs, oldExt)
+  const newBaseNoExt = path.basename(newAbs, newExt)
   const hasSlash = decoded.includes('/') || decoded.includes('\\')
 
   let matchKind: MatchKind | null = null
+  let hadExt = false
 
   if (allowBareBasename && !hasSlash) {
-    const compareBase = hadExt ? decoded : decoded + oldExt
-    if (pathsEqual(path.basename(compareBase), path.basename(oldAbs))) {
+    const stripped = stripKnownExt(decoded, oldExt)
+    if (namesEqual(stripped.base, oldBaseNoExt)) {
       matchKind = 'bare-basename'
+      hadExt = stripped.hadExt
     }
   }
 
   if (!matchKind) {
-    matchKind = resolveTargetMatch(decoded, fileDir, root, oldAbs, oldExt)
+    const stripped = stripKnownExt(decoded, oldExt)
+    hadExt = stripped.hadExt
+    const candidate = hadExt ? decoded : decoded + oldExt
+    matchKind = resolveTargetMatch(candidate, fileDir, root, oldAbs)
   }
 
   if (!matchKind) return null
@@ -182,8 +205,7 @@ function tryRewriteTarget(
   let newTargetPath: string
 
   if (matchKind === 'bare-basename') {
-    const newBase = path.basename(newAbs, newExt)
-    newTargetPath = hadExt ? newBase + newExt : newBase
+    newTargetPath = hadExt ? newBaseNoExt + newExt : newBaseNoExt
   } else {
     const base = matchKind === 'root-relative' ? root : fileDir
     let rel = toPosix(path.relative(base, newAbs))
@@ -277,7 +299,7 @@ export async function renameFile(
   const hasDirSeparator = newPathArg.includes('/') || newPathArg.includes('\\')
   const newAbs = hasDirSeparator ? path.resolve(newPathArg) : path.join(path.dirname(oldAbs), newPathArg)
 
-  const root = path.resolve(options.root ?? process.cwd())
+  const root = path.resolve(options.root ?? (await findDefaultRoot(path.dirname(oldAbs))))
   const updateContentEnabled = options.updateContent ?? true
   const dryRun = options.dryRun ?? false
   const force = options.force ?? false
@@ -293,7 +315,7 @@ export async function renameFile(
     throw new Error('Source and destination are the same path')
   }
 
-  const result: MoveResult = { from: oldAbs, to: newAbs, updatedFiles: [], bareBasenameAmbiguous: false }
+  const result: MoveResult = { from: oldAbs, to: newAbs, root, updatedFiles: [], bareBasenameAmbiguous: false }
 
   const allFiles = updateContentEnabled ? await collectFiles(root) : []
 
@@ -350,9 +372,10 @@ if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
   ) {
     console.log('Usage: mv <oldPath> <newPath> [--root <dir>] [--dry|-n] [--force] [--no-update-content]')
     console.log('Renames/moves a single file and updates references to it (markdown links, wikilinks,')
-    console.log('imports, href/src) in every text file under <dir> (default: current directory), recursively.')
+    console.log('imports, href/src) in every text file under <dir>, recursively.')
     console.log('Options:')
-    console.log('  --root <dir>           Directory to scan for references (default: current directory)')
+    console.log('  --root <dir>           Directory to scan for references')
+    console.log('                         (default: nearest git repo root of <oldPath>, or its own directory)')
     console.log('  --dry, -n              Preview changes without applying them')
     console.log('  --force                Overwrite destination file if it already exists')
     console.log('  --no-update-content    Skip updating references in other files')
@@ -388,6 +411,7 @@ if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
       } else {
         console.log(`Renamed:\n  ${result.from} → ${result.to}`)
       }
+      console.log(`Scanned for references under: ${result.root}`)
       if (result.updatedFiles.length > 0) {
         console.log(`\n${dryRun ? 'Would update' : 'Updated'} ${result.updatedFiles.length} file(s):`)
         result.updatedFiles.forEach(({ file, count }) => {

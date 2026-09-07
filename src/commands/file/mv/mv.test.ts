@@ -1,10 +1,15 @@
 import { describe, expect, test } from 'bun:test'
 import { renameFile } from './mv.js'
 import fs from 'fs'
+import os from 'os'
 import path from 'path'
 
 function mktmp(): string {
   return fs.mkdtempSync(path.join(process.cwd(), 'test-tmp-mv-'))
+}
+
+function mktmpOutsideRepo(): string {
+  return fs.mkdtempSync(path.join(os.tmpdir(), 'hlpr-mv-test-'))
 }
 
 function cleanup(tmp: string) {
@@ -83,6 +88,24 @@ describe('mv module', () => {
 
       const content = fs.readFileSync(path.join(tmp, 'index.md'), 'utf-8')
       expect(content).toBe('Link: [doc](./archive/new-name.md)')
+    } finally {
+      cleanup(tmp)
+    }
+  })
+
+  test('updates wikilinks pointing at multi-dot filenames (e.g. locale-suffixed .ru.md)', async () => {
+    const tmp = mktmp()
+    try {
+      fs.writeFileSync(path.join(tmp, 'old-name.ru.md'), '# hi')
+      fs.writeFileSync(
+        path.join(tmp, 'index.md'),
+        'See [[old-name.ru]] and [[old-name.ru|Alias]] and [link](./old-name.ru.md).'
+      )
+
+      await renameFile(path.join(tmp, 'old-name.ru.md'), 'new-name.ru.md', { root: tmp })
+
+      const content = fs.readFileSync(path.join(tmp, 'index.md'), 'utf-8')
+      expect(content).toBe('See [[new-name.ru]] and [[new-name.ru|Alias]] and [link](./new-name.ru.md).')
     } finally {
       cleanup(tmp)
     }
@@ -281,6 +304,48 @@ describe('mv module', () => {
       await renameFile(path.join(tmp, 'old-name.md'), 'new-name.md', { root: tmp, updateContent: false })
 
       expect(fs.readFileSync(path.join(tmp, 'index.md'), 'utf-8')).toBe('See [doc](./old-name.md)')
+    } finally {
+      cleanup(tmp)
+    }
+  })
+
+  test('without --root, walks up to the nearest git repo root instead of using cwd', async () => {
+    // Simulate a repo: tmp/.git at the top, file + referrer several levels deep,
+    // and confirm scanning finds the referrer even though it isn't in the same
+    // directory as the file and process.cwd() is somewhere else entirely.
+    const tmp = mktmpOutsideRepo()
+    try {
+      fs.mkdirSync(path.join(tmp, '.git'))
+      const itemDir = path.join(tmp, 'data', 'Item')
+      const docsDir = path.join(tmp, 'docs')
+      fs.mkdirSync(itemDir, { recursive: true })
+      fs.mkdirSync(docsDir, { recursive: true })
+      fs.writeFileSync(path.join(itemDir, 'old-name.md'), '# hi')
+      fs.writeFileSync(path.join(docsDir, 'index.md'), 'See [item](../data/Item/old-name.md)')
+
+      const result = await renameFile(path.join(itemDir, 'old-name.md'), 'new-name.md')
+
+      expect(result.root).toBe(tmp)
+      expect(fs.readFileSync(path.join(docsDir, 'index.md'), 'utf-8')).toBe('See [item](../data/Item/new-name.md)')
+    } finally {
+      cleanup(tmp)
+    }
+  })
+
+  test('without --root and no git repo found, falls back to the file own directory', async () => {
+    const tmp = mktmpOutsideRepo()
+    try {
+      const itemDir = path.join(tmp, 'nested', 'deep')
+      fs.mkdirSync(itemDir, { recursive: true })
+      fs.writeFileSync(path.join(itemDir, 'old-name.md'), '# hi')
+      // A referrer outside itemDir must NOT be updated, since no .git exists
+      // anywhere up the tree and the fallback root is itemDir itself.
+      fs.writeFileSync(path.join(tmp, 'outside.md'), 'See [item](./nested/deep/old-name.md)')
+
+      const result = await renameFile(path.join(itemDir, 'old-name.md'), 'new-name.md')
+
+      expect(result.root).toBe(itemDir)
+      expect(fs.readFileSync(path.join(tmp, 'outside.md'), 'utf-8')).toBe('See [item](./nested/deep/old-name.md)')
     } finally {
       cleanup(tmp)
     }

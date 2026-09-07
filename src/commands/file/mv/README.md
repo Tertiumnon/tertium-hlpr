@@ -18,7 +18,11 @@ hlpr file mv <oldPath> <newPath> [--root <dir>] [--dry|-n] [--force] [--no-updat
 - `<newPath>` - New path or filename. If it has no directory separators, the file is renamed
   in place (kept in the same directory as `<oldPath>`); otherwise it's treated as a full path
   and the file is moved there (missing directories are created).
-- `--root <dir>` - Directory to scan for references (default: current directory)
+- `--root <dir>` - Directory to scan for references. If omitted, defaults to the nearest
+  ancestor of `<oldPath>` containing a `.git` folder (i.e. its git repo root), or `<oldPath>`'s
+  own directory if no repo is found. **Not** your shell's current working directory — this
+  matters for the globally-installed `hlpr` binary, since your terminal's cwd may have nothing
+  to do with the file you're renaming.
 - `--dry` or `-n` - Preview changes without applying them
 - `--force` - Overwrite the destination file if it already exists
 - `--no-update-content` - Skip updating references in other files (only rename/move the file)
@@ -44,7 +48,7 @@ hlpr file mv docs/old-name.md docs/existing.md --force
 
 ## What Gets Updated
 
-For every text file under `--root` (default: current directory), the command rewrites:
+For every text file under `--root` (see default above), the command rewrites:
 
 - **Markdown links & images**: `[text](./old-name.md)`, `![alt](../old-name.md)`, including
   `<path with spaces>` wrapping, `#heading` fragments, and `"title"` suffixes.
@@ -70,6 +74,9 @@ touched.
 - `--dry` reports exactly what would be renamed and which files would be updated (and how many
   references in each), without touching disk.
 - Skips `.git` and `node_modules` when scanning for references.
+- Always prints which directory it scanned (`Scanned for references under: ...`), so a
+  surprising "No references found" is easy to diagnose — pass `--root` explicitly if the
+  auto-detected repo root isn't what you expect.
 
 ## TypeScript API
 
@@ -84,6 +91,7 @@ const result = await renameFile('docs/old-name.md', 'new-name.md', {
 })
 
 // result.from / result.to           — resolved absolute paths
+// result.root                        — the directory actually scanned for references
 // result.updatedFiles                — [{ file, count }, ...]
 // result.bareBasenameAmbiguous       — true if bare wikilinks were skipped due to a name clash
 ```

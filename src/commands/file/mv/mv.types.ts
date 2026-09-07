@@ -6,6 +6,7 @@ export interface UpdatedFile {
 export interface MoveResult {
   from: string
   to: string
+  root: string
   updatedFiles: UpdatedFile[]
   bareBasenameAmbiguous: boolean
 }
