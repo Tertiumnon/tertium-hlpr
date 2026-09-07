@@ -38,6 +38,7 @@ hlpr ssh init dir
 
 # TypeScript commands (nested structure)
 hlpr file rename <directory> <style> [--dry|-n]
+hlpr file mv <oldPath> <newPath> [--dry|-n]
 
 # Continue execution even if commands fail
 hlpr -f ssh init dir
@@ -50,6 +51,7 @@ See individual command documentation for detailed usage, options, and examples.
 ### TypeScript Commands
 
 - **[file rename](src/commands/file/rename/README.md)** - Recursively rename files/folders with various case styles
+- **[file mv](src/commands/file/mv/README.md)** - Rename/move a single file and update all references to it (markdown links, wikilinks, imports)
 - **[help](src/commands/help/README.md)** - Display help information about hlpr commands
 - **[process list-port](src/commands/process/list-port/README.md)** - List processes running on a port
 - **[process kill-port](src/commands/process/kill-port/README.md)** - Kill processes on a port

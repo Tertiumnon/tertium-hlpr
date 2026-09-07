@@ -179,6 +179,6 @@ if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, "/"))) {
 }
 var kill_port_default = { killPort };
 export {
-  killPort,
-  kill_port_default as default
+  kill_port_default as default,
+  killPort
 };

@@ -2,14 +2,9 @@
 import { execSync } from 'node:child_process'
 import { platform } from 'node:os'
 import type { BaseCommandOptions } from '../../../core/command/command.types.js'
+import type { ProcessInfo } from './list-port.types.js'
 
 // @description List process(es) running on a specified port (Windows & Linux support)
-
-interface ProcessInfo {
-  pid: number
-  state: string
-  command?: string
-}
 
 function getProcessesOnWindowsPort(port: number): ProcessInfo[] {
   try {

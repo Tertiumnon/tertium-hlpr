@@ -1,15 +1,8 @@
 import fs from 'fs/promises'
 import path from 'path'
+import type { Style } from './rename.types.js'
 
-type Style =
-  | 'title_underscore'
-  | 'snake'
-  | 'kebab'
-  | 'camel'
-  | 'pascal'
-  | 'pascal_underscore'
-  | 'upper'
-  | 'lower'
+export type { Style } from './rename.types.js'
 
 function splitWords(s: string): string[] {
   // split on any run of non-letter/number, and also split CamelCase boundaries

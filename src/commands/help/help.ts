@@ -3,14 +3,7 @@ import * as path from "node:path";
 import * as fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { readFile } from "node:fs/promises";
-
-interface CommandInfo {
-  category: string;
-  name: string;
-  type: 'typescript' | 'shell';
-  path: string;
-  description?: string;
-}
+import type { CommandInfo } from "./help.types.js";
 
 async function getVersion(): Promise<string> {
   try {

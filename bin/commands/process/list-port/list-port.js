@@ -159,6 +159,6 @@ if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, "/"))) {
 }
 var list_port_default = { listPort };
 export {
-  listPort,
-  list_port_default as default
+  list_port_default as default,
+  listPort
 };

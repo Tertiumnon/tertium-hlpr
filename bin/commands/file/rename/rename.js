@@ -279,7 +279,7 @@ var rename_default = {
   renameRecursive
 };
 export {
-  transformBasename,
+  rename_default as default,
   renameRecursive,
-  rename_default as default
+  transformBasename
 };
