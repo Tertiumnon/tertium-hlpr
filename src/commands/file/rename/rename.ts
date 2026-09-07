@@ -191,23 +191,37 @@ function escapeRegex(str: string): string {
 
 async function isTextFile(filePath: string): Promise<boolean> {
   try {
-    // Read first 512 bytes to check for binary content
+    // Read first 4096 bytes to check for binary content
     const fd = await fs.open(filePath, 'r')
-    const buffer = Buffer.alloc(512)
-    const { bytesRead } = await fd.read(buffer, 0, 512, 0)
+    const buffer = Buffer.alloc(4096)
+    const { bytesRead } = await fd.read(buffer, 0, 4096, 0)
     await fd.close()
 
     if (bytesRead === 0) return true // Empty files are text
 
+    const sample = buffer.subarray(0, bytesRead)
+
     // Check for null bytes (common in binary files)
     for (let i = 0; i < bytesRead; i++) {
-      if (buffer[i] === 0) return false
+      if (sample[i] === 0) return false
+    }
+
+    // Valid UTF-8 (the common case for non-English text - Cyrillic, CJK, etc.
+    // - which is mostly non-ASCII and would otherwise fail the printable-ASCII
+    // heuristic below) is decoded with `stream: true` so a multi-byte sequence
+    // truncated at the end of our sample isn't mistaken for invalid data.
+    try {
+      new TextDecoder('utf-8', { fatal: true }).decode(sample, { stream: true })
+      return true
+    } catch {
+      // Not valid UTF-8: fall through to the printable-ASCII heuristic below,
+      // which still catches plain ASCII/Latin-1 text files.
     }
 
     // Check for common text file patterns and high ratio of printable ASCII
     let printableCount = 0
     for (let i = 0; i < bytesRead; i++) {
-      const byte = buffer[i]
+      const byte = sample[i]
       // Count printable ASCII, tabs, newlines, carriage returns
       if ((byte >= 32 && byte <= 126) || byte === 9 || byte === 10 || byte === 13) {
         printableCount++

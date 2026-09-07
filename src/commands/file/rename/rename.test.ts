@@ -172,4 +172,23 @@ describe('rename module', () => {
       fs.rmSync(tmp, { recursive: true, force: true })
     }
   })
+
+  test('renameRecursive updates references inside files that are mostly non-ASCII text (Cyrillic)', async () => {
+    const tmp = fs.mkdtempSync(path.join(process.cwd(), 'test-tmp-'))
+    try {
+      fs.writeFileSync(path.join(tmp, 'my-utils.ts'), 'export const helper = () => {}')
+      const content =
+        '// Модуль вспомогательных функций для работы с данными\n' +
+        "import { helper } from './my-utils'\n"
+      fs.writeFileSync(path.join(tmp, 'index.ts'), content, 'utf-8')
+
+      await renameRecursive(tmp, 'snake', { updateContent: true })
+
+      const updated = fs.readFileSync(path.join(tmp, 'index.ts'), 'utf-8')
+      expect(updated).toContain(`'./my_utils'`)
+      expect(updated).not.toContain(`'./my-utils'`)
+    } finally {
+      fs.rmSync(tmp, { recursive: true, force: true })
+    }
+  })
 })

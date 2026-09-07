@@ -92,7 +92,7 @@ async function showHelp() {
     return;
   }
   async function discoverCommands(commandsDir) {
-    const commands2 = [];
+    const commands = [];
     try {
       const categories = await fs.promises.readdir(commandsDir, { withFileTypes: true });
       for (const category of categories) {
@@ -116,7 +116,7 @@ async function showHelp() {
               continue;
             }
             const description = await getCommandDescription(commandPath);
-            commands2.push({
+            commands.push({
               category: category.name,
               name: item.name,
               type: commandType,
@@ -128,7 +128,7 @@ async function showHelp() {
             const commandName = path.basename(item.name, ".js");
             if (commandName !== "test" && !commandName.endsWith(".test")) {
               const description = await getCommandDescription(jsPath);
-              commands2.push({
+              commands.push({
                 category: category.name,
                 name: commandName,
                 type: "typescript",
@@ -140,7 +140,7 @@ async function showHelp() {
             const shPath = path.join(categoryPath, item.name);
             const commandName = path.basename(item.name, ".sh");
             const description = await getCommandDescription(shPath);
-            commands2.push({
+            commands.push({
               category: category.name,
               name: commandName,
               type: "shell",
@@ -151,7 +151,7 @@ async function showHelp() {
         }
       }
     } catch (error) {}
-    return commands2;
+    return commands;
   }
   const version = await getVersion();
   const binCommandsDir = path.join(__dirname2, "commands");
@@ -264,10 +264,10 @@ async function main() {
       }
       const finalCommand = `node "${scriptPath}" ${tsArgs.join(" ")}`;
       console.log(`Executing command: ${finalCommand}`);
-      const success2 = await executeCommand(finalCommand, {});
-      const helpFlags2 = ["-h", "--help", "help", "/h", "/help", "/?"];
-      const isHelpInvocation = tsArgs.some((arg) => helpFlags2.includes(arg));
-      if (!success2 && !forceFlag && !isHelpInvocation) {
+      const success = await executeCommand(finalCommand, {});
+      const helpFlags = ["-h", "--help", "help", "/h", "/help", "/?"];
+      const isHelpInvocation = tsArgs.some((arg) => helpFlags.includes(arg));
+      if (!success && !forceFlag && !isHelpInvocation) {
         console.error("Command failed, stopping execution.");
         process.exit(1);
       }

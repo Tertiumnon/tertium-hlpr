@@ -230,6 +230,30 @@ describe('mv module', () => {
     }
   })
 
+  test('updates markdown links inside files that are mostly non-ASCII text (Cyrillic)', async () => {
+    const tmp = mktmp()
+    try {
+      fs.writeFileSync(path.join(tmp, 'Alignment.ru.md'), '# Мировоззрение')
+      // A paragraph of Cyrillic text is mostly non-ASCII bytes in UTF-8, which
+      // used to make isTextFile() misclassify the whole file as binary and
+      // skip it, silently leaving the link unrewritten.
+      const content =
+        '| **[Мировоззрение →](./Alignment.ru.md)** | Моральная ориентация персонажа определяет его поведение |\n'.repeat(
+          10
+        )
+      fs.writeFileSync(path.join(tmp, 'index.ru.md'), content, 'utf-8')
+
+      const result = await renameFile(path.join(tmp, 'Alignment.ru.md'), 'Creature_Alignment.ru.md', { root: tmp })
+
+      const updated = fs.readFileSync(path.join(tmp, 'index.ru.md'), 'utf-8')
+      expect(updated).toContain('[Мировоззрение →](./Creature_Alignment.ru.md)')
+      expect(updated).not.toContain('./Alignment.ru.md')
+      expect(result.updatedFiles).toHaveLength(1)
+    } finally {
+      cleanup(tmp)
+    }
+  })
+
   test('works across a wide variety of file extensions', async () => {
     const extensions = ['md', 'markdown', 'js', 'ts', 'tsx', 'jsx', 'py', 'go', 'rs', 'json', 'yaml', 'yml', 'css', 'html', 'txt', 'sh']
 
