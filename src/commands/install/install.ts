@@ -99,29 +99,66 @@ export function updateProfile(content: string, tool: PromptTool): string {
   return `${lines.join('\n')}\n`
 }
 
-async function selectTool(value?: string): Promise<Tool> {
+const menu: Array<[Tool, string]> = [
+  ['oh-my-posh', 'Windows · PowerShell'],
+  ['starship', 'Windows · PowerShell'],
+  ['psreadline', 'Windows · PowerShell'],
+  ['pstop', 'Windows'],
+  ['nvm', 'Linux/macOS · Bash; Windows · Git Bash/WSL'],
+  ['oh-my-zsh', 'Linux/macOS · Zsh; Windows · WSL'],
+  ['node', 'Windows/macOS/Debian/Ubuntu'],
+  ['python', 'Windows/macOS/Debian/Ubuntu'],
+  ['bun', 'Windows/macOS/Debian/Ubuntu'],
+]
+
+export function moveSelection(index: number, direction: 'up' | 'down', count: number): number {
+  return (index + (direction === 'up' ? -1 : 1) + count) % count
+}
+
+async function selectTool(value?: string): Promise<Tool | undefined> {
   const tool = parseTool(value)
   if (tool) return tool
   if (value) throw new Error(`Unknown tool: ${value}`)
+  if (!process.stdin.isTTY || !process.stdout.isTTY) throw new Error('Select a tool in an interactive terminal, or pass its name')
 
-  console.log('1) oh-my-posh [Windows · PowerShell]\n2) starship    [Windows · PowerShell]\n3) PSReadLine  [Windows · PowerShell]\n4) pstop       [Windows]\n5) nvm         [Linux/macOS · Bash; Windows · Git Bash/WSL]\n6) oh-my-zsh   [Linux/macOS · Zsh; Windows · WSL]\n7) node        [Windows/macOS/Debian/Ubuntu]\n8) python      [Windows/macOS/Debian/Ubuntu]\n9) bun         [Windows/macOS/Debian/Ubuntu]')
-  const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
-  const answer = await new Promise<string>((resolve) => rl.question('Select tool: ', resolve))
-  rl.close()
-  if (answer === '1') return 'oh-my-posh'
-  if (answer === '2') return 'starship'
-  if (answer === '3') return 'psreadline'
-  if (answer === '4') return 'pstop'
-  if (answer === '5') return 'nvm'
-  if (answer === '6') return 'oh-my-zsh'
-  if (answer === '7') return 'node'
-  if (answer === '8') return 'python'
-  if (answer === '9') return 'bun'
-  throw new Error('Invalid selection (use 1-9)')
+  let selected = 0
+  const render = () => {
+    process.stdout.write(menu.map(([name, compatibility], index) =>
+      `${index === selected ? '❯' : ' '} ${name.padEnd(11)} [${compatibility}]\x1b[K\n`).join(''))
+  }
+
+  console.log('Select a tool (↑/↓, Enter; Esc to cancel):')
+  render()
+  readline.emitKeypressEvents(process.stdin)
+  process.stdin.setRawMode(true)
+  process.stdin.resume()
+  try {
+    return await new Promise<Tool | undefined>((resolve) => {
+      const onKeypress = (_input: string, key: { name?: string; ctrl?: boolean }) => {
+        if (key.name === 'return' || key.name === 'enter') {
+          process.stdin.off('keypress', onKeypress)
+          resolve(menu[selected][0])
+        } else if (key.name === 'escape' || (key.ctrl && key.name === 'c')) {
+          process.stdin.off('keypress', onKeypress)
+          resolve(undefined)
+        } else if (key.name === 'up' || key.name === 'down') {
+          selected = moveSelection(selected, key.name, menu.length)
+          process.stdout.write(`\x1b[${menu.length}A`)
+          render()
+        }
+      }
+      process.stdin.on('keypress', onKeypress)
+    })
+  } finally {
+    process.stdin.setRawMode(false)
+    process.stdin.pause()
+    process.stdout.write('\n')
+  }
 }
 
 async function main(): Promise<void> {
   const tool = await selectTool(process.argv[2])
+  if (!tool) return
 
   if (isRuntimeTool(tool)) {
     const platform = process.platform

@@ -25,7 +25,7 @@ hlpr install bun -v 1
 hlpr install node -version 24
 ```
 
-`install` and `i` are equivalent. Choose from the displayed list, or pass an app name. Node defaults to the current LTS release. Python and Bun do not have LTS channels, so they default to the latest stable release. Runtime versions are selected by major number with `-v` or `-version`.
+`install` and `i` are equivalent. In the interactive menu, use ↑/↓ to choose an app and Enter to install it; Esc cancels. You can also pass an app name directly. Node defaults to the current LTS release. Python and Bun do not have LTS channels, so they default to the latest stable release. Runtime versions are selected by major number with `-v` or `-version`.
 
 ### Compatibility
 

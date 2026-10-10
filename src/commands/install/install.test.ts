@@ -1,7 +1,12 @@
 import { describe, expect, test } from 'bun:test'
-import { parseTool, parseVersion, runtimeInstallCommands, updateProfile } from './install.js'
+import { moveSelection, parseTool, parseVersion, runtimeInstallCommands, updateProfile } from './install.js'
 
 describe('install', () => {
+  test('arrow selection wraps at both ends', () => {
+    expect(moveSelection(0, 'up', 9)).toBe(8)
+    expect(moveSelection(8, 'down', 9)).toBe(0)
+    expect(moveSelection(3, 'down', 9)).toBe(4)
+  })
   test('switches prompt initialization without changing other profile lines', () => {
     const profile = '$env:EDITOR = "code"\nInvoke-Expression (&starship init powershell)\n'
     expect(updateProfile(profile, 'oh-my-posh')).toBe('$env:EDITOR = "code"\noh-my-posh init pwsh | Invoke-Expression\n')

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { exec } from "node:child_process";
+import { exec, spawnSync } from "node:child_process";
 import * as fs from "node:fs";
 import { readFile } from "node:fs/promises";
 import * as path from "node:path";
@@ -346,11 +346,17 @@ async function main() {
       }
       
       // Use node to run built JavaScript files
-      const finalCommand = `node "${scriptPath}" ${tsArgs.join(' ')}`;
-      
-      console.log(`Executing command: ${finalCommand}`);
       rl.close();
-      const success = await executeCommand(finalCommand, {});
+      let success: boolean;
+      if (category === 'install' && tsArgs.length === 0) {
+        const result = spawnSync(process.execPath, [scriptPath], { stdio: 'inherit' });
+        if (result.error) console.error(result.error.message);
+        success = result.status === 0;
+      } else {
+        const finalCommand = `node "${scriptPath}" ${tsArgs.join(' ')}`;
+        console.log(`Executing command: ${finalCommand}`);
+        success = await executeCommand(finalCommand, {});
+      }
       
       // If this invocation was only to show help, don't treat non-zero exit as failure
       const helpFlags = ['-h', '--help', 'help', '/h', '/help', '/?'];
