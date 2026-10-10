@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
-import fs from 'fs/promises'
-import path from 'path'
+import fs from 'node:fs/promises'
+import path from 'node:path'
 import type { MatchKind, MoveOptions, MoveResult } from './mv.types.js'
 
 // @description Rename or move a single file and update every reference to it (markdown links, wikilinks, imports, href/src) across a directory tree
@@ -121,7 +121,7 @@ async function performRename(oldAbs: string, newAbs: string, force: boolean): Pr
   }
 
   if (caseOnlyChange) {
-    const tmp = newAbs + '__tmp_renaming__'
+    const tmp = `${newAbs}__tmp_renaming__`
     await fs.rename(oldAbs, tmp)
     try {
       await fs.rename(tmp, newAbs)
@@ -163,7 +163,7 @@ function encodeLikeOriginal(newPathStr: string, original: string): string {
 // so this only needs to decide which base directory it resolves against.
 function resolveTargetMatch(candidatePath: string, fileDir: string, root: string, oldAbs: string): MatchKind | null {
   if (candidatePath.startsWith('/')) {
-    const resolved = path.resolve(root, '.' + candidatePath)
+    const resolved = path.resolve(root, `.${candidatePath}`)
     return pathsEqual(resolved, oldAbs) ? 'root-relative' : null
   }
 
@@ -231,9 +231,9 @@ function tryRewriteTarget(
     const wasExplicitRelative = decoded.startsWith('./') || decoded.startsWith('../')
 
     if (wasRootAbsolute) {
-      newTargetPath = '/' + rel
+      newTargetPath = `/${rel}`
     } else if (wasExplicitRelative || rel.startsWith('..')) {
-      newTargetPath = rel.startsWith('.') ? rel : './' + rel
+      newTargetPath = rel.startsWith('.') ? rel : `./${rel}`
     } else {
       newTargetPath = rel
     }

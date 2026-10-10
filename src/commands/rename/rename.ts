@@ -1,5 +1,5 @@
-import fs from 'fs/promises'
-import path from 'path'
+import fs from 'node:fs/promises'
+import path from 'node:path'
 import type { Style } from './rename.types.js'
 
 export type { Style } from './rename.types.js'
@@ -157,7 +157,7 @@ async function safeRename(oldPath: string, newPath: string) {
   const oldLower = oldPath.toLowerCase()
   const newLower = newPath.toLowerCase()
   if (oldLower === newLower && oldPath !== newPath) {
-    const tmp = newPath + '__tmp_renaming__'
+    const tmp = `${newPath}__tmp_renaming__`
     await fs.rename(oldPath, tmp)
     try {
       await fs.rename(tmp, newPath)
@@ -360,7 +360,7 @@ export async function renameRecursive(
         if (await isTextFile(file)) {
           await updateFileReferences(file, performed)
         }
-      } catch (err) {
+      } catch {
         // Ignore files that can't be read/written (e.g., permission issues)
       }
     }

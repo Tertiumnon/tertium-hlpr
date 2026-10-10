@@ -12,7 +12,7 @@ async function getVersion(): Promise<string> {
     const packagePath = path.join(__dirname, '..', '..', 'package.json');
     const packageJson = JSON.parse(await readFile(packagePath, 'utf-8'));
     return packageJson.version;
-  } catch (error) {
+  } catch {
     return '0.0.0';
   }
 }
@@ -37,7 +37,7 @@ async function getCommandDescription(filePath: string): Promise<string | undefin
         return firstLine.trim();
       }
     }
-  } catch (error) {
+  } catch {
     // Ignore errors
   }
   return undefined;
@@ -168,7 +168,7 @@ function printHelp(commands: CommandInfo[], version: string) {
   console.log('  hlpr help');
   console.log('  hlpr rename -dir ./src -style kebab -r -d -f');
   console.log('  hlpr ssh init-dir');
-  console.log('  hlpr -f git precommit\n');
+  console.log('  hlpr git create -b feature/example\n');
 }
 
 async function main() {

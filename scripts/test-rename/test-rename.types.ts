@@ -1,4 +1,4 @@
-import { SpawnSyncReturns } from "node:child_process";
+import type { SpawnSyncReturns } from "node:child_process";
 
 export interface TestFile {
   path: string;

@@ -32,7 +32,12 @@ npm install @tertium/hlpr
 hlpr <category> <command>
 
 # Examples
-hlpr git fodd
+hlpr git create -b feature/example
+hlpr git switch -branch feature/example
+hlpr git rm -b feature/example
+hlpr git rm feature/example -remote
+hlpr git sync
+hlpr git clean
 hlpr hello
 hlpr hello world
 hlpr ssh init dir
@@ -62,7 +67,7 @@ See individual command documentation for detailed usage, options, and examples.
 
 Shell scripts support variable substitution using `{{variable}}` syntax.
 
-- **[git](src/commands/git/README.md)** - Git utilities (fodd, precommit, switch-clean)
+- **[git](src/commands/git/README.md)** - Create, switch, remove, and clean Git branches/files
 - **[nvm](src/commands/nvm/README.md)** - Node Version Manager utilities
 - **[install](src/commands/install/README.md)** (`i`) - Install supported command-line tools
 - **[ssh](src/commands/ssh/README.md)** - SSH configuration and setup utilities
@@ -71,7 +76,7 @@ Shell scripts support variable substitution using `{{variable}}` syntax.
 
 ### Shell Scripts
 
-1. A shell command such as `hlpr git fodd` looks for `commands/git/fodd.sh`
+1. A shell command such as `hlpr git clean` looks for `commands/git/clean.sh`
 2. If the script contains variables like `{{name}}`, you'll be prompted to enter values
 3. Each line of the script is executed with the variables replaced
 
@@ -95,9 +100,11 @@ src/
 │   │       ├── rename.test.ts
 │   │       └── README.md
 │   ├── git/
-│   │   ├── fodd.sh
-│   │   ├── precommit.sh
-│   │   ├── switch-clean.sh
+│   │   ├── clean.sh
+│   │   ├── create.sh
+│   │   ├── remove.sh
+│   │   ├── switch.sh
+│   │   ├── sync.sh
 │   │   └── README.md
 │   ├── hello/
 │   │   ├── hello.ts
@@ -167,7 +174,7 @@ The utility maps command arguments to script files:
 
 **Shell Scripts:**
 
-- `hlpr git fodd` → runs `commands/git/fodd.sh`
+- `hlpr git clean` → runs `commands/git/clean.sh`
 - `hlpr nvm i -v 24` → runs `commands/nvm/i.sh`
 - `hlpr nvm use -v 24` → runs `commands/nvm/use.sh`
 - `hlpr ssh init dir` → runs `commands/ssh/initdir.sh`
@@ -218,7 +225,7 @@ Hello Alice, welcome to Wonderland
 
 **How it works:**
 
-1. User runs: `hlpr git fodd`
+1. User runs: `hlpr git clean`
 2. hlpr detects the platform is Windows
 3. hlpr invokes **PowerShell** to execute the `.sh` script
 4. PowerShell (v7+) and installed tools provide Unix-like command support

@@ -5,7 +5,7 @@ import { readFile } from "node:fs/promises";
 import * as path from "node:path";
 import * as readline from "node:readline";
 import { fileURLToPath } from "node:url";
-import { resolveCommandAlias } from "./core/command/aliases.js";
+import { resolveCommandAlias, resolveSubcommandAlias } from "./core/command/aliases.js";
 
 // Get package version from package.json
 async function getVersion(): Promise<string> {
@@ -120,7 +120,7 @@ async function showHelp() {
           return firstLine.trim();
         }
       }
-    } catch (error) {
+    } catch {
       // Ignore errors
     }
     return undefined;
@@ -190,7 +190,7 @@ async function showHelp() {
           }
         }
       }
-    } catch (error) {
+    } catch {
       // Ignore errors
     }
     
@@ -259,7 +259,7 @@ async function showHelp() {
   console.log('  hlpr help');
   console.log('  hlpr rename -dir ./src -style kebab -r -d -f');
   console.log('  hlpr ssh init-dir');
-  console.log('  hlpr -f git precommit\n');
+  console.log('  hlpr git create -b feature/example\n');
 }
 
 async function main() {
@@ -283,13 +283,13 @@ async function main() {
     const restArgs = commandArgs.slice(1);
     
     // Check for TypeScript command first (now built as JS)
-    let scriptPath: string;
+    let scriptPath: string | undefined;
     let isTypeScriptCommand = false;
     
     // Try nested structure: bin/commands/<category>/<subcategory>/<subcategory>.js
     // e.g., "hlpr list process" -> bin/commands/list/process/process.js
     if (restArgs.length > 0) {
-      const subcategory = restArgs[0];
+      const subcategory = resolveSubcommandAlias(category, restArgs[0]);
       const nestedJsPath = path.join(__dirname, "..", "bin", "commands", category, subcategory, `${subcategory}.js`);
       if (fs.existsSync(nestedJsPath)) {
         scriptPath = nestedJsPath;
@@ -310,7 +310,7 @@ async function main() {
     // Try shell script: commands/<category>/<scriptname>.sh
     if (!isTypeScriptCommand && restArgs.length > 0) {
       // First argument is the command name
-      const scriptName = restArgs[0];
+      const scriptName = resolveSubcommandAlias(category, restArgs[0]);
       let scriptPathCandidate = path.join(scriptDir, "commands", category, `${scriptName}.sh`);
 
       // If not found in scriptDir (src/), try in bin/ (for built version)
@@ -326,7 +326,7 @@ async function main() {
       }
     }
     
-    if (!scriptPath!) {
+    if (!scriptPath) {
       console.error(`Command not found. Usage: hlpr ${category} <args>`);
       process.exit(1);
     }

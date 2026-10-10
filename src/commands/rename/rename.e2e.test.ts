@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test'
-import { spawnSync } from 'child_process'
-import fs from 'fs'
-import path from 'path'
+import { spawnSync } from 'node:child_process'
+import fs from 'node:fs'
+import path from 'node:path'
 
 const tmpDir = path.join(process.cwd(), 'tmp', 'rename-e2e')
 

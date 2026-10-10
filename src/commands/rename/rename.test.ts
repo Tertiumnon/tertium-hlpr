@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
-import fs from 'fs'
-import path from 'path'
+import fs from 'node:fs'
+import path from 'node:path'
 import { parseRenameArgs, renameRecursive, transformBasename } from './rename.js'
 
 describe('rename module', () => {
