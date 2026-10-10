@@ -288,8 +288,8 @@ hlpr -f ssh init dir
 
 ```bash
 # Clone the repository
-git clone https://github.com/tertiumnon/hlpr.git
-cd hlpr
+git clone https://github.com/Tertiumnon/tertium-hlpr.git
+cd tertium-hlpr
 
 # Install dependencies
 npm install
