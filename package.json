@@ -13,13 +13,13 @@
     "test": "bun test",
     "test:e2e": "bun scripts/test-rename/test-rename.ts",
     "prepublishOnly": "bun run build",
-    "release:patch": "bun node_modules/@tertium/js/scripts/release.js patch",
-    "release:minor": "bun node_modules/@tertium/js/scripts/release.js minor",
-    "release:major": "bun node_modules/@tertium/js/scripts/release.js major",
+    "release:patch": "bun node_modules/@tertium/js/scripts/release/release.ts patch",
+    "release:minor": "bun node_modules/@tertium/js/scripts/release/release.ts minor",
+    "release:major": "bun node_modules/@tertium/js/scripts/release/release.ts major",
     "setup:hooks": "git config core.hooksPath .githooks"
   },
   "dependencies": {
-    "@tertium/js": "^3.1.1"
+    "@tertium/js": "^3.2.0"
   },
   "devDependencies": {
     "@types/bun": "^1.4.1",
