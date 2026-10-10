@@ -65,7 +65,8 @@ async function executeCommand(command: string, variables: Record<string, string>
   return new Promise((resolve) => {
     console.log(`Executing: ${processedCommand}`);
     const childProcess = exec(processedCommand);
-    childProcess.stdin?.end(input);
+    if (input === undefined && childProcess.stdin) process.stdin.pipe(childProcess.stdin);
+    else childProcess.stdin?.end(input);
     
     if (childProcess.stdout) {
       childProcess.stdout.on("data", (data: string) => {
@@ -80,6 +81,7 @@ async function executeCommand(command: string, variables: Record<string, string>
     }
     
     childProcess.on("exit", (code: number | null) => {
+      if (childProcess.stdin) process.stdin.unpipe(childProcess.stdin);
       if (code === 0) {
         resolve(true);
       } else {
@@ -346,7 +348,7 @@ async function main() {
       const finalCommand = `node "${scriptPath}" ${tsArgs.join(' ')}`;
       
       console.log(`Executing command: ${finalCommand}`);
-      
+      rl.close();
       const success = await executeCommand(finalCommand, {});
       
       // If this invocation was only to show help, don't treat non-zero exit as failure
