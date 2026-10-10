@@ -11,17 +11,21 @@
     "build:commands": "bun scripts/build-commands/build-commands.ts",
     "build": "bun run build:main && bun run build:commands",
     "test": "bun test",
+    "lint": "biome lint src scripts",
+    "typecheck": "tsc --noEmit",
     "test:e2e": "bun scripts/test-rename/test-rename.ts",
     "prepublishOnly": "bun run build",
     "release:patch": "bun node_modules/@tertium/js/scripts/release/release.ts patch",
     "release:minor": "bun node_modules/@tertium/js/scripts/release/release.ts minor",
     "release:major": "bun node_modules/@tertium/js/scripts/release/release.ts major",
-    "setup:hooks": "git config core.hooksPath .githooks"
+    "setup:hooks": "git config core.hooksPath .githooks",
+    "prepare": "git config core.hooksPath .githooks"
   },
   "dependencies": {
     "@tertium/js": "^3.2.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.5.15",
     "@types/bun": "^1.4.1",
     "@types/node": "^26.4.1",
     "typescript": "^5.8.3"

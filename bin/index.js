@@ -280,8 +280,7 @@ async function main() {
     const variableRegex = /{{([^}]+)}}/g;
     const variables = {};
     const uniqueVars = new Set;
-    let match;
-    while ((match = variableRegex.exec(scriptContent)) !== null) {
+    for (const match of scriptContent.matchAll(variableRegex)) {
       uniqueVars.add(match[1]);
     }
     const helpFlags = ["-h", "--help", "help", "/h", "/help", "/?"];

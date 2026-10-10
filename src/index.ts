@@ -373,8 +373,7 @@ async function main() {
     const variables: Record<string, string> = {};
     const uniqueVars = new Set<string>();
 
-    let match;
-    while ((match = variableRegex.exec(scriptContent)) !== null) {
+    for (const match of scriptContent.matchAll(variableRegex)) {
       uniqueVars.add(match[1]);
     }
 
