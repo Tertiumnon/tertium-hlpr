@@ -55,6 +55,8 @@ See individual command documentation for detailed usage, options, and examples.
 - **[help](src/commands/help/README.md)** - Display help information about hlpr commands
 - **[process list-port](src/commands/process/list-port/README.md)** - List processes running on a port
 - **[process kill-port](src/commands/process/kill-port/README.md)** - Kill processes on a port
+- **[update](src/commands/update/README.md)** - Update hlpr to the latest version from npm
+- **[upgrade](src/commands/upgrade/README.md)** - Alias for `update`
 
 ### Shell Script Commands
 
