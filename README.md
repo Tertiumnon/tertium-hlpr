@@ -63,6 +63,7 @@ Shell scripts support variable substitution using `{{variable}}` syntax.
 - **[git](src/commands/git/README.md)** - Git utilities (fodd, precommit, switch-clean)
 - **[hello](src/commands/hello/README.md)** - Example greeting command with variable substitution
 - **[nvm](src/commands/nvm/README.md)** - Node Version Manager utilities
+- **[prompt](src/commands/prompt/README.md)** - Install and enable oh-my-posh or Starship in PowerShell
 - **[ssh](src/commands/ssh/README.md)** - SSH configuration and setup utilities
 
 ## How It Works
