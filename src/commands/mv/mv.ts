@@ -1,11 +1,11 @@
 #!/usr/bin/env bun
 import fs from 'fs/promises'
 import path from 'path'
-import type { MoveOptions, MoveResult, MatchKind } from './mv.types.js'
+import type { MatchKind, MoveOptions, MoveResult } from './mv.types.js'
 
 // @description Rename or move a single file and update every reference to it (markdown links, wikilinks, imports, href/src) across a directory tree
 
-export type { UpdatedFile, MoveResult, MoveOptions } from './mv.types.js'
+export type { MoveOptions, MoveResult, UpdatedFile } from './mv.types.js'
 
 async function exists(p: string): Promise<boolean> {
   try {
@@ -384,7 +384,7 @@ if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
     rawArgs.includes('/h') ||
     rawArgs.includes('/?')
   ) {
-    console.log('Usage: mv <oldPath> <newPath> [--root <dir>] [--dry|-n] [--force] [--no-update-content]')
+    console.log('Usage: hlpr mv <oldPath> <newPath> [--root <dir>] [--dry|-n] [--force] [--no-update-content]')
     console.log('Renames/moves a single file and updates references to it (markdown links, wikilinks,')
     console.log('imports, href/src) in every text file under <dir>, recursively.')
     console.log('Options:')
@@ -414,7 +414,7 @@ if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
   const [oldPathArg, newPathArg] = positional
 
   if (!oldPathArg || !newPathArg) {
-    console.error('Usage: mv <oldPath> <newPath> [--root <dir>] [--dry|-n] [--force] [--no-update-content]')
+    console.error('Usage: hlpr mv <oldPath> <newPath> [--root <dir>] [--dry|-n] [--force] [--no-update-content]')
     process.exit(1)
   }
 

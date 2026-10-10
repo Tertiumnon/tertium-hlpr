@@ -1,17 +1,21 @@
 # Rename Command
 
-Recursively rename files and folders according to a specific case style.
+Rename selected files and directories according to a specific case style.
 
 ## Usage
 
 ```bash
-hlpr file rename <directory> <style> [--dry|-n] [--no-update-content]
+hlpr rename -dir <dir> -style <style> [-r] [-d] [-f]
+hlpr rn -dir <dir> -style <style> [-r] [-d] [-f]
 ```
 
 ### Arguments
 
-- `<directory>` - The root directory to recursively process
-- `<style>` - The target case style (see Supported Styles below)
+- `-dir <dir>` - The root directory to process
+- `-style <style>` - The target case style (see Supported Styles below)
+- `-r` - Process subdirectories recursively
+- `-d` - Rename directories
+- `-f` - Rename files
 - `--dry` or `-n` - Optional dry-run mode (preview changes without applying)
 - `--no-update-content` - Skip updating import/require statements in files (content updates are enabled by default)
 
@@ -34,24 +38,24 @@ hlpr file rename <directory> <style> [--dry|-n] [--no-update-content]
 
 ```bash
 # Preview renaming all files/folders to kebab-case
-hlpr file rename ./my-project kebab --dry
+hlpr rename -dir ./my-project -style kebab -r -d -f --dry
 
 # Preview renaming with short flag
-hlpr file rename ./src snake -n
+hlpr rn -dir ./src -style snake -r -f -n
 ```
 
 ### Apply Changes
 
 ```bash
 # Rename all files/folders to kebab-case
-hlpr file rename ./my-project kebab
+hlpr rename -dir ./my-project -style kebab -r -d -f
 
 # Rename to PascalCase
-hlpr file rename ./docs pascal
+hlpr rename -dir ./docs -style pascal -r -d -f
 
 # Rename current directory
-hlpr file rename . snake
-hlpr rename . snake
+hlpr rename -dir . -style snake -r -d -f
+hlpr rn -dir . -style snake -r -d -f
 ```
 
 ## Features
@@ -77,7 +81,7 @@ Example:
 import { helper } from './my-utils'
 const x = require('./my-utils')
 
-// After running: hlpr file rename . snake
+// After running: hlpr rename -dir . -style snake -r -f
 import { helper } from './my_utils'
 const x = require('./my_utils')
 ```
@@ -130,7 +134,7 @@ If a renamed file would conflict with an existing file, the command automaticall
 Use `--dry` or `-n` to preview all changes before applying them:
 
 ```bash
-hlpr file rename ./src kebab --dry
+hlpr rename -dir ./src -style kebab -r -d -f --dry
 ```
 
 Output:

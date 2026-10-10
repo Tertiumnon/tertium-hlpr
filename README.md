@@ -33,12 +33,13 @@ hlpr <category> <command>
 
 # Examples
 hlpr git fodd
+hlpr hello
 hlpr hello world
 hlpr ssh init dir
 
 # TypeScript commands (nested structure)
-hlpr file rename <directory> <style> [--dry|-n]
-hlpr file mv <oldPath> <newPath> [--dry|-n]
+hlpr rename -dir <dir> -style <style> -r -d -f
+hlpr mv <oldPath> <newPath>
 
 # Continue execution even if commands fail
 hlpr -f ssh init dir
@@ -50,33 +51,33 @@ See individual command documentation for detailed usage, options, and examples.
 
 ### TypeScript Commands
 
-- **[file rename](src/commands/file/rename/README.md)** - Recursively rename files/folders with various case styles
-- **[file mv](src/commands/file/mv/README.md)** - Rename/move a single file and update all references to it (markdown links, wikilinks, imports)
+- **[rename](src/commands/rename/README.md)** (`rn`) - Rename files/directories with various case styles
+- **[mv](src/commands/mv/README.md)** - Rename/move a single file and update all references to it
 - **[help](src/commands/help/README.md)** - Display help information about hlpr commands
-- **[process list-port](src/commands/process/list-port/README.md)** - List processes running on a port
-- **[process kill-port](src/commands/process/kill-port/README.md)** - Kill processes on a port
+- **[hello](src/commands/hello/README.md)** - Display the Wake Up Neo sequence, Matrix rain, or Hello World art
+- **[list process](src/commands/list/process/README.md)** - List running processes
+- **[kill process](src/commands/kill/process/README.md)** - Kill a process by ID or port
 
 ### Shell Script Commands
 
 Shell scripts support variable substitution using `{{variable}}` syntax.
 
 - **[git](src/commands/git/README.md)** - Git utilities (fodd, precommit, switch-clean)
-- **[hello](src/commands/hello/README.md)** - Example greeting command with variable substitution
 - **[nvm](src/commands/nvm/README.md)** - Node Version Manager utilities
-- **[install](src/commands/install/README.md)** - Install and enable oh-my-posh or Starship in PowerShell
+- **[install](src/commands/install/README.md)** (`i`) - Install supported command-line tools
 - **[ssh](src/commands/ssh/README.md)** - SSH configuration and setup utilities
 
 ## How It Works
 
 ### Shell Scripts
 
-1. The command `hlpr hello world` looks for a script at `commands/hello/world.sh`
+1. A shell command such as `hlpr git fodd` looks for `commands/git/fodd.sh`
 2. If the script contains variables like `{{name}}`, you'll be prompted to enter values
 3. Each line of the script is executed with the variables replaced
 
 ### TypeScript Commands
 
-1. The command `hlpr file rename` looks for a script at `commands/file/rename/rename.ts`
+1. The command `hlpr rename` looks for a script at `commands/rename/rename.ts`
 2. Arguments are passed directly to the TypeScript module
 3. The module is executed with Bun runtime
 
@@ -99,18 +100,27 @@ src/
 │   │   ├── switch-clean.sh
 │   │   └── README.md
 │   ├── hello/
-│   │   ├── world.sh
+│   │   ├── hello.ts
+│   │   ├── hello.test.ts
+│   │   ├── world/
+│   │   │   ├── world.ts
+│   │   │   └── world.test.ts
+│   │   └── README.md
+│   ├── i/
+│   │   ├── i.ts
+│   │   ├── i.test.ts
 │   │   └── README.md
 │   ├── nvm/
-│   │   ├── install.sh
-│   │   ├── lts.sh
+│   │   ├── i.sh
+│   │   ├── use.sh
 │   │   └── README.md
-│   ├── process/
-│   │   ├── kill-port/
-│   │   │   ├── kill-port.ts
-│   │   │   └── README.md
-│   │   └── list-port/
-│   │       ├── list-port.ts
+│   ├── kill/
+│   │   └── process/
+│   │       ├── process.ts
+│   │       └── README.md
+│   ├── list/
+│   │   └── process/
+│   │       ├── process.ts
 │   │       └── README.md
 │   └── ssh/
 │       ├── init-dir.sh
@@ -127,7 +137,7 @@ src/
 2. Add your `.sh` script files
 3. Use `{{variable}}` syntax for user inputs
 
-Example script (`commands/hello/world.sh`):
+Example script (`commands/example/greet.sh`):
 
 ```bash
 echo "Hello World, {{name}}"
@@ -135,8 +145,8 @@ echo "Hello World, {{name}}"
 
 ### TypeScript Commands
 
-1. Create a nested directory structure in `commands/<category>/<command>/`
-2. Add your TypeScript file named `<command>.ts`
+1. Create `commands/<category>/<category>.ts` or a nested `commands/<category>/<command>/<command>.ts`
+2. Add the TypeScript implementation
 3. Implement CLI argument parsing and logic
 4. Optionally add tests in `<command>.test.ts`
 
@@ -158,12 +168,15 @@ The utility maps command arguments to script files:
 **Shell Scripts:**
 
 - `hlpr git fodd` → runs `commands/git/fodd.sh`
-- `hlpr hello world` → runs `commands/hello/world.sh`
+- `hlpr nvm i -v 24` → runs `commands/nvm/i.sh`
+- `hlpr nvm use -v 24` → runs `commands/nvm/use.sh`
 - `hlpr ssh init dir` → runs `commands/ssh/initdir.sh`
 
 **TypeScript Commands:**
 
-- `hlpr file rename <args>` → runs `commands/file/rename/rename.ts`
+- `hlpr rename <args>` → runs `commands/rename/rename.ts`
+- `hlpr hello` → runs `commands/hello/hello.ts`
+- `hlpr hello world` → runs `commands/hello/world/world.ts`
 
 ## How Shell Scripts (.sh) Work
 

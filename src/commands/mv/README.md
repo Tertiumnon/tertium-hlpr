@@ -9,7 +9,7 @@ binary files are skipped automatically.
 ## Usage
 
 ```bash
-hlpr file mv <oldPath> <newPath> [--root <dir>] [--dry|-n] [--force] [--no-update-content]
+hlpr mv <oldPath> <newPath> [--root <dir>] [--dry|-n] [--force] [--no-update-content]
 ```
 
 ### Arguments
@@ -31,19 +31,19 @@ hlpr file mv <oldPath> <newPath> [--root <dir>] [--dry|-n] [--force] [--no-updat
 
 ```bash
 # Rename a markdown file in place and fix every link to it
-hlpr file mv docs/old-name.md new-name.md
+hlpr mv docs/old-name.md new-name.md
 
 # Preview what would change first
-hlpr file mv docs/old-name.md new-name.md --dry
+hlpr mv docs/old-name.md new-name.md --dry
 
 # Move a file into another folder
-hlpr file mv docs/old-name.md docs/archive/old-name.md
+hlpr mv docs/old-name.md docs/archive/old-name.md
 
 # Only scan a specific subtree for references
-hlpr file mv docs/old-name.md new-name.md --root docs
+hlpr mv docs/old-name.md new-name.md --root docs
 
 # Overwrite an existing destination file
-hlpr file mv docs/old-name.md docs/existing.md --force
+hlpr mv docs/old-name.md docs/existing.md --force
 ```
 
 ## What Gets Updated
@@ -81,7 +81,7 @@ touched.
 ## TypeScript API
 
 ```typescript
-import { renameFile } from './commands/file/mv/mv.js'
+import { renameFile } from './commands/mv/mv.js'
 
 const result = await renameFile('docs/old-name.md', 'new-name.md', {
   root: 'docs',
@@ -99,6 +99,6 @@ const result = await renameFile('docs/old-name.md', 'new-name.md', {
 ## See Also
 
 - [Main hlpr README](../../../../README.md)
-- [file rename](../rename/README.md) - bulk case-style renaming for whole directory trees
+- [rename](../rename/README.md) - bulk case-style renaming for directory trees
 - [TypeScript Implementation](./mv.ts)
 - [Tests](./mv.test.ts)

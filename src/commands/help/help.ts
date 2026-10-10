@@ -166,7 +166,7 @@ function printHelp(commands: CommandInfo[], version: string) {
   
   console.log('EXAMPLES:');
   console.log('  hlpr help');
-  console.log('  hlpr file rename --style kebab --dir ./src');
+  console.log('  hlpr rename -dir ./src -style kebab -r -d -f');
   console.log('  hlpr ssh init-dir');
   console.log('  hlpr -f git precommit\n');
 }

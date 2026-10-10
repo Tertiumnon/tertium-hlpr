@@ -1,10 +1,11 @@
 #!/usr/bin/env node
-import { readFile } from "node:fs/promises";
 import { exec } from "node:child_process";
-import * as path from "node:path";
 import * as fs from "node:fs";
+import { readFile } from "node:fs/promises";
+import * as path from "node:path";
 import * as readline from "node:readline";
 import { fileURLToPath } from "node:url";
+import { resolveCommandAlias } from "./core/command/aliases.js";
 
 // Get package version from package.json
 async function getVersion(): Promise<string> {
@@ -256,14 +257,14 @@ async function showHelp() {
   
   console.log('EXAMPLES:');
   console.log('  hlpr help');
-  console.log('  hlpr file rename --style kebab --dir ./src');
+  console.log('  hlpr rename -dir ./src -style kebab -r -d -f');
   console.log('  hlpr ssh init-dir');
   console.log('  hlpr -f git precommit\n');
 }
 
 async function main() {
   // Check for version flag
-  if (commandArgs[0] === "--version" || commandArgs[0] === "-v") {
+  if (commandArgs[0] === "--version" || commandArgs[0] === "-version" || commandArgs[0] === "-v") {
     const version = await getVersion();
     console.log(`hlpr version ${version}`);
     process.exit(0);
@@ -278,7 +279,7 @@ async function main() {
 
   try {
     // Get the category (first argument) and the rest of the command
-    const category = commandArgs[0];
+    const category = resolveCommandAlias(commandArgs[0]);
     const restArgs = commandArgs.slice(1);
     
     // Check for TypeScript command first (now built as JS)
@@ -286,7 +287,7 @@ async function main() {
     let isTypeScriptCommand = false;
     
     // Try nested structure: bin/commands/<category>/<subcategory>/<subcategory>.js
-    // e.g., "hlpr file rename" -> bin/commands/file/rename/rename.js
+    // e.g., "hlpr list process" -> bin/commands/list/process/process.js
     if (restArgs.length > 0) {
       const subcategory = restArgs[0];
       const nestedJsPath = path.join(__dirname, "..", "bin", "commands", category, subcategory, `${subcategory}.js`);

@@ -3,7 +3,19 @@ import { execSync, spawnSync } from 'node:child_process'
 import { platform } from 'node:os'
 import type { KillPortOptions } from '../../../core/command/command.types.js'
 
-// @description Kill process(es) running on a specified port (Windows & Linux support)
+// @description Kill a process by ID or processes using a port
+
+export type KillTarget = { id: number } | { port: number }
+
+export function parseKillTarget(args: string[]): KillTarget {
+  const idIndex = args.findIndex((arg) => arg === '-id' || arg === '--id')
+  const portIndex = args.findIndex((arg) => arg === '-port' || arg === '--port')
+  if ((idIndex >= 0) === (portIndex >= 0)) throw new Error('Specify exactly one of -id <id> or -port <port>')
+  const index = idIndex >= 0 ? idIndex : portIndex
+  const value = Number(args[index + 1])
+  if (!Number.isInteger(value) || value <= 0) throw new Error(`Invalid ${idIndex >= 0 ? 'process ID' : 'port'}`)
+  return idIndex >= 0 ? { id: value } : { port: value }
+}
 
 function getProcessOnWindowsPort(port: number): number[] {
   try {
@@ -22,7 +34,7 @@ function getProcessOnWindowsPort(port: number): number[] {
       }
     }
     return pids
-  } catch (error) {
+  } catch {
     return []
   }
 }
@@ -38,7 +50,7 @@ function getProcessOnLinuxPort(port: number): number[] {
       const parts = lines[i].trim().split(/\s+/)
       if (parts.length > 1) {
         const pid = parseInt(parts[1], 10)
-        if (!isNaN(pid) && !pids.includes(pid)) {
+        if (!Number.isNaN(pid) && !pids.includes(pid)) {
           pids.push(pid)
         }
       }
@@ -150,16 +162,23 @@ export async function killPort(port: number, options: KillPortOptions = {}): Pro
   return { killed, failed }
 }
 
+export async function killPid(pid: number, options: KillPortOptions = {}): Promise<boolean> {
+  if (!Number.isInteger(pid) || pid <= 0) throw new Error(`Invalid process ID: ${pid}`)
+  const { force = false, verbose = false } = options
+  return platform() === 'win32' ? killProcessOnWindows(pid, force, verbose) : killProcessOnLinux(pid, force, verbose)
+}
+
 // CLI entry point
 if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
   const args = process.argv.slice(2)
 
   if (args.includes('--help') || args.includes('-h') || args.length === 0) {
-    console.log('Usage: kill-port <port> [options]')
-    console.log('Kill process(es) running on a specified port (Windows & Linux support)')
+    console.log('Usage: hlpr kill process (-id <id> | -port <port>) [options]')
+    console.log('Kill a process by ID or processes using a port')
     console.log()
-    console.log('Arguments:')
-    console.log('  port                  Port number (1-65535)')
+    console.log('Targets:')
+    console.log('  -id <id>              Process ID')
+    console.log('  -port <port>          Port number (1-65535)')
     console.log()
     console.log('Options:')
     console.log('  -f, --force           Force kill (SIGKILL on Linux, /F on Windows)')
@@ -167,28 +186,29 @@ if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
     console.log('  -h, --help            Show this help message')
     console.log()
     console.log('Examples:')
-    console.log('  hlpr process kill-port 3000')
-    console.log('  hlpr process kill-port 8080 --force')
-    console.log('  hlpr process kill-port 5432 -v')
+    console.log('  hlpr kill process -id 1234')
+    console.log('  hlpr kill process -port 3000 --force')
     process.exit(0)
   }
 
-  const port = parseInt(args[0], 10)
   const force = args.includes('-f') || args.includes('--force')
   const verbose = args.includes('-v') || args.includes('--verbose')
 
-  killPort(port, { force, verbose })
-    .then((result) => {
-      if (result.killed.length > 0) {
-        console.log(`Successfully killed ${result.killed.length} process(es) on port ${port}`)
+  Promise.resolve()
+    .then(async () => {
+      const target = parseKillTarget(args)
+      if ('id' in target) {
+        const killed = await killPid(target.id, { force, verbose })
+        if (!killed) throw new Error(`Failed to kill process ${target.id}`)
+        console.log(`Killed process ${target.id}`)
+        return
       }
-      if (result.failed.length > 0) {
-        console.error(`Failed to kill ${result.failed.length} process(es): ${result.failed.join(', ')}`)
-        process.exit(1)
-      }
-      if (result.killed.length === 0 && result.failed.length === 0) {
-        console.log(`No processes found on port ${port}`)
-      }
+
+      const result = await killPort(target.port, { force, verbose })
+      if (result.failed.length > 0) throw new Error(`Failed to kill process(es): ${result.failed.join(', ')}`)
+      console.log(result.killed.length > 0 ? `Killed ${result.killed.length} process(es) on port ${target.port}` : `No processes found on port ${target.port}`)
+    })
+    .then(() => {
       process.exit(0)
     })
     .catch((error) => {
@@ -197,4 +217,4 @@ if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
     })
 }
 
-export default { killPort }
+export default { killPid, killPort }

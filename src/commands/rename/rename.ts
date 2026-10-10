@@ -4,6 +4,47 @@ import type { Style } from './rename.types.js'
 
 export type { Style } from './rename.types.js'
 
+const styles: Style[] = ['title_underscore', 'pascal_underscore', 'snake', 'kebab', 'camel', 'pascal', 'upper', 'lower']
+
+export interface RenameOptions {
+  dryRun?: boolean
+  updateContent?: boolean
+  recursive?: boolean
+  directories?: boolean
+  files?: boolean
+}
+
+export interface RenameCliOptions extends RenameOptions {
+  root: string
+  style: Style
+}
+
+export function parseRenameArgs(args: string[]): RenameCliOptions {
+  let root: string | undefined
+  let style: Style | undefined
+  let recursive = false
+  let directories = false
+  let files = false
+  let dryRun = false
+  let updateContent = true
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i]
+    if (arg === '-dir') root = args[++i]
+    else if (arg === '-style') style = args[++i] as Style
+    else if (arg === '-r') recursive = true
+    else if (arg === '-d') directories = true
+    else if (arg === '-f') files = true
+    else if (arg === '--dry' || arg === '-n') dryRun = true
+    else if (arg === '--no-update-content') updateContent = false
+    else throw new Error(`Unknown option: ${arg}`)
+  }
+
+  if (!root || !style || !styles.includes(style)) throw new Error('Required: -dir <dir> -style <style>')
+  if (!directories && !files) throw new Error('Select files with -f, directories with -d, or both')
+  return { root, style, recursive, directories, files, dryRun, updateContent }
+}
+
 function splitWords(s: string): string[] {
   // split on any run of non-letter/number, and also split CamelCase boundaries
   const parts = s
@@ -238,10 +279,13 @@ async function isTextFile(filePath: string): Promise<boolean> {
 export async function renameRecursive(
   root: string,
   style: Style = 'title_underscore',
-  options: { dryRun?: boolean; updateContent?: boolean } = {}
+  options: RenameOptions = {}
 ) {
   const performed: Array<{ from: string; to: string }> = []
   const updateContentEnabled = options.updateContent ?? true // Default to true
+  const recursive = options.recursive ?? true
+  const renameDirectories = options.directories ?? true
+  const renameFiles = options.files ?? true
 
   async function walk(current: string) {
     const entries = await fs.readdir(current, { withFileTypes: true })
@@ -249,7 +293,7 @@ export async function renameRecursive(
     // First process files
     for (const e of entries) {
       const full = path.join(current, e.name)
-      if (e.isFile()) {
+      if (e.isFile() && renameFiles) {
         const parsed = path.parse(e.name)
         const newBase = transformBasename(parsed.name, style) + parsed.ext
         if (newBase !== e.name) {
@@ -270,15 +314,17 @@ export async function renameRecursive(
     for (const e of entries2) {
       const full = path.join(current, e.name)
       if (e.isDirectory()) {
-        await walk(full)
-        const newBase = transformBasename(e.name, style)
-        if (newBase !== e.name) {
-          const dest = path.join(current, newBase)
-          if (options.dryRun) {
-            performed.push({ from: full, to: dest })
-          } else {
-            await safeRename(full, dest)
-            performed.push({ from: full, to: dest })
+        if (recursive) await walk(full)
+        if (renameDirectories) {
+          const newBase = transformBasename(e.name, style)
+          if (newBase !== e.name) {
+            const dest = path.join(current, newBase)
+            if (options.dryRun) {
+              performed.push({ from: full, to: dest })
+            } else {
+              await safeRename(full, dest)
+              performed.push({ from: full, to: dest })
+            }
           }
         }
       }
@@ -326,30 +372,33 @@ export async function renameRecursive(
 // CLI entry point
 if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
   const args = process.argv.slice(2)
-  const rootArg = args[0]
-  const styleArg = args[1] as Style | undefined
 
   // If user asked for help, print usage and exit with success
   if (args.includes('--help') || args.includes('-h') || args.includes('/help') || args.includes('/h') || args.includes('/?')) {
-    console.log('Usage: rename <root> <style> [--dry|-n] [--no-update-content]')
+    console.log('Usage: hlpr rename -dir <dir> -style <style> [-r] [-d] [-f]')
     console.log('Styles: title_underscore, pascal_underscore, snake, kebab, camel, pascal, upper, lower')
     console.log('Options:')
+    console.log('  -r                     Process subdirectories recursively')
+    console.log('  -d                     Rename directories')
+    console.log('  -f                     Rename files')
     console.log('  --dry, -n              Preview changes without applying them')
     console.log('  --no-update-content    Skip updating import/require statements in files')
     process.exit(0)
   }
-  const dryRun = args.includes('--dry') || args.includes('-n')
-  const updateContent = !args.includes('--no-update-content')
 
-  if (!rootArg || !styleArg) {
-    console.error('Usage: rename <root> <style> [--dry|-n] [--no-update-content]')
-    console.error('Styles: title_underscore, pascal_underscore, snake, kebab, camel, pascal, upper, lower')
+  let options: RenameCliOptions
+  try {
+    options = parseRenameArgs(args)
+  } catch (error) {
+    console.error(`Error: ${error instanceof Error ? error.message : error}`)
+    console.error('Usage: hlpr rename -dir <dir> -style <style> [-r] [-d] [-f]')
     process.exit(1)
   }
 
-  renameRecursive(rootArg, styleArg, { dryRun, updateContent })
+  const { root, style, ...renameOptions } = options
+  renameRecursive(root, style, renameOptions)
     .then((performed) => {
-      if (dryRun) {
+      if (options.dryRun) {
         console.log(`Dry run - would rename ${performed.length} items:`)
       } else {
         console.log(`Renamed ${performed.length} items:`)

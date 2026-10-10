@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test'
+import { spawnSync } from 'child_process'
 import fs from 'fs'
 import path from 'path'
-import { spawnSync } from 'child_process'
 
 const tmpDir = path.join(process.cwd(), 'tmp', 'rename-e2e')
 
@@ -33,7 +33,7 @@ describe('rename e2e', () => {
     expect(build.status).toBe(0)
 
     // dry run
-    const dry = spawnSync('node', ['bin/index.js', 'file', 'rename', tmpDir, 'kebab', '--dry'], { encoding: 'utf8' })
+    const dry = spawnSync('node', ['bin/index.js', 'rn', '-dir', tmpDir, '-style', 'kebab', '-r', '-d', '-f', '--dry'], { encoding: 'utf8' })
     expect(dry.stdout).toContain('Dry run - would rename')
 
     // files not changed
@@ -41,7 +41,7 @@ describe('rename e2e', () => {
     expect(fs.existsSync(path.join(tmpDir, 'Nested Dir', 'Deep File.testdata.js'))).toBe(true)
 
     // Apply
-    const actual = spawnSync('node', ['bin/index.js', 'file', 'rename', tmpDir, 'kebab'], { encoding: 'utf8' })
+    const actual = spawnSync('node', ['bin/index.js', 'rename', '-dir', tmpDir, '-style', 'kebab', '-r', '-d', '-f'], { encoding: 'utf8' })
     expect(actual.stdout).toContain('Renamed')
 
     // Validate

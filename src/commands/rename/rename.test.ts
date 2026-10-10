@@ -1,9 +1,22 @@
 import { describe, expect, test } from 'bun:test'
-import { transformBasename, renameRecursive } from './rename.js'
 import fs from 'fs'
 import path from 'path'
+import { parseRenameArgs, renameRecursive, transformBasename } from './rename.js'
 
 describe('rename module', () => {
+  test('parses directory, style, and scope flags', () => {
+    expect(parseRenameArgs(['-dir', './src', '-style', 'kebab', '-r', '-d', '-f'])).toEqual({
+      root: './src',
+      style: 'kebab',
+      recursive: true,
+      directories: true,
+      files: true,
+      dryRun: false,
+      updateContent: true,
+    })
+    expect(() => parseRenameArgs(['-dir', './src', '-style', 'kebab'])).toThrow('Select files')
+  })
+
   test('transformBasename styles', () => {
     expect(transformBasename('file-name', 'title_underscore')).toBe('File_Name')
     expect(transformBasename('file-name.md', 'snake')).toBe('file_name.md')
@@ -44,6 +57,21 @@ describe('rename module', () => {
       expect(hasFile).toBe(true)
     } finally {
       // cleanup
+      fs.rmSync(tmp, { recursive: true, force: true })
+    }
+  })
+
+  test('can limit renaming to top-level files', async () => {
+    const tmp = fs.mkdtempSync(path.join(process.cwd(), 'test-tmp-'))
+    try {
+      const nested = path.join(tmp, 'Nested Dir')
+      fs.mkdirSync(nested)
+      fs.writeFileSync(path.join(tmp, 'Top File.txt'), 'x')
+      fs.writeFileSync(path.join(nested, 'Deep File.txt'), 'x')
+
+      const planned = await renameRecursive(tmp, 'kebab', { dryRun: true, recursive: false, directories: false, files: true })
+      expect(planned.map(({ to }) => path.basename(to))).toEqual(['top-file.txt'])
+    } finally {
       fs.rmSync(tmp, { recursive: true, force: true })
     }
   })

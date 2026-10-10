@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'bun:test'
-import { renameFile } from './mv.js'
 import fs from 'fs'
 import os from 'os'
 import path from 'path'
+import { renameFile } from './mv.js'
 
 function mktmp(): string {
   return fs.mkdtempSync(path.join(process.cwd(), 'test-tmp-mv-'))
