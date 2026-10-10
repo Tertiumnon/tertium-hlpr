@@ -15,10 +15,11 @@ describe('install', () => {
     expect(selectsTool('', 'right')).toBe(false)
   })
 
-  test('adds PSReadLine Tab autocomplete once', () => {
+  test('adds PSReadLine completion and history predictions once', () => {
     const configured = updatePsReadLineProfile('$env:EDITOR = "code"\n')
-    expect(configured).toBe('$env:EDITOR = "code"\nSet-PSReadLineKeyHandler -Key Tab -Function MenuComplete\n')
+    expect(configured).toBe('$env:EDITOR = "code"\nSet-PSReadLineKeyHandler -Key Tab -Function MenuComplete\nif ($Host.UI.SupportsVirtualTerminal -and -not [Console]::IsOutputRedirected) {\n    Set-PSReadLineOption -PredictionSource History\n    Set-PSReadLineOption -PredictionViewStyle ListView\n}\n')
     expect(updatePsReadLineProfile(configured)).toBe(configured)
+    expect(updatePsReadLineProfile('Set-PSReadLineOption -PredictionSource History\n')).toContain('    Set-PSReadLineOption -PredictionViewStyle ListView\n')
   })
   test('switches prompt initialization without changing other profile lines', () => {
     const profile = '$env:EDITOR = "code"\nInvoke-Expression (&starship init powershell)\n'

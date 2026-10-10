@@ -100,11 +100,17 @@ export function updateProfile(content: string, tool: PromptTool): string {
 }
 
 const psReadLineAutocomplete = 'Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete'
+const psReadLinePrediction = [
+  'Set-PSReadLineOption -PredictionSource History',
+  'Set-PSReadLineOption -PredictionViewStyle ListView',
+]
 
 export function updatePsReadLineProfile(content: string): string {
   const lines = content.split(/\r?\n/)
   while (lines[lines.length - 1] === '') lines.pop()
   if (!lines.some((line) => line.trim() === psReadLineAutocomplete)) lines.push(psReadLineAutocomplete)
+  const missingPrediction = psReadLinePrediction.filter((option) => !lines.some((line) => line.trim() === option))
+  if (missingPrediction.length) lines.push('if ($Host.UI.SupportsVirtualTerminal -and -not [Console]::IsOutputRedirected) {', ...missingPrediction.map((option) => `    ${option}`), '}')
   return `${lines.join('\n')}\n`
 }
 
@@ -220,7 +226,7 @@ async function main(): Promise<void> {
     fs.mkdirSync(path.dirname(profile), { recursive: true })
     const content = fs.existsSync(profile) ? fs.readFileSync(profile, 'utf8') : ''
     fs.writeFileSync(profile, updatePsReadLineProfile(content))
-    console.log('Installed PSReadLine with Tab autocomplete. Restart PowerShell to apply.')
+    console.log('Installed PSReadLine with Tab completion and history predictions. Restart PowerShell to apply.')
     return
   }
 

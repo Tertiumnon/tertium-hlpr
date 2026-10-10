@@ -45,7 +45,7 @@ hlpr install node -version 24
 
 ### What it does
 
-1. Installs oh-my-posh, Starship, or pstop with `winget`, PSReadLine from the PowerShell Gallery with Tab menu completion, or nvm/oh-my-zsh from their official installation scripts
+1. Installs oh-my-posh, Starship, or pstop with `winget`, PSReadLine from the PowerShell Gallery with Tab menu completion and history predictions in ListView, or nvm/oh-my-zsh from their official installation scripts
 2. For prompt tools, finds your PowerShell profile (`$PROFILE`)
 3. Removes the other prompt tool's init line from the profile, if present
 4. Appends the chosen prompt tool's init line if it is not already there:
