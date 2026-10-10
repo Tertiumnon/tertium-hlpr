@@ -1,11 +1,24 @@
 import { describe, expect, test } from 'bun:test'
-import { moveSelection, parseTool, parseVersion, runtimeInstallCommands, updateProfile } from './install.js'
+import { moveSelection, parseTool, parseVersion, runtimeInstallCommands, selectsTool, updateProfile, updatePsReadLineProfile } from './install.js'
 
 describe('install', () => {
   test('arrow selection wraps at both ends', () => {
     expect(moveSelection(0, 'up', 9)).toBe(8)
     expect(moveSelection(8, 'down', 9)).toBe(0)
     expect(moveSelection(3, 'down', 9)).toBe(4)
+  })
+
+  test('selects with Enter or Space, not horizontal arrows', () => {
+    expect(selectsTool('', 'return')).toBe(true)
+    expect(selectsTool(' ', 'space')).toBe(true)
+    expect(selectsTool('', 'left')).toBe(false)
+    expect(selectsTool('', 'right')).toBe(false)
+  })
+
+  test('adds PSReadLine Tab autocomplete once', () => {
+    const configured = updatePsReadLineProfile('$env:EDITOR = "code"\n')
+    expect(configured).toBe('$env:EDITOR = "code"\nSet-PSReadLineKeyHandler -Key Tab -Function MenuComplete\n')
+    expect(updatePsReadLineProfile(configured)).toBe(configured)
   })
   test('switches prompt initialization without changing other profile lines', () => {
     const profile = '$env:EDITOR = "code"\nInvoke-Expression (&starship init powershell)\n'
@@ -20,6 +33,7 @@ describe('install', () => {
     expect(parseTool('node')).toBe('node')
     expect(parseTool('python')).toBe('python')
     expect(parseTool('bun')).toBe('bun')
+    expect(parseTool('TLDR')).toBe('tldr')
   })
 
   test('parses a major version flag', () => {

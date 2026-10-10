@@ -21,7 +21,7 @@ const tools = {
 
 type PromptTool = keyof typeof tools
 type RuntimeTool = 'node' | 'python' | 'bun'
-type Tool = PromptTool | RuntimeTool | 'psreadline' | 'pstop' | 'nvm' | 'oh-my-zsh'
+type Tool = PromptTool | RuntimeTool | 'psreadline' | 'pstop' | 'nvm' | 'oh-my-zsh' | 'tldr'
 type Platform = 'win32' | 'darwin' | 'linux'
 
 export interface InstallCommand {
@@ -39,7 +39,7 @@ function isRuntimeTool(tool: Tool): tool is RuntimeTool {
 
 export function parseTool(value?: string): Tool | undefined {
   const normalized = value?.toLowerCase()
-  return normalized === 'psreadline' || normalized === 'pstop' || normalized === 'nvm' || normalized === 'oh-my-zsh' || runtimeTools.includes(normalized as RuntimeTool) || (normalized && normalized in tools) ? normalized as Tool : undefined
+  return normalized === 'psreadline' || normalized === 'pstop' || normalized === 'nvm' || normalized === 'oh-my-zsh' || normalized === 'tldr' || runtimeTools.includes(normalized as RuntimeTool) || (normalized && normalized in tools) ? normalized as Tool : undefined
 }
 
 export function parseVersion(args: string[]): string | undefined {
@@ -99,6 +99,15 @@ export function updateProfile(content: string, tool: PromptTool): string {
   return `${lines.join('\n')}\n`
 }
 
+const psReadLineAutocomplete = 'Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete'
+
+export function updatePsReadLineProfile(content: string): string {
+  const lines = content.split(/\r?\n/)
+  while (lines[lines.length - 1] === '') lines.pop()
+  if (!lines.some((line) => line.trim() === psReadLineAutocomplete)) lines.push(psReadLineAutocomplete)
+  return `${lines.join('\n')}\n`
+}
+
 const menu: Array<[Tool, string]> = [
   ['oh-my-posh', 'Windows · PowerShell'],
   ['starship', 'Windows · PowerShell'],
@@ -109,10 +118,15 @@ const menu: Array<[Tool, string]> = [
   ['node', 'Windows/macOS/Debian/Ubuntu'],
   ['python', 'Windows/macOS/Debian/Ubuntu'],
   ['bun', 'Windows/macOS/Debian/Ubuntu'],
+  ['tldr', 'Windows/macOS/Linux · Node.js/npm'],
 ]
 
 export function moveSelection(index: number, direction: 'up' | 'down', count: number): number {
   return (index + (direction === 'up' ? -1 : 1) + count) % count
+}
+
+export function selectsTool(input: string, keyName?: string): boolean {
+  return keyName === 'return' || keyName === 'enter' || keyName === 'space' || input === ' '
 }
 
 async function selectTool(value?: string): Promise<Tool | undefined> {
@@ -127,7 +141,7 @@ async function selectTool(value?: string): Promise<Tool | undefined> {
       `${index === selected ? '❯' : ' '} ${name.padEnd(11)} [${compatibility}]\x1b[K\n`).join(''))
   }
 
-  console.log('Select a tool (↑/↓, Enter; Esc to cancel):')
+  console.log('Select a tool (↑/↓, Enter/Space; Esc to cancel):')
   render()
   readline.emitKeypressEvents(process.stdin)
   process.stdin.setRawMode(true)
@@ -135,7 +149,7 @@ async function selectTool(value?: string): Promise<Tool | undefined> {
   try {
     return await new Promise<Tool | undefined>((resolve) => {
       const onKeypress = (_input: string, key: { name?: string; ctrl?: boolean }) => {
-        if (key.name === 'return' || key.name === 'enter') {
+        if (selectsTool(_input, key.name)) {
           process.stdin.off('keypress', onKeypress)
           resolve(menu[selected][0])
         } else if (key.name === 'escape' || (key.ctrl && key.name === 'c')) {
@@ -159,6 +173,14 @@ async function selectTool(value?: string): Promise<Tool | undefined> {
 async function main(): Promise<void> {
   const tool = await selectTool(process.argv[2])
   if (!tool) return
+
+  if (tool === 'tldr') {
+    run([process.platform === 'win32'
+      ? { command: 'cmd.exe', args: ['/d', '/c', 'npm.cmd', 'install', '--global', 'tldr'] }
+      : { command: 'npm', args: ['install', '--global', 'tldr'] }])
+    console.log('Installed tldr. Try: tldr tar')
+    return
+  }
 
   if (isRuntimeTool(tool)) {
     const platform = process.platform
@@ -190,7 +212,15 @@ async function main(): Promise<void> {
   if (tool === 'psreadline') {
     const install = spawnSync(powershell, ['-NoProfile', '-Command', 'Install-Module -Name PSReadLine -AllowClobber -Force -Scope CurrentUser'], { stdio: 'inherit' })
     if (install.status !== 0) throw new Error(install.error?.message || `PowerShell failed with exit code ${install.status}`)
-    console.log('Installed PSReadLine. Restart PowerShell to apply.')
+
+    const profileResult = spawnSync(powershell, ['-NoProfile', '-Command', '$PROFILE'], { encoding: 'utf8' })
+    if (profileResult.status !== 0) throw new Error(profileResult.stderr.trim() || 'Could not find the PowerShell profile')
+    const profile = profileResult.stdout.trim()
+    if (!profile) throw new Error('PowerShell returned an empty profile path')
+    fs.mkdirSync(path.dirname(profile), { recursive: true })
+    const content = fs.existsSync(profile) ? fs.readFileSync(profile, 'utf8') : ''
+    fs.writeFileSync(profile, updatePsReadLineProfile(content))
+    console.log('Installed PSReadLine with Tab autocomplete. Restart PowerShell to apply.')
     return
   }
 

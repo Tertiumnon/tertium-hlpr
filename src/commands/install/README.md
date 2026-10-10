@@ -17,6 +17,7 @@ hlpr install
 hlpr install starship
 hlpr install psreadline
 hlpr install pstop
+hlpr install tldr
 hlpr install nvm
 hlpr install oh-my-zsh
 hlpr install node -v 24
@@ -25,7 +26,7 @@ hlpr install bun -v 1
 hlpr install node -version 24
 ```
 
-`install` and `i` are equivalent. In the interactive menu, use ↑/↓ to choose an app and Enter to install it; Esc cancels. You can also pass an app name directly. Node defaults to the current LTS release. Python and Bun do not have LTS channels, so they default to the latest stable release. Runtime versions are selected by major number with `-v` or `-version`.
+`install` and `i` are equivalent. In the interactive menu, use ↑/↓ to choose an app and Enter or Space to install it; Esc cancels. You can also pass an app name directly. Node defaults to the current LTS release. Python and Bun do not have LTS channels, so they default to the latest stable release. Runtime versions are selected by major number with `-v` or `-version`.
 
 ### Compatibility
 
@@ -35,6 +36,7 @@ hlpr install node -version 24
 | Starship | Windows, configured for PowerShell |
 | PSReadLine | Windows PowerShell or PowerShell Core |
 | pstop | Windows |
+| tldr | Windows/macOS/Linux with Node.js/npm (`npm install --global tldr`) |
 | nvm | Linux/macOS with Bash; Windows through Git Bash or WSL |
 | oh-my-zsh | Linux/macOS with Zsh; Windows through WSL |
 | Node.js | Windows (winget), macOS (Homebrew), Debian/Ubuntu (NodeSource and apt) |
@@ -43,7 +45,7 @@ hlpr install node -version 24
 
 ### What it does
 
-1. Installs oh-my-posh, Starship, or pstop with `winget`, PSReadLine from the PowerShell Gallery, or nvm/oh-my-zsh from their official installation scripts
+1. Installs oh-my-posh, Starship, or pstop with `winget`, PSReadLine from the PowerShell Gallery with Tab menu completion, or nvm/oh-my-zsh from their official installation scripts
 2. For prompt tools, finds your PowerShell profile (`$PROFILE`)
 3. Removes the other prompt tool's init line from the profile, if present
 4. Appends the chosen prompt tool's init line if it is not already there:
