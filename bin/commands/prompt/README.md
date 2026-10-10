@@ -22,11 +22,14 @@ You will be prompted for `tool`: `oh-my-posh` or `starship`.
 
 1. Installs the chosen tool with `winget`
 2. Finds your PowerShell profile (`$PROFILE`)
-3. Appends the init line to the profile if it is not already there:
+3. Removes the other tool's init line from the profile, if present (this is how you switch)
+4. Appends the chosen tool's init line if it is not already there:
    - oh-my-posh: `oh-my-posh init pwsh | Invoke-Expression`
    - starship: `Invoke-Expression (&starship init powershell)`
 
-Running it again does not duplicate the init line.
+Running it again does not duplicate the init line. Other profile lines are left untouched.
+
+The installed tool is not uninstalled when you switch. Only the profile line changes.
 
 ### Next steps
 
