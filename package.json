@@ -1,6 +1,6 @@
 {
   "name": "@tertium/hlpr",
-  "version": "0.3.3",
+  "version": "0.8.0",
   "description": "Windows and *Nix utility for typical programming activity",
   "author": "Vitalii Balabanov",
   "email": "tertiumnon@gmail.com",
@@ -8,19 +8,26 @@
   "type": "module",
   "scripts": {
     "build:main": "bun build ./src/index.ts --outfile ./bin/index.js --target node",
-    "build:commands": "node build-commands.js",
+    "build:commands": "bun scripts/build-commands/build-commands.ts",
     "build": "bun run build:main && bun run build:commands",
     "test": "bun test",
-    "prepublishOnly": "npm run build",
-    "release:minor": "node node_modules/@tertium/js/scripts/release.js minor",
-    "release:patch": "node node_modules/@tertium/js/scripts/release.js patch",
-    "release:major": "node node_modules/@tertium/js/scripts/release.js major",
-    "prepare": "husky"
+    "lint": "biome lint src scripts",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "bun scripts/test-rename/test-rename.ts",
+    "prepublishOnly": "bun run build",
+    "release:patch": "bun node_modules/@tertium/js/scripts/release/release.ts patch",
+    "release:minor": "bun node_modules/@tertium/js/scripts/release/release.ts minor",
+    "release:major": "bun node_modules/@tertium/js/scripts/release/release.ts major",
+    "setup:hooks": "git config core.hooksPath .githooks",
+    "prepare": "git config core.hooksPath .githooks"
+  },
+  "dependencies": {
+    "@tertium/js": "^3.2.0"
   },
   "devDependencies": {
-    "@tertium/js": "^0.16.0",
-    "@types/node": "^22.13.10",
-    "husky": "^9.1.7",
+    "@biomejs/biome": "^2.5.15",
+    "@types/bun": "^1.4.1",
+    "@types/node": "^26.4.1",
     "typescript": "^5.8.3"
   },
   "bin": {

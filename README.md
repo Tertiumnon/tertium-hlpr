@@ -2,6 +2,16 @@
 
 A CLI utility for running shell scripts with variable substitution and TypeScript-based commands.
 
+## Platform Support
+
+hlpr works on all major operating systems:
+
+- ✅ **Linux** - Fully supported
+- ✅ **macOS** - Fully supported
+- ✅ **Windows** - Requires [Git for Windows](https://git-scm.com/download/win) (includes Git Bash)
+
+**Note for Windows users:** Shell script commands (`.sh` files) require Bash, which is included with Git for Windows. TypeScript commands work on all platforms.
+
 ## Installation
 
 ```bash
@@ -28,6 +38,7 @@ hlpr ssh init dir
 
 # TypeScript commands (nested structure)
 hlpr file rename <directory> <style> [--dry|-n]
+hlpr file mv <oldPath> <newPath> [--dry|-n]
 
 # Continue execution even if commands fail
 hlpr -f ssh init dir
@@ -35,54 +46,25 @@ hlpr -f ssh init dir
 
 ## Available Commands
 
+See individual command documentation for detailed usage, options, and examples.
+
+### TypeScript Commands
+
+- **[file rename](src/commands/file/rename/README.md)** - Recursively rename files/folders with various case styles
+- **[file mv](src/commands/file/mv/README.md)** - Rename/move a single file and update all references to it (markdown links, wikilinks, imports)
+- **[help](src/commands/help/README.md)** - Display help information about hlpr commands
+- **[process list-port](src/commands/process/list-port/README.md)** - List processes running on a port
+- **[process kill-port](src/commands/process/kill-port/README.md)** - Kill processes on a port
+
 ### Shell Script Commands
 
 Shell scripts support variable substitution using `{{variable}}` syntax.
 
-- `git fodd` - Git command
-- `hello world` - Hello world example
-- `ssh init dir` - SSH initialization
-
-### TypeScript Commands
-
-TypeScript commands are implemented as `.ts` files and run directly with Bun.
-
-#### file rename
-
-Recursively rename files and folders according to a specific case style.
-
-**Supported styles:**
-
-- `title_underscore` - Title_Case_With_Underscores
-- `snake` - snake_case_lowercase
-- `kebab` - kebab-case-lowercase
-- `camel` - camelCaseLowerFirst
-- `pascal` - PascalCaseUpperFirst
-- `upper` - UPPER_CASE_WITH_UNDERSCORES
-- `lower` - lower_case_with_underscores
-
-**Examples:**
-
-```bash
-# Dry run (preview changes without applying)
-hlpr file rename ./my-project kebab --dry
-hlpr file rename ./src snake -n
-
-# Apply changes
-hlpr file rename ./my-project kebab
-hlpr file rename ./docs pascal
-```
-
-**Features:**
-
-- ✅ Recursive directory traversal
-- ✅ Extension preservation (e.g., `file-name.md` core name only)
-- ✅ Leading dot file support (e.g., `.gitignore`)
-- ✅ Case-only rename handling (Windows compatibility)
-- ✅ Conflict resolution (adds `_N` suffix)
-- ✅ Dry-run mode (`--dry` or `-n`)
-
-See `commands/file/rename/README.md` for detailed documentation.
+- **[git](src/commands/git/README.md)** - Git utilities (fodd, precommit, switch-clean)
+- **[hello](src/commands/hello/README.md)** - Example greeting command with variable substitution
+- **[nvm](src/commands/nvm/README.md)** - Node Version Manager utilities
+- **[prompt](src/commands/prompt/README.md)** - Install and enable oh-my-posh or Starship in PowerShell
+- **[ssh](src/commands/ssh/README.md)** - SSH configuration and setup utilities
 
 ## How It Works
 
@@ -101,21 +83,40 @@ See `commands/file/rename/README.md` for detailed documentation.
 ## Directory Structure
 
 ```
-commands/
-├── file/
-│   └── rename/
-│       ├── rename.ts
-│       ├── rename.test.ts
+src/
+├── core/
+│   └── command/
+│       └── command.types.ts
+├── commands/
+│   ├── file/
+│   │   └── rename/
+│   │       ├── rename.ts
+│   │       ├── rename.test.ts
+│   │       └── README.md
+│   ├── git/
+│   │   ├── fodd.sh
+│   │   ├── precommit.sh
+│   │   ├── switch-clean.sh
+│   │   └── README.md
+│   ├── hello/
+│   │   ├── world.sh
+│   │   └── README.md
+│   ├── nvm/
+│   │   ├── install.sh
+│   │   ├── lts.sh
+│   │   └── README.md
+│   ├── process/
+│   │   ├── kill-port/
+│   │   │   ├── kill-port.ts
+│   │   │   └── README.md
+│   │   └── list-port/
+│   │       ├── list-port.ts
+│   │       └── README.md
+│   └── ssh/
+│       ├── init-dir.sh
 │       └── README.md
-├── git/
-│   └── fodd.sh
-├── hello/
-│   └── world.sh
-├── nvm/
-│   ├── install.sh
-│   └── lts.sh
-└── ssh/
-    └── initdir.sh
+├── index.ts
+└── commands.ts
 ```
 
 ## Adding Your Own Scripts
@@ -164,6 +165,113 @@ The utility maps command arguments to script files:
 
 - `hlpr file rename <args>` → runs `commands/file/rename/rename.ts`
 
+## How Shell Scripts (.sh) Work
+
+Shell scripts are bash scripts stored in `src/commands/<category>/` directories. They support interactive variable substitution and are cross-platform compatible.
+
+### Variable Substitution
+
+Shell scripts can use `{{variable}}` placeholders for user input:
+
+```bash
+#!/bin/bash
+# Example: src/commands/greet/hello.sh
+echo "Hello {{name}}, welcome to {{place}}"
+```
+
+When you run `hlpr greet hello`, the utility:
+1. Reads the script
+2. Finds all `{{variable}}` placeholders
+3. Prompts you to enter values for each variable
+4. Executes the script with variables replaced
+
+**Example interaction:**
+```
+$ hlpr greet hello
+Enter value for name: Alice
+Enter value for place: Wonderland
+Hello Alice, welcome to Wonderland
+```
+
+### Script Execution
+
+- Each line of the script is executed sequentially
+- If any line fails and `-f` flag is not set, execution stops
+- Scripts have access to standard bash features (pipes, redirects, etc.)
+
+### Windows Compatibility
+
+`.sh` scripts run on Windows through **PowerShell** and the modern cross-platform command stack.
+
+**How it works:**
+
+1. User runs: `hlpr git fodd`
+2. hlpr detects the platform is Windows
+3. hlpr invokes **PowerShell** to execute the `.sh` script
+4. PowerShell (v7+) and installed tools provide Unix-like command support
+5. Commands like `grep`, `sed`, `ls`, etc. work through various implementations
+
+**Why this works:**
+
+Modern Windows systems have multiple sources for Unix-like commands:
+
+- **PowerShell 7+** - Cross-platform, provides built-in Unix-like commands and aliases (ls, grep, select-string, etc.)
+- **Git** - Installs Unix utilities as part of its toolchain
+- **Node.js** - Provides command-line tools that work cross-platform
+- **Package managers** - scoop, chocolatey, and winget provide Unix tools
+- **WSL 2** - Windows Subsystem for Linux provides full Linux compatibility
+
+Scripts work because:
+- Modern tools use consistent command-line interfaces across platforms
+- PowerShell Core has native cross-platform support
+- Common utilities are available through multiple sources in system PATH
+
+**Example:**
+
+```bash
+#!/bin/bash
+# This script works on Windows, Linux, and macOS
+echo "Running on: $(uname -s || echo 'Windows PowerShell')"
+if [ -d "./src" ]; then
+  echo "Found src directory"
+  ls src | head -5
+fi
+```
+
+**Requirements:**
+
+- **Modern PowerShell** (v7+) is recommended for full compatibility
+- **Windows 10+** with default PowerShell Core support
+- **Git** installed (provides additional Unix utilities)
+- **Node.js** for runtime support
+
+No special configuration needed - hlpr automatically detects and uses PowerShell on Windows.
+
+### Creating Shell Scripts
+
+1. Create directory: `src/commands/<category>/`
+2. Add `.sh` file: `<command>.sh`
+3. Add shebang: `#!/bin/bash`
+4. Use `{{variable}}` for user input
+5. Build with `bun run build` (copies `.sh` files to `bin/commands/`)
+
+Example:
+
+```bash
+#!/bin/bash
+# src/commands/greet/hello.sh
+NAME={{name}}
+echo "Hello $NAME!"
+echo "Today is $(date '+%A')"
+```
+
+### Building and Distribution
+
+Shell scripts are:
+- **Copied** (not compiled) during build to `bin/commands/`
+- **Distributed** as part of the published package
+- **Platform-compatible** across Linux, macOS, and Windows (with Git Bash)
+
 ## Error Handling
 
 By default, the utility stops execution if any command fails. Use the `-f` flag to continue execution despite failures:
@@ -181,16 +289,34 @@ hlpr -f ssh init dir
 ```bash
 # Clone the repository
 git clone https://github.com/tertiumnon/hlpr.git
+cd hlpr
 
 # Install dependencies
 npm install
 
+# Setup git hooks (runs tests before commit)
+npm run setup:hooks
+
 # Build the project
-npm run build
+bun run build
 
 # Link for local development
 npm link
 ```
+
+### Git Hooks
+
+This project uses native git hooks (`.githooks/pre-commit`) to run tests before each commit. After cloning or pulling, ensure hooks are configured:
+
+```bash
+npm run setup:hooks
+```
+
+The pre-commit hook:
+- Runs unit and integration tests
+- Runs end-to-end tests
+- Aborts commit if tests fail
+- Can be skipped with `SKIP_E2E=1 git commit` (not recommended)
 
 ## License
 
