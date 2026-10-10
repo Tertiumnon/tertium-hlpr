@@ -1,4 +1,4 @@
-# Prompt Commands
+# Install Commands
 
 Setup utilities for PowerShell prompt themes.
 
@@ -6,17 +6,17 @@ Setup utilities for PowerShell prompt themes.
 
 - ✅ **Windows** - Requires Git Bash (included with Git for Windows) and winget
 
-## setup
+## cli-tool
 
 Install and enable [oh-my-posh](https://ohmyposh.dev) or [Starship](https://starship.rs) in the PowerShell profile.
 
 ### Usage
 
 ```bash
-hlpr prompt setup
+hlpr install cli-tool starship
 ```
 
-You will be prompted for `tool`: `oh-my-posh` or `starship`.
+Pass `oh-my-posh` or `starship` as the final argument.
 
 ### What it does
 

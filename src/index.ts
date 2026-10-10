@@ -55,7 +55,7 @@ function prompt(question: string): Promise<string> {
 }
 
 // Execute a command with variable substitution
-async function executeCommand(command: string, variables: Record<string, string>): Promise<boolean> {
+async function executeCommand(command: string, variables: Record<string, string>, input?: string): Promise<boolean> {
   // Replace variables in the command
   let processedCommand = command;
   for (const [key, value] of Object.entries(variables)) {
@@ -65,6 +65,7 @@ async function executeCommand(command: string, variables: Record<string, string>
   return new Promise((resolve) => {
     console.log(`Executing: ${processedCommand}`);
     const childProcess = exec(processedCommand);
+    childProcess.stdin?.end(input);
     
     if (childProcess.stdout) {
       childProcess.stdout.on("data", (data: string) => {
@@ -394,17 +395,11 @@ async function main() {
       processedScript = processedScript.replace(new RegExp(`{{${key}}}`, 'g'), value);
     }
 
-    const tempScriptPath = path.join(path.dirname(scriptPath), `_temp_${path.basename(scriptPath)}`);
-    fs.writeFileSync(tempScriptPath, processedScript);
-
-    // Execute the temporary script with bash and arguments
+    // Execute the script with bash and arguments
     // (.sh files require bash, not PowerShell on Windows)
     const argsStr = scriptArgs.map(arg => `"${arg}"`).join(' ');
-    const command = `bash "${tempScriptPath}" ${argsStr}`;
-    const success = await executeCommand(command, {});
-    
-    // Clean up the temporary script
-    fs.unlinkSync(tempScriptPath);
+    const command = `bash -s -- ${argsStr}`;
+    const success = await executeCommand(command, {}, processedScript);
     
     // If command failed and force flag is not set, exit
     if (!success && !forceFlag) {

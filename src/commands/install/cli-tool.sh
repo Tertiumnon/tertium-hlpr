@@ -1,7 +1,7 @@
 #!/bin/bash
 # @description Install and enable oh-my-posh or starship in the PowerShell profile (switches from the other one)
 
-case "{{tool}}" in
+case "$1" in
   oh-my-posh)
     winget install JanDeDobbeleer.OhMyPosh -s winget
     init_line='oh-my-posh init pwsh | Invoke-Expression'
@@ -13,7 +13,7 @@ case "{{tool}}" in
     other_line='oh-my-posh init pwsh | Invoke-Expression'
     ;;
   *)
-    echo "Unknown tool: {{tool}} (use oh-my-posh or starship)"
+    echo "Unknown tool: $1 (use oh-my-posh or starship)"
     exit 1
     ;;
 esac
