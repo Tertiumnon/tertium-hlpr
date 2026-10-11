@@ -1,7 +1,25 @@
 import { describe, expect, test } from 'bun:test'
+import { spawnSync } from 'node:child_process'
+import fs from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
 import { moveSelection, parseTool, parseVersion, runtimeInstallCommands, selectsTool, updateProfile, updatePsReadLineProfile } from './install.js'
 
 describe('install', () => {
+  test('recognizes an existing oh-my-zsh installation without running the installer', () => {
+    const zshDir = fs.mkdtempSync(path.join(os.tmpdir(), 'hlpr-oh-my-zsh-'))
+    try {
+      fs.writeFileSync(path.join(zshDir, 'oh-my-zsh.sh'), '')
+      const result = spawnSync(process.execPath, [path.join(import.meta.dir, 'install.ts'), 'oh-my-zsh'], {
+        encoding: 'utf8', env: { ...process.env, ZSH: zshDir },
+      })
+      expect(result.status).toBe(0)
+      expect(result.stdout).toContain('already installed')
+    } finally {
+      fs.rmSync(zshDir, { recursive: true, force: true })
+    }
+  })
+
   test('arrow selection wraps at both ends', () => {
     expect(moveSelection(0, 'up', 9)).toBe(8)
     expect(moveSelection(8, 'down', 9)).toBe(0)

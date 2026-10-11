@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process'
 import fs from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 import readline from 'node:readline'
 
@@ -205,6 +206,12 @@ async function main(): Promise<void> {
   }
 
   if (tool === 'oh-my-zsh') {
+    const zshDir = process.env.ZSH || path.join(os.homedir(), '.oh-my-zsh')
+    if (fs.existsSync(zshDir)) {
+      if (!fs.existsSync(path.join(zshDir, 'oh-my-zsh.sh'))) throw new Error(`${zshDir} exists but does not contain an oh-my-zsh installation`)
+      console.log(`oh-my-zsh is already installed in ${zshDir}.`)
+      return
+    }
     const install = spawnSync('sh', ['-c', 'curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh | sh'], { stdio: 'inherit' })
     if (install.status !== 0) throw new Error(install.error?.message || `oh-my-zsh installation failed with exit code ${install.status}`)
     console.log('Installed oh-my-zsh. Restart your shell to apply.')
