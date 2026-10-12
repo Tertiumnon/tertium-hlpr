@@ -74,4 +74,6 @@ hlpr file rename -dir ./src -style kebab -r -d -f --dry
 | [self update](src/commands/self/update/README.md) (`self upgrade`) | Update hlpr globally through npm |
 | [help](src/commands/help/README.md)                 | Show available commands                 |
 
+[Support the project](https://ko-fi.com/tertiumnon)
+
 License: MIT.
