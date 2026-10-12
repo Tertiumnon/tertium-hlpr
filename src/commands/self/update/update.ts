@@ -3,6 +3,7 @@ import { execSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { installedCommandsWork, repairInstallation, selfUpdateInstallCommand } from '../../../core/command/self-update.js'
 
 const PACKAGE_NAME = '@tertium/hlpr'
 
@@ -19,8 +20,8 @@ function isNewer(latest: string, current: string): boolean {
 const args = process.argv.slice(2)
 if (args.includes('--help') || args.includes('-h')) {
   console.log('Usage: hlpr self update')
-  console.log('Update hlpr through npm: npm install -g @tertium/hlpr@latest')
-  console.log('Installs only when npm has a newer version. Alias: hlpr self upgrade')
+  console.log('Update hlpr through Volta or npm.')
+  console.log('Checks installed commands and repairs them if needed. Alias: hlpr self upgrade')
   process.exit(0)
 }
 if (args.length > 0) {
@@ -36,10 +37,16 @@ try {
 
   if (isNewer(latestVersion, currentVersion)) {
     console.log(`Updating hlpr v${currentVersion} -> v${latestVersion}`)
-    execSync(`npm install -g ${PACKAGE_NAME}@latest`, { stdio: 'inherit' })
+    execSync(selfUpdateInstallCommand(packagePath), { stdio: 'inherit' })
     console.log(`✓ hlpr updated to v${latestVersion}`)
   } else {
     console.log(`hlpr is up to date (v${currentVersion}, npm latest v${latestVersion})`)
+  }
+  if (!installedCommandsWork()) {
+    console.log('Installed commands did not pass verification. Repairing hlpr...')
+    repairInstallation(packagePath)
+    if (!installedCommandsWork()) throw new Error('hlpr commands still fail after repair')
+    console.log('hlpr commands verified after repair.')
   }
 } catch (error) {
   console.error(`Update failed: ${error instanceof Error ? error.message : error}`)

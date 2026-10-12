@@ -1,9 +1,18 @@
+const aliases: Record<string, Record<string, string>> = {
+  app: { delete: 'remove', uninstall: 'remove', find: 'search' },
+  battery: { info: 'status' },
+  disk: { status: 'info' },
+  file: { mv: 'move', search: 'find' },
+  git: { rm: 'remove' },
+  memory: { status: 'info' },
+  net: { info: 'status' },
+  system: { status: 'info' },
+}
+
 export function resolveSubcommandAlias(category: string, command: string): string {
-  if (category === 'app' && (command === 'delete' || command === 'uninstall')) return 'remove'
-  if (category === 'app' && command === 'find') return 'search'
-  if (category === 'file' && command === 'mv') return 'move'
-  if (category === 'file' && command === 'search') return 'find'
-  if (command === 'info' && (category === 'battery' || category === 'net')) return 'status'
-  if (command === 'status' && (category === 'disk' || category === 'memory' || category === 'system')) return 'info'
-  return category === 'git' && command === 'rm' ? 'remove' : command
+  return aliases[category]?.[command] ?? command
+}
+
+export function subcommandAliases(category: string, command: string): string[] {
+  return Object.entries(aliases[category] ?? {}).filter(([, target]) => target === command).map(([alias]) => alias)
 }

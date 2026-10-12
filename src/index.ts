@@ -9,6 +9,7 @@ import { resolveSubcommandAlias } from "./core/command/aliases.js";
 import { HLPR_LOGO } from "./core/command/logo.js";
 import { performance } from "node:perf_hooks";
 import { commandUsages, renderHelp } from "./core/command/help.js";
+import { repairInstallation } from "./core/command/self-update.js";
 
 // Get package version from package.json
 async function getVersion(): Promise<string> {
@@ -248,6 +249,27 @@ async function main() {
     // Get the category (first argument) and the rest of the command
     const category = commandArgs[0];
     const restArgs = commandArgs.slice(1);
+
+    // Repair must work even when bin/commands is missing from an installation.
+    if (category === 'self' && restArgs[0] === 'fix') {
+      rl.close();
+      if (restArgs.length === 2 && ['-h', '--help'].includes(restArgs[1])) {
+        console.log('Usage: hlpr self fix\nReinstall the latest hlpr through Volta or npm, even if this version is already installed.');
+        return;
+      }
+      if (restArgs.length !== 1) {
+        console.error('Usage: hlpr self fix');
+        process.exit(1);
+      }
+      try {
+        repairInstallation(path.join(__dirname, '..', 'package.json'));
+        console.log('hlpr reinstalled. Run hlpr help to check the available commands.');
+      } catch (error) {
+        console.error(`Repair failed: ${error instanceof Error ? error.message : error}`);
+        process.exit(1);
+      }
+      return;
+    }
 
     // Check for TypeScript command first (now built as JS)
     let scriptPath: string | undefined;

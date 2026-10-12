@@ -1,6 +1,8 @@
 import { expect, test } from 'bun:test'
 import { spawnSync } from 'node:child_process'
-import { readFileSync, readdirSync } from 'node:fs'
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
 import { HLPR_LOGO } from '../../core/command/logo.js'
 import { renderHelp } from '../../core/command/help.js'
 
@@ -26,6 +28,34 @@ test('TypeScript commands use domain and command directories', () => {
 test('help lists current commands, excludes helpers, and shows the package version', () => {
   const build = spawnSync('bun', ['run', 'build'], { encoding: 'utf8' })
   expect(build.status).toBe(0)
+  const pack = process.platform === 'win32'
+    ? spawnSync('cmd.exe', ['/d', '/c', 'npm.cmd', 'pack', '--dry-run', '--ignore-scripts', '--json'], { encoding: 'utf8' })
+    : spawnSync('npm', ['pack', '--dry-run', '--ignore-scripts', '--json'], { encoding: 'utf8' })
+  expect(pack.status).toBe(0)
+  const packageFiles = new Set(JSON.parse(pack.stdout)[0].files.map((file: { path: string }) => file.path))
+  for (const command of ['bin/index.js', 'bin/commands/app/list/list.js', 'bin/commands/self/update/update.js', 'bin/commands/self/fix/fix.js']) expect(packageFiles.has(command)).toBe(true)
+  const incomplete = mkdtempSync(path.join(os.tmpdir(), 'hlpr-incomplete-'))
+  try {
+    mkdirSync(path.join(incomplete, 'bin'))
+    copyFileSync('bin/index.js', path.join(incomplete, 'bin', 'index.js'))
+    writeFileSync(path.join(incomplete, 'package.json'), '{"type":"module"}')
+    const help = spawnSync('node', [path.join(incomplete, 'bin', 'index.js'), 'self', 'fix', '--help'], { encoding: 'utf8' })
+    expect(help.status).toBe(0)
+    expect(help.stdout).toContain('Usage: hlpr self fix')
+    const fakeTools = path.join(incomplete, 'tools')
+    const log = path.join(incomplete, 'install.log')
+    mkdirSync(fakeTools)
+    writeFileSync(path.join(fakeTools, process.platform === 'win32' ? 'npm.cmd' : 'npm'), process.platform === 'win32'
+      ? '@echo off\r\necho %*>>"%HLPR_FIX_LOG%"\r\n'
+      : '#!/bin/sh\nprintf "%s\\n" "$*" >> "$HLPR_FIX_LOG"\n', { mode: 0o755 })
+    const repaired = spawnSync(process.execPath, [path.join(incomplete, 'bin', 'index.js'), 'self', 'fix'], {
+      encoding: 'utf8', env: { ...process.env, PATH: `${fakeTools}${path.delimiter}${process.env.PATH}`, HLPR_FIX_LOG: log },
+    })
+    expect(repaired.status).toBe(0)
+    expect(readFileSync(log, 'utf8').trim()).toBe('install -g --force @tertium/hlpr@latest')
+  } finally {
+    rmSync(incomplete, { recursive: true, force: true })
+  }
   const { version } = JSON.parse(readFileSync('package.json', 'utf8'))
   expect(readFileSync('README.md', 'utf8').replace(/\r\n/g, '\n')).toContain(HLPR_LOGO)
 
@@ -51,7 +81,7 @@ test('help lists current commands, excludes helpers, and shows the package versi
     expect(result.stdout).not.toContain('(TS)')
     expect(result.stdout).not.toContain('EXAMPLES:')
     expect(result.stdout).not.toContain('\u001b[')
-    for (const command of ['file rename', 'file move', 'file find -name <name>', 'file search -name <name>', 'net scan', 'net list -device', 'net status', 'system info', 'battery status', 'disk info', 'memory info', 'git create', 'process list', 'process kill', 'app list', 'app search -name <name>', 'app find -name <name>', 'app remove -name <app name>', 'ssh mkconn', 'tool install', 'runtime install', 'self update', 'self upgrade', 'hello', 'hello world']) {
+    for (const command of ['file rename', 'file move', 'file find -name <name>', 'file search -name <name>', 'net scan', 'net list -device', 'net status', 'system info', 'battery status', 'disk info', 'memory info', 'git create', 'process list', 'process kill', 'app list', 'app search -name <name>', 'app find -name <name>', 'app remove -name <app name>', 'ssh mkconn', 'tool install', 'runtime install', 'self update', 'self fix', 'self upgrade', 'hello', 'hello world']) {
       expect(result.stdout).toContain(`hlpr ${command}`)
     }
     expect(result.stdout).toContain('also: -d')
@@ -62,7 +92,7 @@ test('help lists current commands, excludes helpers, and shows the package versi
     expect(result.stdout).toContain('hlpr git create <-branch|-b> <branch>')
     expect(result.stdout).toContain('hlpr process kill (-id <id> | -port <port>) [options]')
     expect(result.stdout).toContain('hlpr file rename -dir <dir> -style <style> [-r] [-d] [-f]')
-    for (const alias of ['battery info', 'net info', 'disk status', 'memory status', 'system status']) expect(result.stdout).toContain(`hlpr ${alias}`)
+    for (const alias of ['battery info', 'net info', 'disk status', 'memory status', 'system status', 'app delete -name <app name>', 'app uninstall -name <app name>', 'file mv', 'git rm']) expect(result.stdout).toContain(`hlpr ${alias}`)
   }
   for (const [category, alias, original] of [['battery', 'info', 'status'], ['net', 'info', 'status'], ['disk', 'status', 'info'], ['memory', 'status', 'info'], ['system', 'status', 'info']]) {
     const result = spawnSync('node', ['bin/index.js', category, alias, '--help'], { encoding: 'utf8' })
@@ -70,7 +100,7 @@ test('help lists current commands, excludes helpers, and shows the package versi
     expect(result.stdout).toContain(`Usage: hlpr ${category} ${original}`)
     expect(result.stdout).toContain(`Alias: hlpr ${category} ${alias}`)
   }
-  for (const [domain, action] of [['file', 'rename'], ['file', 'move'], ['file', 'find'], ['file', 'search'], ['process', 'list'], ['process', 'kill'], ['app', 'list'], ['app', 'search'], ['app', 'find'], ['ssh', 'mkconn'], ['tool', 'install'], ['runtime', 'install'], ['self', 'update'], ['self', 'upgrade'], ['hello', 'world']]) {
+  for (const [domain, action] of [['file', 'rename'], ['file', 'move'], ['file', 'find'], ['file', 'search'], ['process', 'list'], ['process', 'kill'], ['app', 'list'], ['app', 'search'], ['app', 'find'], ['ssh', 'mkconn'], ['tool', 'install'], ['runtime', 'install'], ['self', 'update'], ['self', 'fix'], ['self', 'upgrade'], ['hello', 'world']]) {
     const result = spawnSync('node', ['bin/index.js', domain, action, '--help'], { encoding: 'utf8' })
     expect(result.status).toBe(0)
     expect(result.stdout).toContain(`hlpr ${domain} ${action === 'upgrade' ? 'update' : domain === 'app' && action === 'find' ? 'search' : domain === 'file' && action === 'search' ? 'find' : action}`)

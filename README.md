@@ -71,7 +71,8 @@ hlpr file rename -dir ./src -style kebab -r -d -f --dry
 | [ssh mkconn](src/commands/ssh/mkconn/README.md) | Set up an SSH connection |
 | [hello](src/commands/hello/README.md) | Run a Matrix rain animation |
 | [hello world](src/commands/hello/world/README.md) | Display animated Hello World art |
-| [self update](src/commands/self/update/README.md) (`self upgrade`) | Update hlpr globally through npm |
+| [self update](src/commands/self/update/README.md) (`self upgrade`) | Update hlpr and repair broken command files |
+| [self fix](src/commands/self/fix/README.md) | Reinstall hlpr when command files are missing |
 | [help](src/commands/help/README.md)                 | Show available commands                 |
 
 [Support the project](https://ko-fi.com/tertiumnon)

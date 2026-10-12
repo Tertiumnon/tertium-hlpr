@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
+import { subcommandAliases } from './aliases.js'
 
 export async function commandUsages(filePath: string, command: string): Promise<string[]> {
   const sources = [filePath, path.join(path.dirname(filePath), 'README.md')]
@@ -47,9 +48,7 @@ export function renderHelp(commands: HelpCommand[], version: string, color = pro
       const [first, ...alternatives] = syntax.length ? syntax : [base]
       lines.push(`  ${paint('36', first)}${command.description ? paint('2', `  ${command.description}`) : ''}`)
       const variants = alternatives.filter(usage => !commandNames.has(usage)).map(usage => usage.startsWith(`${base} `) ? usage.slice(base.length + 1) : usage)
-      if (command.name === 'info' || command.name === 'status') variants.push(`hlpr ${category} ${command.name === 'info' ? 'status' : 'info'}`)
-      if (category === 'app' && command.name === 'search') variants.push('hlpr app find -name <name>')
-      if (category === 'file' && command.name === 'find') variants.push('hlpr file search -name <name>')
+      variants.push(...subcommandAliases(category, command.name).map(alias => first.replace(base, `hlpr ${category} ${alias}`)))
       if (variants.length) lines.push(`    ${paint('2', `also: ${variants.join('  ·  ')}`)}`)
     }
   }

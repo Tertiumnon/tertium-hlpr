@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { resolveSubcommandAlias } from './aliases.js'
+import { resolveSubcommandAlias, subcommandAliases } from './aliases.js'
 
 describe('command aliases', () => {
   test('git rm resolves to git remove', () => {
@@ -18,6 +18,12 @@ describe('command aliases', () => {
 
   test('file search resolves to find', () => {
     expect(resolveSubcommandAlias('file', 'search')).toBe('find')
+  })
+
+  test('lists the same aliases for help', () => {
+    expect(subcommandAliases('app', 'remove')).toEqual(['delete', 'uninstall'])
+    expect(subcommandAliases('file', 'find')).toEqual(['search'])
+    expect(subcommandAliases('git', 'remove')).toEqual(['rm'])
   })
 
   test('info and status are synonyms for system state commands', () => {
