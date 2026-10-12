@@ -21,6 +21,8 @@
 
 hlpr aims to make everyday command-line tasks simpler across Windows, macOS, and Linux. It brings useful commands together with consistent, natural names—like `net list -device`, `list process`, and `git create`—so you can focus on what you want to do instead of remembering different commands for each environment.
 
+> **Note:** This app is in development. Commands, behavior, and documentation are still evolving and may change without notice.
+
 ## Install
 
 ```sh
