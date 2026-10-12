@@ -4,8 +4,7 @@ import * as fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { readFile } from "node:fs/promises";
 import type { CommandInfo } from "./help.types.js";
-import { HLPR_LOGO } from "../../core/command/logo.js";
-import { commandUsages } from "../../core/command/help.js";
+import { commandUsages, renderHelp } from "../../core/command/help.js";
 
 async function getVersion(): Promise<string> {
   try {
@@ -123,58 +122,7 @@ async function discoverCommands(commandsDir: string): Promise<CommandInfo[]> {
 }
 
 function printHelp(commands: CommandInfo[], version: string) {
-  console.log(`\n${HLPR_LOGO}\n\nhlpr v${version}\n`);
-  
-  console.log('USAGE:');
-  console.log('  hlpr [options] <command> [args...]');
-  console.log('  hlpr [options] <category> <command> [args...]\n');
-  
-  console.log('OPTIONS:');
-  console.log('  -f              Force execution (continue on errors)');
-  console.log('  -v, --version   Show version information');
-  console.log('  help, -h, --help, /h, /help, /?');
-  console.log('                  Show this help message\n');
-  
-  console.log('AVAILABLE COMMANDS:\n');
-  
-  // Group commands by category
-  const grouped = commands.reduce((acc, cmd) => {
-    if (!acc[cmd.category]) {
-      acc[cmd.category] = [];
-    }
-    acc[cmd.category].push(cmd);
-    return acc;
-  }, {} as Record<string, CommandInfo[]>);
-  
-  // Sort categories
-  const sortedCategories = Object.keys(grouped).sort();
-  
-  for (const category of sortedCategories) {
-    console.log(`  ${category}:`);
-    const categoryCommands = grouped[category].sort((a, b) => a.name.localeCompare(b.name));
-    
-    for (const cmd of categoryCommands) {
-      const typeLabel = cmd.type === 'typescript' ? '(TS)' : '(sh)';
-      const cmdDisplay = cmd.category === cmd.name 
-        ? `hlpr ${cmd.name}`.padEnd(35)
-        : `hlpr ${cmd.category} ${cmd.name}`.padEnd(35);
-      
-      if (cmd.description) {
-        console.log(`    ${cmdDisplay} ${typeLabel.padEnd(6)} ${cmd.description}`);
-      } else {
-        console.log(`    ${cmdDisplay} ${typeLabel}`);
-      }
-      for (const usage of cmd.usages ?? []) console.log(`      Usage: ${usage}`);
-    }
-    console.log('');
-  }
-  
-  console.log('EXAMPLES:');
-  console.log('  hlpr help');
-  console.log('  hlpr net list -device   (or: hlpr net list -d)');
-  console.log('  hlpr rename -dir ./src -style kebab -r -d -f');
-  console.log('  hlpr ssh init-dir');
-  console.log('  hlpr git create -b feature/example\n');
+  console.log(renderHelp(commands, version));
 }
 
 async function main() {

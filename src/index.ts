@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 import { resolveCommandAlias, resolveSubcommandAlias } from "./core/command/aliases.js";
 import { HLPR_LOGO } from "./core/command/logo.js";
 import { performance } from "node:perf_hooks";
-import { commandUsages } from "./core/command/help.js";
+import { commandUsages, renderHelp } from "./core/command/help.js";
 
 // Get package version from package.json
 async function getVersion(): Promise<string> {
@@ -70,19 +70,19 @@ async function executeCommand(command: string, variables: Record<string, string>
     const childProcess = exec(processedCommand);
     if (input === undefined && childProcess.stdin) process.stdin.pipe(childProcess.stdin);
     else childProcess.stdin?.end(input);
-    
+
     if (childProcess.stdout) {
       childProcess.stdout.on("data", (data: string) => {
         console.log(data.toString().trim());
       });
     }
-    
+
     if (childProcess.stderr) {
       childProcess.stderr.on("data", (data: string) => {
         console.error(data.toString().trim());
       });
     }
-    
+
     childProcess.on("exit", (code: number | null) => {
       if (childProcess.stdin) process.stdin.unpipe(childProcess.stdin);
       if (code === 0) {
@@ -113,7 +113,7 @@ async function showHelp() {
       if (descMatch) {
         return descMatch[1].trim();
       }
-      
+
       const dir = path.dirname(filePath);
       const readmePath = path.join(dir, 'README.md');
       if (fs.existsSync(readmePath)) {
@@ -131,23 +131,23 @@ async function showHelp() {
 
   async function discoverCommands(commandsDir: string): Promise<CommandInfo[]> {
     const commands: CommandInfo[] = [];
-    
+
     try {
       const categories = await fs.promises.readdir(commandsDir, { withFileTypes: true });
-      
+
       for (const category of categories) {
         if (!category.isDirectory()) continue;
-        
+
         const categoryPath = path.join(commandsDir, category.name);
         const items = await fs.promises.readdir(categoryPath, { withFileTypes: true });
-        
+
         for (const item of items) {
           if (item.isDirectory()) {
             const nestedJsPath = path.join(categoryPath, item.name, `${item.name}.js`);
             const nestedShPath = path.join(categoryPath, item.name, `${item.name}.sh`);
             let commandPath: string;
             let commandType: 'typescript' | 'shell';
-            
+
             if (fs.existsSync(nestedJsPath)) {
               commandPath = nestedJsPath;
               commandType = 'typescript';
@@ -157,7 +157,7 @@ async function showHelp() {
             } else {
               continue;
             }
-            
+
             const description = await getCommandDescription(commandPath);
             commands.push({
               category: category.name,
@@ -199,74 +199,24 @@ async function showHelp() {
     } catch {
       // Ignore errors
     }
-    
+
     return commands;
   }
 
   const version = await getVersion();
   const binCommandsDir = path.join(__dirname, "commands");
   const srcCommandsDir = path.join(__dirname, '..', 'src', 'commands');
-  
+
   const commands = [
     ...(await discoverCommands(binCommandsDir)),
     ...(await discoverCommands(srcCommandsDir))
   ];
-  
-  const uniqueCommands = commands.filter((cmd, index, self) => 
+
+  const uniqueCommands = commands.filter((cmd, index, self) =>
     index === self.findIndex(c => c.category === cmd.category && c.name === cmd.name)
   );
-  
-  // Print help
-  console.log(`\n${HLPR_LOGO}\n\nhlpr v${version}\n`);
-  
-  console.log('USAGE:');
-  console.log('  hlpr [options] <command> [args...]');
-  console.log('  hlpr [options] <category> <command> [args...]\n');
-  
-  console.log('OPTIONS:');
-  console.log('  -f              Force execution (continue on errors)');
-  console.log('  -v, --version   Show version information');
-  console.log('  help, -h, --help, /h, /help, /?');
-  console.log('                  Show this help message\n');
-  
-  console.log('AVAILABLE COMMANDS:\n');
-  
-  const grouped = uniqueCommands.reduce((acc, cmd) => {
-    if (!acc[cmd.category]) {
-      acc[cmd.category] = [];
-    }
-    acc[cmd.category].push(cmd);
-    return acc;
-  }, {} as Record<string, CommandInfo[]>);
-  
-  const sortedCategories = Object.keys(grouped).sort();
-  
-  for (const category of sortedCategories) {
-    console.log(`  ${category}:`);
-    const categoryCommands = grouped[category].sort((a, b) => a.name.localeCompare(b.name));
-    
-    for (const cmd of categoryCommands) {
-      const typeLabel = cmd.type === 'typescript' ? '(TS)' : '(sh)';
-      const cmdDisplay = cmd.category === cmd.name 
-        ? `hlpr ${cmd.name}`.padEnd(35)
-        : `hlpr ${cmd.category} ${cmd.name}`.padEnd(35);
-      
-      if (cmd.description) {
-        console.log(`    ${cmdDisplay} ${typeLabel.padEnd(6)} ${cmd.description}`);
-      } else {
-        console.log(`    ${cmdDisplay} ${typeLabel}`);
-      }
-      for (const usage of cmd.usages) console.log(`      Usage: ${usage}`);
-    }
-    console.log('');
-  }
-  
-  console.log('EXAMPLES:');
-  console.log('  hlpr help');
-  console.log('  hlpr net list -device   (or: hlpr net list -d)');
-  console.log('  hlpr rename -dir ./src -style kebab -r -d -f');
-  console.log('  hlpr ssh init-dir');
-  console.log('  hlpr git create -b feature/example\n');
+
+  console.log(renderHelp(uniqueCommands, version));
 }
 
 async function main() {
@@ -281,10 +231,12 @@ async function main() {
   // Check for help flag or no arguments
   if (commandArgs.length === 0 || commandArgs[0] === "help" || commandArgs[0] === "--help" || commandArgs[0] === "-h" || commandArgs[0] === "/help" || commandArgs[0] === "/h" || commandArgs[0] === "/?") {
     if (commandArgs.length === 0) {
-      console.log(`\n${HLPR_LOGO}\n`);
-      console.log('       .--------------------.');
-      console.log('       |  use "hlpr help"   |');
-      console.log('       \'--------------------\'');
+      const logo = HLPR_LOGO.split('\n');
+      logo[5] += ` v${await getVersion()}`;
+      const balloon = ['.--------------------.', '|  use "hlpr help"   |', "'--------------------'"];
+      const balloonX = logo[6].indexOf("I'll automate you...");
+      for (let i = 0; i < balloon.length; i++) logo[7 + i] = `${logo[7 + i].padEnd(balloonX)}${balloon[i]}`;
+      console.log(`\n${logo.join('\n')}\n`);
       process.exit(0);
     }
     // Run help inline to avoid subprocess issues
@@ -296,11 +248,11 @@ async function main() {
     // Get the category (first argument) and the rest of the command
     const category = resolveCommandAlias(commandArgs[0]);
     const restArgs = commandArgs.slice(1);
-    
+
     // Check for TypeScript command first (now built as JS)
     let scriptPath: string | undefined;
     let isTypeScriptCommand = false;
-    
+
     // Try nested structure: bin/commands/<category>/<subcategory>/<subcategory>.js
     // e.g., "hlpr list process" -> bin/commands/list/process/process.js
     if (restArgs.length > 0) {
@@ -311,7 +263,7 @@ async function main() {
         isTypeScriptCommand = true;
       }
     }
-    
+
     // Try flat structure: bin/commands/<category>/<category>.js
     // e.g., "hlpr rename" -> bin/commands/rename/rename.js
     if (!isTypeScriptCommand) {
@@ -321,7 +273,7 @@ async function main() {
         isTypeScriptCommand = true;
       }
     }
-    
+
     // Try shell script: commands/<category>/<scriptname>.sh
     if (!isTypeScriptCommand && restArgs.length > 0) {
       // First argument is the command name
@@ -340,7 +292,7 @@ async function main() {
         process.exit(1);
       }
     }
-    
+
     if (!scriptPath) {
       console.error(`Command not found. Usage: hlpr ${category} <args>`);
       process.exit(1);
@@ -359,28 +311,28 @@ async function main() {
       } else {
         tsArgs = process.argv.slice(3);
       }
-      
+
       // Use node to run built JavaScript files
       rl.close();
       let success: boolean;
-      if (category === 'install' && tsArgs.length === 0) {
-        const result = spawnSync(process.execPath, [scriptPath], { stdio: 'inherit' });
+      if ((category === 'install' && tsArgs.length === 0) || (category === 'ssh' && restArgs[0] === 'add')) {
+        const result = spawnSync(process.execPath, [scriptPath, ...tsArgs], { stdio: 'inherit' });
         if (result.error) console.error(result.error.message);
         success = result.status === 0;
       } else {
         const finalCommand = `node "${scriptPath}" ${tsArgs.join(' ')}`;
         success = await executeCommand(finalCommand, {});
       }
-      
+
       // If this invocation was only to show help, don't treat non-zero exit as failure
       const helpFlags = ['-h', '--help', 'help', '/h', '/help', '/?'];
       const isHelpInvocation = tsArgs.some(arg => helpFlags.includes(arg));
-      
+
       if (!success && !forceFlag && !isHelpInvocation) {
         console.error("Command failed, stopping execution.");
         process.exit(1);
       }
-      
+
       console.log(`--- finished by ${((performance.now() - startedAt) / 1000).toFixed(2)}s ---`);
       rl.close();
       return;
@@ -423,13 +375,13 @@ async function main() {
     const argsStr = scriptArgs.map(arg => `"${arg}"`).join(' ');
     const command = `bash -s -- ${argsStr}`;
     const success = await executeCommand(command, {}, processedScript);
-    
+
     // If command failed and force flag is not set, exit
     if (!success && !forceFlag) {
       console.error("Command failed, stopping execution.");
       process.exit(1);
     }
-    
+
     console.log(`--- finished by ${((performance.now() - startedAt) / 1000).toFixed(2)}s ---`);
   } catch (error) {
     console.error("Error:", error);

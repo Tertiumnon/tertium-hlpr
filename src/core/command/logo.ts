@@ -4,7 +4,7 @@ export const HLPR_LOGO = String.raw`    |==|   |==|
    _|__|___|__|_
   /  ___   ___  \
  |  | o | | o |  |   hlpr
- |  '---' '---'  |   your CLI helper
+ |  '---' '---'  |   I'll automate you...
  |      /_\      |
   \   .----- .  /
    '._|_|_|__.'

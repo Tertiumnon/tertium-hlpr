@@ -7,7 +7,7 @@
    _|__|___|__|_
   /  ___   ___  \
  |  | o | | o |  |   hlpr
- |  '---' '---'  |   your CLI helper
+ |  '---' '---'  |   I'll automate you...
  |      /_\      |
   \   .----- .  /
    '._|_|_|__.'
@@ -39,6 +39,7 @@ hlpr net scan
 hlpr memory info
 hlpr system info
 hlpr battery status
+hlpr ssh add connection
 hlpr git create -b[ranch] feature/example
 hlpr rename -dir ./src -style kebab -r -d -f --dry
 ```
@@ -62,7 +63,7 @@ hlpr rename -dir ./src -style kebab -r -d -f --dry
 | [list app](src/commands/list/app/README.md)         | List installed apps                     |
 | [install](src/commands/install/README.md) (`i`)     | Install supported tools                 |
 | [nvm](src/commands/nvm/README.md)                   | Install or switch Node.js versions      |
-| [ssh](src/commands/ssh/README.md)                   | Set up the SSH directory                |
+| [ssh](src/commands/ssh/README.md)                   | Set up SSH directories and connections  |
 | [hello](src/commands/hello/README.md)               | Run terminal demos                      |
 | [update](src/commands/update/README.md) (`upgrade`) | Update hlpr globally through npm        |
 | [help](src/commands/help/README.md)                 | Show available commands                 |

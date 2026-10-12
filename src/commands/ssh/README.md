@@ -2,6 +2,11 @@
 
 SSH configuration and setup utilities.
 
+## add connection
+
+Run `hlpr ssh add connection` to create a key, authorize it on a remote host,
+and add a backed-up local SSH config entry. See [add connection](add/README.md).
+
 ## Platform Support
 
 - ✅ **Linux** - Fully supported
