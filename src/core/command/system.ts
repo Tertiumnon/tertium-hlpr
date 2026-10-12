@@ -8,8 +8,12 @@ export function formatBytes(bytes: number): string {
 }
 
 export function formatInfo(rows: [string, string][]): string {
-  const width = Math.max(0, ...rows.map(([label]) => label.length))
-  return rows.map(([label, value]) => `${label.padEnd(width)} | ${value || 'Unavailable'}`).join('\n')
+  const width = Math.max(0, ...rows.filter(([, value]) => value !== '').map(([label]) => label.length))
+  const color = Boolean(process.stdout.isTTY && process.env.NO_COLOR === undefined && process.env.TERM !== 'dumb')
+  const paint = (code: number, value: string) => color ? `\x1b[${code}m${value}\x1b[0m` : value
+  return rows.map(([label, value]) => value === ''
+    ? paint(1, `--- ${label} ---`)
+    : `${paint(36, label.padEnd(width))} ${paint(90, '|')} ${value || 'Unavailable'}`).join('\n')
 }
 
 export function powershellJson<T>(script: string): T {

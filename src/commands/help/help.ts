@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { readFile } from "node:fs/promises";
 import type { CommandInfo } from "./help.types.js";
 import { HLPR_LOGO } from "../../core/command/logo.js";
+import { commandUsages } from "../../core/command/help.js";
 
 async function getVersion(): Promise<string> {
   try {
@@ -80,7 +81,8 @@ async function discoverCommands(commandsDir: string): Promise<CommandInfo[]> {
             name: item.name,
             type: commandType,
             path: commandPath,
-            description
+            description,
+            usages: await commandUsages(commandPath, `hlpr ${category.name} ${item.name}`)
           });
         } else if (item.name.endsWith('.js')) {
           // Flat JavaScript command (e.g., help/help.js)
@@ -93,7 +95,8 @@ async function discoverCommands(commandsDir: string): Promise<CommandInfo[]> {
               name: commandName,
               type: 'typescript',
               path: jsPath,
-              description
+              description,
+              usages: await commandUsages(jsPath, `hlpr ${commandName}`)
             });
           }
         } else if (item.name.endsWith('.sh')) {
@@ -106,7 +109,8 @@ async function discoverCommands(commandsDir: string): Promise<CommandInfo[]> {
             name: commandName,
             type: 'shell',
             path: shPath,
-            description
+            description,
+            usages: await commandUsages(shPath, `hlpr ${category.name} ${commandName}`)
           });
         }
       }
@@ -160,6 +164,7 @@ function printHelp(commands: CommandInfo[], version: string) {
       } else {
         console.log(`    ${cmdDisplay} ${typeLabel}`);
       }
+      for (const usage of cmd.usages ?? []) console.log(`      Usage: ${usage}`);
     }
     console.log('');
   }

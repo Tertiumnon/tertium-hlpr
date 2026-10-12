@@ -7,6 +7,8 @@ import * as readline from "node:readline";
 import { fileURLToPath } from "node:url";
 import { resolveCommandAlias, resolveSubcommandAlias } from "./core/command/aliases.js";
 import { HLPR_LOGO } from "./core/command/logo.js";
+import { performance } from "node:perf_hooks";
+import { commandUsages } from "./core/command/help.js";
 
 // Get package version from package.json
 async function getVersion(): Promise<string> {
@@ -101,6 +103,7 @@ async function showHelp() {
     type: 'typescript' | 'shell';
     path: string;
     description?: string;
+    usages: string[];
   }
 
   async function getCommandDescription(filePath: string): Promise<string | undefined> {
@@ -161,7 +164,8 @@ async function showHelp() {
               name: item.name,
               type: commandType,
               path: commandPath,
-              description
+              description,
+              usages: await commandUsages(commandPath, `hlpr ${category.name} ${item.name}`),
             });
           } else if (item.name.endsWith('.js')) {
             const jsPath = path.join(categoryPath, item.name);
@@ -173,7 +177,8 @@ async function showHelp() {
                 name: commandName,
                 type: 'typescript',
                 path: jsPath,
-                description
+                description,
+                usages: await commandUsages(jsPath, `hlpr ${commandName}`),
               });
             }
           } else if (item.name.endsWith('.sh')) {
@@ -185,7 +190,8 @@ async function showHelp() {
               name: commandName,
               type: 'shell',
               path: shPath,
-              description
+              description,
+              usages: await commandUsages(shPath, `hlpr ${category.name} ${commandName}`),
             });
           }
         }
@@ -250,6 +256,7 @@ async function showHelp() {
       } else {
         console.log(`    ${cmdDisplay} ${typeLabel}`);
       }
+      for (const usage of cmd.usages) console.log(`      Usage: ${usage}`);
     }
     console.log('');
   }
@@ -263,6 +270,7 @@ async function showHelp() {
 }
 
 async function main() {
+  const startedAt = performance.now();
   // Check for version flag
   if (commandArgs[0] === "--version" || commandArgs[0] === "-version" || commandArgs[0] === "-v") {
     const version = await getVersion();
@@ -272,6 +280,13 @@ async function main() {
 
   // Check for help flag or no arguments
   if (commandArgs.length === 0 || commandArgs[0] === "help" || commandArgs[0] === "--help" || commandArgs[0] === "-h" || commandArgs[0] === "/help" || commandArgs[0] === "/h" || commandArgs[0] === "/?") {
+    if (commandArgs.length === 0) {
+      console.log(`\n${HLPR_LOGO}\n`);
+      console.log('       .--------------------.');
+      console.log('       |  use "hlpr help"   |');
+      console.log('       \'--------------------\'');
+      process.exit(0);
+    }
     // Run help inline to avoid subprocess issues
     await showHelp();
     process.exit(0);
@@ -366,7 +381,7 @@ async function main() {
         process.exit(1);
       }
       
-      console.log("Done!");
+      console.log(`--- finished by ${((performance.now() - startedAt) / 1000).toFixed(2)}s ---`);
       rl.close();
       return;
     }
@@ -415,7 +430,7 @@ async function main() {
       process.exit(1);
     }
     
-    console.log("Done!");
+    console.log(`--- finished by ${((performance.now() - startedAt) / 1000).toFixed(2)}s ---`);
   } catch (error) {
     console.error("Error:", error);
     process.exit(1);

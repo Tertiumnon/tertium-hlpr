@@ -4,4 +4,5 @@ export interface CommandInfo {
   type: 'typescript' | 'shell'
   path: string
   description?: string
+  usages?: string[]
 }

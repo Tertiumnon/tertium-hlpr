@@ -1,16 +1,29 @@
 # system info
 
-Show a table of CPU, RAM, OS, architecture, hostname, uptime, and network addresses.
+Show a table grouped by M/B, BIOS, expansion, CPU, RAM, GPU, disks, OS, and uptime.
 
 ```sh
 hlpr system info
 hlpr system info --help
 ```
 
-Windows also shows manufacturer/model, motherboard, BIOS, physical CPU core count,
-and GPU using PowerShell/CIM. Linux reads model and board details from
-`/sys/class/dmi/id`. macOS reports the model identifier using `sysctl`.
-Missing or inaccessible hardware details are marked unavailable; no elevation is requested.
+Windows shows motherboard and BIOS details, CPU socket, reported PCI slots, physical CPU cores,
+GPU manufacturer, name, memory type, physical memory, and VRAM using PowerShell/CIM; NVIDIA VRAM
+uses `nvidia-smi` when available to avoid the 4 GiB limit in Windows CIM. Windows
+CIM may only provide a generic memory type for discrete GPUs. Physical disks are
+listed by model with bus type, media type, and capacity. Expansion details include
+firmware-reported PCI slots and detected SATA/NVMe drive counts. Total SATA/M.2
+connectors are not reliably exposed by Windows.
+Each RAM module is listed on its own line
+with its firmware-reported slot name, part or manufacturer name, physical capacity, and
+rated/configured frequency. Linux reads available board details from
+`/sys/class/dmi/id` and PCI slots from sysfs. macOS reports the
+model identifier using `sysctl`. Firmware restrictions can hide hardware details.
+Per-module RAM names/frequencies and GPU names are currently supplied by Windows CIM;
+other platforms show `Unavailable` when their built-in system APIs do not expose them.
+Empty RAM slots appear as `<free>` only when firmware reports total slot count; some
+systems report installed modules only, so they cannot identify free slots.
 
-RAM used is total minus OS-reported free memory, which can include caches.
-Virtual machines report the virtual hardware exposed by the host.
+This command shows physical memory modules only. Use `hlpr memory info` for total,
+used, and free RAM. Virtual machines report the hardware exposed by the host.
+Use `hlpr net status` for interface addresses.

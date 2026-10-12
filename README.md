@@ -34,7 +34,11 @@ Requires Node.js. Shell commands require Bash (Git Bash on Windows). Other requi
 ```sh
 hlpr help
 hlpr net list -device
+hlpr net status
 hlpr net scan
+hlpr memory info
+hlpr system info
+hlpr battery status
 hlpr git create -b[ranch] feature/example
 hlpr rename -dir ./src -style kebab -r -d -f --dry
 ```
@@ -48,7 +52,10 @@ hlpr rename -dir ./src -style kebab -r -d -f --dry
 | [git](src/commands/git/README.md)                   | Manage branches and working files       |
 | [net list -device](src/commands/net/list/README.md)   | List cached local device IPv4 addresses |
 | [net scan](src/commands/net/scan/README.md)         | List local ports and connections        |
-| [system info](src/commands/system/info/README.md) | Show hardware, OS, and RAM information |
+| [net status](src/commands/net/status/README.md) | Show network interface addresses |
+| [system info](src/commands/system/info/README.md) | Show hardware, OS, and physical RAM module details |
+| [battery status](src/commands/battery/status/README.md) | Show battery charge and status |
+| [memory info](src/commands/memory/info/README.md) | Show total, used, and free memory |
 | [disk info](src/commands/disk/info/README.md) | Show disk usage and available space |
 | [list process](src/commands/list/process/README.md) | List running processes                  |
 | [kill process](src/commands/kill/process/README.md) | Kill a process by ID or port            |
