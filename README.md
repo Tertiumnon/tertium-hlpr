@@ -61,6 +61,8 @@ See individual command documentation for detailed usage, options, and examples.
 - **[help](src/commands/help/README.md)** - Display help information about hlpr commands
 - **[hello](src/commands/hello/README.md)** - Display the Wake Up Neo sequence, Matrix rain, or Hello World art
 - **[list process](src/commands/list/process/README.md)** - List running processes
+- **[net scan](src/commands/net/scan/README.md)** - Show local TCP/UDP ports and their processes
+- **[net devices](src/commands/net/devices/README.md)** - List known local-network device IPv4 addresses
 - **[kill process](src/commands/kill/process/README.md)** - Kill a process by ID or port
 
 ### Shell Script Commands
