@@ -32,7 +32,7 @@ export function renderHelp(commands: HelpCommand[], version: string, color = pro
   const paint = (code: string, value: string) => color ? `\u001b[${code}m${value}\u001b[0m` : value
   const lines = [
     paint('1;36', `hlpr v${version}`),
-    `${paint('1', 'Usage')}  hlpr [options] <command> [args...]`,
+    `${paint('1', 'Usage')}  hlpr [options] <domain> <command> [params...]`,
     `${paint('1', 'Options')}  -f force  ·  -v, --version  ·  help, -h, --help, /h, /help, /?`,
   ]
 
@@ -47,6 +47,9 @@ export function renderHelp(commands: HelpCommand[], version: string, color = pro
       const [first, ...alternatives] = syntax.length ? syntax : [base]
       lines.push(`  ${paint('36', first)}${command.description ? paint('2', `  ${command.description}`) : ''}`)
       const variants = alternatives.filter(usage => !commandNames.has(usage)).map(usage => usage.startsWith(`${base} `) ? usage.slice(base.length + 1) : usage)
+      if (command.name === 'info' || command.name === 'status') variants.push(`hlpr ${category} ${command.name === 'info' ? 'status' : 'info'}`)
+      if (category === 'app' && command.name === 'search') variants.push('hlpr app find -name <name>')
+      if (category === 'file' && command.name === 'find') variants.push('hlpr file search -name <name>')
       if (variants.length) lines.push(`    ${paint('2', `also: ${variants.join('  ·  ')}`)}`)
     }
   }

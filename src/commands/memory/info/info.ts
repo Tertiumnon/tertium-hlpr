@@ -13,12 +13,12 @@ export function memoryInfo(): [string, string][] {
 if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
   const args = process.argv.slice(2)
   if (args.includes('--help') || args.includes('-h')) {
-    console.log('Usage: hlpr memory info')
+    console.log('Usage: hlpr memory info\nAlias: hlpr memory status')
     console.log('Show total, used, and free physical memory.')
     process.exit(0)
   }
   if (args.length) {
-    console.error('Usage: hlpr memory info')
+    console.error('Usage: hlpr memory info\nAlias: hlpr memory status')
     process.exit(1)
   }
   console.log(formatInfo(memoryInfo()))

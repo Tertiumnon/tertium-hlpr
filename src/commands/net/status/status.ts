@@ -13,12 +13,12 @@ export function networkStatus(): [string, string][] {
 if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
   const args = process.argv.slice(2)
   if (args.includes('--help') || args.includes('-h')) {
-    console.log('Usage: hlpr net status')
+    console.log('Usage: hlpr net status\nAlias: hlpr net info')
     console.log('Show active network interfaces and their IP addresses.')
     process.exit(0)
   }
   if (args.length) {
-    console.error('Usage: hlpr net status')
+    console.error('Usage: hlpr net status\nAlias: hlpr net info')
     process.exit(1)
   }
   const interfaces = networkStatus()

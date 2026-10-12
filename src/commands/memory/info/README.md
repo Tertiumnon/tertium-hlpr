@@ -4,6 +4,7 @@ Show total, used, and free physical memory.
 
 ```sh
 hlpr memory info
+hlpr memory status
 hlpr memory info --help
 ```
 

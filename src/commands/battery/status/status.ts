@@ -39,12 +39,12 @@ export function batteryStatus(): [string, string][] {
 if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
   const args = process.argv.slice(2)
   if (args.includes('--help') || args.includes('-h')) {
-    console.log('Usage: hlpr battery status')
+    console.log('Usage: hlpr battery status\nAlias: hlpr battery info')
     console.log('Show battery charge and charging status.')
     process.exit(0)
   }
   if (args.length) {
-    console.error('Usage: hlpr battery status')
+    console.error('Usage: hlpr battery status\nAlias: hlpr battery info')
     process.exit(1)
   }
   const rows = batteryStatus()

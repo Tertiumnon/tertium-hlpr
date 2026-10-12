@@ -4,6 +4,14 @@ Make everyday CLI tasks simpler across Windows, macOS, and Linux. Prefer useful
 commands with natural, consistent names and the smallest complete implementation.
 Reuse existing patterns and native tools; avoid unnecessary dependencies and options.
 
+## Command names
+
+- Name user commands `hlpr <domain> <command> [params]`: put the noun first and the operation second (`hlpr net scan`, `hlpr file rename`, `hlpr process list`). Do not add flat action commands or action-first categories.
+- Keep TypeScript commands at `src/commands/<domain>/<action>/<action>.ts`; shell commands may use `src/commands/<domain>/<action>.sh`. Put command docs and tests beside the implementation. The path, CLI syntax, and help entry must agree.
+- Use one command token for one operation (`hlpr ssh mkconn`), with flags or positional values after it. Use aliases only for established synonyms of the same operation.
+- `hlpr hello` and `hlpr hello world` are deliberate naming exceptions. Keep their flat and nested paths under `src/commands/hello/`.
+- `hlpr help`, version flags, and the bare splash screen are CLI entry points, outside the domain/action scheme.
+
 ## When commands change
 
 - Keep help current whenever adding, renaming, removing, or changing a command or flag.
@@ -15,14 +23,15 @@ Reuse existing patterns and native tools; avoid unnecessary dependencies and opt
   README minimal; put detailed options, requirements, and limitations in command docs.
 - Check callers, aliases in `src/core/command/aliases.ts`, tests, and scripts for
   references to old names or arguments.
-- Follow the existing `src/commands/<command>/<command>.ts` or
-  `src/commands/<category>/<command>/<command>.ts` layout. Build and help discovery
-  rely on these names. `bin/` is generated; do not edit or commit it.
+- Follow the domain/action layouts above. Build and help discovery rely on these
+  names. `bin/` is generated; do not edit or commit it.
 
 ## Behavior and compatibility
 
 - Keep the user-facing command consistent across environments; use platform-specific
   tools internally where needed. Document required tools and unsupported platforms.
+- For system tasks, check available native or common tools on Windows, macOS,
+  Debian/Ubuntu, Fedora, and Arch instead of assuming one package manager.
 - Validate arguments, report failures clearly, and return a nonzero exit code on
   failure. Preserve safeguards against data loss and unintended destructive actions.
 - State limitations accurately: cached device lists are not active discovery, and

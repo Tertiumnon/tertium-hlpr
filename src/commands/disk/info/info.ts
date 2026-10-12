@@ -45,12 +45,12 @@ export function formatDisks(disks: DiskInfo[]): string {
 if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
   const args = process.argv.slice(2)
   if (args.includes('--help') || args.includes('-h')) {
-    console.log('Usage: hlpr disk info')
+    console.log('Usage: hlpr disk info\nAlias: hlpr disk status')
     console.log('Show mounted volumes vertically, with usage bars and total, used, and available space.')
     process.exit(0)
   }
   if (args.length) {
-    console.error('Usage: hlpr disk info')
+    console.error('Usage: hlpr disk info\nAlias: hlpr disk status')
     process.exit(1)
   }
   try {

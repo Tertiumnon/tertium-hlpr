@@ -21,6 +21,10 @@ async function main(): Promise<void> {
 }
 
 if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
+  if (process.argv.slice(2).includes('--help') || process.argv.slice(2).includes('-h')) {
+    console.log('Usage: hlpr hello world')
+    process.exit(0)
+  }
   main().catch((error) => {
     console.error(`Error: ${error.message}`)
     process.exit(1)

@@ -4,6 +4,7 @@ Show a table grouped by M/B, BIOS, expansion, CPU, RAM, GPU, disks, OS, and upti
 
 ```sh
 hlpr system info
+hlpr system status
 hlpr system info --help
 ```
 
@@ -17,10 +18,11 @@ connectors are not reliably exposed by Windows.
 Each RAM module is listed on its own line
 with its firmware-reported slot name, part or manufacturer name, physical capacity, and
 rated/configured frequency. Linux reads available board details from
-`/sys/class/dmi/id` and PCI slots from sysfs. macOS reports the
+`/sys/class/dmi/id`, PCI slots from sysfs, physical core counts from `lscpu`,
+disks from `lsblk`, and the distribution name from `/etc/os-release`. macOS reports the
 model identifier using `sysctl`. Firmware restrictions can hide hardware details.
-Per-module RAM names/frequencies and GPU names are currently supplied by Windows CIM;
-other platforms show `Unavailable` when their built-in system APIs do not expose them.
+Fields and sections without reported values are omitted on Linux and macOS.
+Per-module RAM names/frequencies and GPU names are currently supplied by Windows CIM.
 Empty RAM slots appear as `<free>` only when firmware reports total slot count; some
 systems report installed modules only, so they cannot identify free slots.
 

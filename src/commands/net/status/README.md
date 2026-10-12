@@ -4,4 +4,5 @@ Show IP addresses assigned to active network interfaces, including virtual adapt
 
 ```sh
 hlpr net status
+hlpr net info
 ```

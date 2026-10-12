@@ -19,7 +19,7 @@
     |___| |___|
 ```
 
-hlpr aims to make everyday command-line tasks simpler across Windows, macOS, and Linux. It brings useful commands together with consistent, natural names—like `net list -device`, `list process`, and `git create`—so you can focus on what you want to do instead of remembering different commands for each environment.
+hlpr aims to make everyday command-line tasks simpler across Windows, macOS, and Linux. Commands use `hlpr <domain> <command> [params]`, such as `hlpr net scan`, `hlpr process list`, and `hlpr file rename`.
 
 > **Note:** This app is in development. Commands, behavior, and documentation are still evolving and may change without notice.
 
@@ -41,33 +41,37 @@ hlpr net scan
 hlpr memory info
 hlpr system info
 hlpr battery status
-hlpr ssh add connection
-hlpr git create -b[ranch] feature/example
-hlpr rename -dir ./src -style kebab -r -d -f --dry
+hlpr ssh mkconn
+hlpr git create -b feature/example
+hlpr file rename -dir ./src -style kebab -r -d -f --dry
 ```
 
 ## Commands
 
 | Command                                             | Purpose                                 |
 |-----------------------------------------------------|-----------------------------------------|
-| [rename](src/commands/rename/README.md) (`rn`)      | Rename files and directories            |
-| [mv](src/commands/mv/README.md)                     | Move a file and update references       |
+| [file rename](src/commands/file/rename/README.md) | Rename files and directories |
+| [file move](src/commands/file/move/README.md) | Move a file and update references |
+| [file find](src/commands/file/find/README.md) (`search`) | Find files by name |
 | [git](src/commands/git/README.md)                   | Manage branches and working files       |
 | [net list -device](src/commands/net/list/README.md)   | List cached local device IPv4 addresses |
 | [net scan](src/commands/net/scan/README.md)         | List local ports and connections        |
-| [net status](src/commands/net/status/README.md) | Show network interface addresses |
-| [system info](src/commands/system/info/README.md) | Show hardware, OS, and physical RAM module details |
-| [battery status](src/commands/battery/status/README.md) | Show battery charge and status |
-| [memory info](src/commands/memory/info/README.md) | Show total, used, and free memory |
-| [disk info](src/commands/disk/info/README.md) | Show disk usage and available space |
-| [list process](src/commands/list/process/README.md) | List running processes                  |
-| [kill process](src/commands/kill/process/README.md) | Kill a process by ID or port            |
-| [list app](src/commands/list/app/README.md)         | List installed apps                     |
-| [install](src/commands/install/README.md) (`i`)     | Install supported tools                 |
-| [nvm](src/commands/nvm/README.md)                   | Install or switch Node.js versions      |
-| [ssh](src/commands/ssh/README.md)                   | Set up SSH directories and connections  |
-| [hello](src/commands/hello/README.md)               | Run terminal demos                      |
-| [update](src/commands/update/README.md) (`upgrade`) | Update hlpr globally through npm        |
+| [net status](src/commands/net/status/README.md) (`info`) | Show network interface addresses |
+| [system info](src/commands/system/info/README.md) (`status`) | Show hardware, OS, and physical RAM module details |
+| [battery status](src/commands/battery/status/README.md) (`info`) | Show battery charge and status |
+| [memory info](src/commands/memory/info/README.md) (`status`) | Show total, used, and free memory |
+| [disk info](src/commands/disk/info/README.md) (`status`) | Show disk usage and available space |
+| [process list](src/commands/process/list/README.md) | List running processes |
+| [process kill](src/commands/process/kill/README.md) | Kill a process by ID or port |
+| [app list](src/commands/app/list/README.md) | List installed apps |
+| [app search](src/commands/app/search/README.md) (`find`) | Find installed apps by name |
+| [app remove](src/commands/app/remove/README.md) (`delete`, `uninstall`) | Find and uninstall an app |
+| [tool install](src/commands/tool/install/README.md) | Install supported tools |
+| [runtime install](src/commands/runtime/install/README.md) | Install Node.js, Python, Bun, Rust, or Go |
+| [ssh mkconn](src/commands/ssh/mkconn/README.md) | Set up an SSH connection |
+| [hello](src/commands/hello/README.md) | Run a Matrix rain animation |
+| [hello world](src/commands/hello/world/README.md) | Display animated Hello World art |
+| [self update](src/commands/self/update/README.md) (`self upgrade`) | Update hlpr globally through npm |
 | [help](src/commands/help/README.md)                 | Show available commands                 |
 
 License: MIT.

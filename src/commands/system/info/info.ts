@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { execFileSync } from 'node:child_process'
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import os from 'node:os'
 import { formatInfo, powershellJson } from '../../../core/command/system.js'
 
@@ -104,13 +104,40 @@ function systemSections(): Record<string, Section> {
       } catch { /* DMI fields may be hidden by firmware or a VM. */ }
     }
     try {
-      sections.Expansion.Slots = readFileSync('/sys/bus/pci/slots', 'utf8').trim() || 'No slots reported'
+      const slots = readdirSync('/sys/bus/pci/slots')
+      if (slots.length) sections.Expansion.Slots = slots.join(', ')
     } catch { /* PCI slot details are optional. */ }
+    try {
+      const cores = parsePhysicalCores(execFileSync('lscpu', ['-p=CORE,SOCKET'], { encoding: 'utf8', timeout: 5000 }))
+      if (cores) sections.CPU['Physical cores'] = String(cores)
+    } catch { /* CPU topology can be unavailable in containers. */ }
+    try {
+      const disks = parseLinuxDisks(execFileSync('lsblk', ['-J', '-d', '-o', 'NAME,MODEL,SIZE,TYPE'], { encoding: 'utf8', timeout: 5000 }))
+      if (disks) sections.Disks.Devices = disks
+    } catch { /* Block devices can be hidden in containers. */ }
+    try {
+      const distro = readFileSync('/etc/os-release', 'utf8').match(/^PRETTY_NAME=(.*)$/m)?.[1]
+      if (distro) sections.OS.Name = distro.replace(/^['"]|['"]$/g, '')
+    } catch { /* Distribution metadata is optional. */ }
   } else if (process.platform === 'darwin') {
     try { sections['M/B'].Model = execFileSync('sysctl', ['-n', 'hw.model'], { encoding: 'utf8', timeout: 5000 }).trim() }
     catch { /* Hardware model can be unavailable in restricted environments. */ }
   }
   return sections
+}
+
+export function parsePhysicalCores(output: string): number {
+  const cores = output.split('\n').filter(line => !line.startsWith('#')).map(line => line.trim()).filter(line => /^\d+,\d+$/.test(line))
+  return new Set(cores).size
+}
+
+export function parseLinuxDisks(output: string): string {
+  const devices = JSON.parse(output).blockdevices as Array<{ name?: string; model?: string; size?: string; type?: string }>
+  return devices.filter(device => device.type === 'disk' && device.name).map(device => `${device.model?.trim() || device.name}\t${device.size || 'Size unavailable'}`).join('\n')
+}
+
+export function knownSections(sections: Record<string, Section>): Record<string, Section> {
+  return Object.fromEntries(Object.entries(sections).map(([heading, fields]) => [heading, Object.fromEntries(Object.entries(fields).filter(([label, value]) => value && value !== 'Unavailable' && value !== 'Not reported' && !(label === 'Slots' && value === '0')))]).filter(([, fields]) => Object.keys(fields).length))
 }
 
 function windowsInfoWithFallback(fallback: Record<string, Section>): Record<string, Section> {
@@ -119,15 +146,15 @@ function windowsInfoWithFallback(fallback: Record<string, Section>): Record<stri
 }
 
 export function systemInfo(): [string, string][] {
-  const sections = systemSections()
+  const sections = process.platform === 'win32' ? systemSections() : knownSections(systemSections())
   return Object.entries(sections).flatMap(([heading, fields]) => [
     [heading, ''] as [string, string],
-    ...(heading === 'RAM' && fields.Modules !== 'Unavailable'
+    ...(heading === 'RAM' && fields.Modules && fields.Modules !== 'Unavailable'
       ? [...fields.Modules.split('\n').map((module, index) => {
           const [locator, value] = module.split('\t')
           return [`${locator || `Slot ${index + 1}`} slot`, value] as [string, string]
         }), ...Array.from({ length: Math.max(0, Number(fields.Slots) - fields.Modules.split('\n').length) }, (_, index) => [`Slot ${fields.Modules.split('\n').length + index + 1} slot`, '<free>'] as [string, string])]
-      : heading === 'Expansion' && fields.Slots !== 'Unavailable'
+      : heading === 'Expansion' && fields.Slots?.includes('\t')
         ? [...fields.Slots.split('\n').map((slot, index) => {
             const [label, value] = slot.split('\t')
             return [label || `Slot ${index + 1}`, value] as [string, string]
@@ -144,12 +171,12 @@ export function systemInfo(): [string, string][] {
 if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
   const args = process.argv.slice(2)
   if (args.includes('--help') || args.includes('-h')) {
-    console.log('Usage: hlpr system info')
+    console.log('Usage: hlpr system info\nAlias: hlpr system status')
     console.log('Show grouped motherboard, BIOS, expansion, CPU, RAM, GPU, disks, OS, and uptime details.')
     process.exit(0)
   }
   if (args.length) {
-    console.error('Usage: hlpr system info')
+    console.error('Usage: hlpr system info\nAlias: hlpr system status')
     process.exit(1)
   }
   try { console.log(formatInfo(systemInfo())) }

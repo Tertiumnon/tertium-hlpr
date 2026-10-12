@@ -5,7 +5,7 @@ import { readFile } from "node:fs/promises";
 import * as path from "node:path";
 import * as readline from "node:readline";
 import { fileURLToPath } from "node:url";
-import { resolveCommandAlias, resolveSubcommandAlias } from "./core/command/aliases.js";
+import { resolveSubcommandAlias } from "./core/command/aliases.js";
 import { HLPR_LOGO } from "./core/command/logo.js";
 import { performance } from "node:perf_hooks";
 import { commandUsages, renderHelp } from "./core/command/help.js";
@@ -246,7 +246,7 @@ async function main() {
 
   try {
     // Get the category (first argument) and the rest of the command
-    const category = resolveCommandAlias(commandArgs[0]);
+    const category = commandArgs[0];
     const restArgs = commandArgs.slice(1);
 
     // Check for TypeScript command first (now built as JS)
@@ -254,7 +254,7 @@ async function main() {
     let isTypeScriptCommand = false;
 
     // Try nested structure: bin/commands/<category>/<subcategory>/<subcategory>.js
-    // e.g., "hlpr list process" -> bin/commands/list/process/process.js
+    // e.g., "hlpr process list" -> bin/commands/process/list/list.js
     if (restArgs.length > 0) {
       const subcategory = resolveSubcommandAlias(category, restArgs[0]);
       const nestedJsPath = path.join(__dirname, "..", "bin", "commands", category, subcategory, `${subcategory}.js`);
@@ -265,7 +265,7 @@ async function main() {
     }
 
     // Try flat structure: bin/commands/<category>/<category>.js
-    // e.g., "hlpr rename" -> bin/commands/rename/rename.js
+    // Flat exceptions such as hello use this layout.
     if (!isTypeScriptCommand) {
       const jsPath = path.join(__dirname, "..", "bin", "commands", category, `${category}.js`);
       if (fs.existsSync(jsPath)) {
@@ -294,7 +294,7 @@ async function main() {
     }
 
     if (!scriptPath) {
-      console.error(`Command not found. Usage: hlpr ${category} <args>`);
+      console.error(`Command not found. Usage: hlpr ${category} <command> [params]`);
       process.exit(1);
     }
 
@@ -305,7 +305,7 @@ async function main() {
       // Determine if this is a nested TypeScript command by checking the resolved scriptPath
       let tsArgs: string[];
       if (restArgs.length > 0 && restArgs[0] && scriptPath) {
-        const subcategory = restArgs[0];
+        const subcategory = resolveSubcommandAlias(category, restArgs[0]);
         const isNested = path.basename(scriptPath) === `${subcategory}.js` && path.basename(path.dirname(scriptPath)) === subcategory;
         tsArgs = isNested ? process.argv.slice(4) : process.argv.slice(3);
       } else {
@@ -315,14 +315,9 @@ async function main() {
       // Use node to run built JavaScript files
       rl.close();
       let success: boolean;
-      if ((category === 'install' && tsArgs.length === 0) || (category === 'ssh' && restArgs[0] === 'add')) {
-        const result = spawnSync(process.execPath, [scriptPath, ...tsArgs], { stdio: 'inherit' });
-        if (result.error) console.error(result.error.message);
-        success = result.status === 0;
-      } else {
-        const finalCommand = `node "${scriptPath}" ${tsArgs.join(' ')}`;
-        success = await executeCommand(finalCommand, {});
-      }
+      const result = spawnSync(process.execPath, [scriptPath, ...tsArgs], { stdio: 'inherit' });
+      if (result.error) console.error(result.error.message);
+      success = result.status === 0;
 
       // If this invocation was only to show help, don't treat non-zero exit as failure
       const helpFlags = ['-h', '--help', 'help', '/h', '/help', '/?'];
@@ -333,7 +328,7 @@ async function main() {
         process.exit(1);
       }
 
-      console.log(`--- finished by ${((performance.now() - startedAt) / 1000).toFixed(2)}s ---`);
+      if (!(category === 'app' && ['list', 'search', 'find'].includes(restArgs[0])) && !(category === 'file' && ['find', 'search'].includes(restArgs[0]))) console.log(`--- finished by ${((performance.now() - startedAt) / 1000).toFixed(2)}s ---`);
       rl.close();
       return;
     }
