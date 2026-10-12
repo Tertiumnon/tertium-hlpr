@@ -1,7 +1,7 @@
 import path from "node:path";
 
 export const TMP_DIR = path.join(process.cwd(), "tmp", "rename-e2e");
-export const TEST_COMMAND = ["file", "rename"];
+export const TEST_COMMAND = ["rename"];
 export const TEST_CASE = "kebab";
 export const DRY_RUN_FLAG = "--dry";
 

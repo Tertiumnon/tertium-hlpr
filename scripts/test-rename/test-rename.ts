@@ -50,10 +50,15 @@ async function main(): Promise<void> {
   }
 
   log(MESSAGES.dryRun);
-  const dry = spawnSync("node", ["bin/index.js", ...TEST_COMMAND, TMP_DIR, TEST_CASE, DRY_RUN_FLAG], {
+  const args = ["bin/index.js", ...TEST_COMMAND, "-dir", TMP_DIR, "-style", TEST_CASE, "-r", "-d", "-f"];
+  const dry = spawnSync("node", [...args, DRY_RUN_FLAG], {
     encoding: "utf8",
   });
   log(dry.stdout);
+  if (dry.status !== 0) {
+    console.error(dry.stderr);
+    process.exit(1);
+  }
   if (!dry.stdout?.includes("Dry run - would rename")) {
     log(MESSAGES.dryRunNotReported);
     process.exit(1);
@@ -65,10 +70,14 @@ async function main(): Promise<void> {
   }
 
   log(MESSAGES.actualRun);
-  const actual = spawnSync("node", ["bin/index.js", ...TEST_COMMAND, TMP_DIR, TEST_CASE], {
+  const actual = spawnSync("node", args, {
     encoding: "utf8",
   });
   log(actual.stdout);
+  if (actual.status !== 0) {
+    console.error(actual.stderr);
+    process.exit(1);
+  }
   if (!actual.stdout?.includes("Renamed")) {
     log(MESSAGES.renameNotReported);
     process.exit(1);

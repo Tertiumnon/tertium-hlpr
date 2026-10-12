@@ -1,10 +1,11 @@
 #!/usr/bin/env node
-import { readFile } from "node:fs/promises";
-import { exec } from "node:child_process";
-import * as path from "node:path";
+import { exec, spawnSync } from "node:child_process";
 import * as fs from "node:fs";
+import { readFile } from "node:fs/promises";
+import * as path from "node:path";
 import * as readline from "node:readline";
 import { fileURLToPath } from "node:url";
+import { resolveCommandAlias, resolveSubcommandAlias } from "./core/command/aliases.js";
 
 // Get package version from package.json
 async function getVersion(): Promise<string> {
@@ -55,7 +56,7 @@ function prompt(question: string): Promise<string> {
 }
 
 // Execute a command with variable substitution
-async function executeCommand(command: string, variables: Record<string, string>): Promise<boolean> {
+async function executeCommand(command: string, variables: Record<string, string>, input?: string): Promise<boolean> {
   // Replace variables in the command
   let processedCommand = command;
   for (const [key, value] of Object.entries(variables)) {
@@ -65,6 +66,8 @@ async function executeCommand(command: string, variables: Record<string, string>
   return new Promise((resolve) => {
     console.log(`Executing: ${processedCommand}`);
     const childProcess = exec(processedCommand);
+    if (input === undefined && childProcess.stdin) process.stdin.pipe(childProcess.stdin);
+    else childProcess.stdin?.end(input);
     
     if (childProcess.stdout) {
       childProcess.stdout.on("data", (data: string) => {
@@ -79,6 +82,7 @@ async function executeCommand(command: string, variables: Record<string, string>
     }
     
     childProcess.on("exit", (code: number | null) => {
+      if (childProcess.stdin) process.stdin.unpipe(childProcess.stdin);
       if (code === 0) {
         resolve(true);
       } else {
@@ -116,7 +120,7 @@ async function showHelp() {
           return firstLine.trim();
         }
       }
-    } catch (error) {
+    } catch {
       // Ignore errors
     }
     return undefined;
@@ -186,7 +190,7 @@ async function showHelp() {
           }
         }
       }
-    } catch (error) {
+    } catch {
       // Ignore errors
     }
     
@@ -253,14 +257,14 @@ async function showHelp() {
   
   console.log('EXAMPLES:');
   console.log('  hlpr help');
-  console.log('  hlpr file rename --style kebab --dir ./src');
+  console.log('  hlpr rename -dir ./src -style kebab -r -d -f');
   console.log('  hlpr ssh init-dir');
-  console.log('  hlpr -f git precommit\n');
+  console.log('  hlpr git create -b feature/example\n');
 }
 
 async function main() {
   // Check for version flag
-  if (commandArgs[0] === "--version" || commandArgs[0] === "-v") {
+  if (commandArgs[0] === "--version" || commandArgs[0] === "-version" || commandArgs[0] === "-v") {
     const version = await getVersion();
     console.log(`hlpr version ${version}`);
     process.exit(0);
@@ -275,17 +279,17 @@ async function main() {
 
   try {
     // Get the category (first argument) and the rest of the command
-    const category = commandArgs[0];
+    const category = resolveCommandAlias(commandArgs[0]);
     const restArgs = commandArgs.slice(1);
     
     // Check for TypeScript command first (now built as JS)
-    let scriptPath: string;
+    let scriptPath: string | undefined;
     let isTypeScriptCommand = false;
     
     // Try nested structure: bin/commands/<category>/<subcategory>/<subcategory>.js
-    // e.g., "hlpr file rename" -> bin/commands/file/rename/rename.js
+    // e.g., "hlpr list process" -> bin/commands/list/process/process.js
     if (restArgs.length > 0) {
-      const subcategory = restArgs[0];
+      const subcategory = resolveSubcommandAlias(category, restArgs[0]);
       const nestedJsPath = path.join(__dirname, "..", "bin", "commands", category, subcategory, `${subcategory}.js`);
       if (fs.existsSync(nestedJsPath)) {
         scriptPath = nestedJsPath;
@@ -306,7 +310,7 @@ async function main() {
     // Try shell script: commands/<category>/<scriptname>.sh
     if (!isTypeScriptCommand && restArgs.length > 0) {
       // First argument is the command name
-      const scriptName = restArgs[0];
+      const scriptName = resolveSubcommandAlias(category, restArgs[0]);
       let scriptPathCandidate = path.join(scriptDir, "commands", category, `${scriptName}.sh`);
 
       // If not found in scriptDir (src/), try in bin/ (for built version)
@@ -322,7 +326,7 @@ async function main() {
       }
     }
     
-    if (!scriptPath!) {
+    if (!scriptPath) {
       console.error(`Command not found. Usage: hlpr ${category} <args>`);
       process.exit(1);
     }
@@ -342,11 +346,17 @@ async function main() {
       }
       
       // Use node to run built JavaScript files
-      const finalCommand = `node "${scriptPath}" ${tsArgs.join(' ')}`;
-      
-      console.log(`Executing command: ${finalCommand}`);
-      
-      const success = await executeCommand(finalCommand, {});
+      rl.close();
+      let success: boolean;
+      if (category === 'install' && tsArgs.length === 0) {
+        const result = spawnSync(process.execPath, [scriptPath], { stdio: 'inherit' });
+        if (result.error) console.error(result.error.message);
+        success = result.status === 0;
+      } else {
+        const finalCommand = `node "${scriptPath}" ${tsArgs.join(' ')}`;
+        console.log(`Executing command: ${finalCommand}`);
+        success = await executeCommand(finalCommand, {});
+      }
       
       // If this invocation was only to show help, don't treat non-zero exit as failure
       const helpFlags = ['-h', '--help', 'help', '/h', '/help', '/?'];
@@ -394,17 +404,11 @@ async function main() {
       processedScript = processedScript.replace(new RegExp(`{{${key}}}`, 'g'), value);
     }
 
-    const tempScriptPath = path.join(path.dirname(scriptPath), `_temp_${path.basename(scriptPath)}`);
-    fs.writeFileSync(tempScriptPath, processedScript);
-
-    // Execute the temporary script with bash and arguments
+    // Execute the script with bash and arguments
     // (.sh files require bash, not PowerShell on Windows)
     const argsStr = scriptArgs.map(arg => `"${arg}"`).join(' ');
-    const command = `bash "${tempScriptPath}" ${argsStr}`;
-    const success = await executeCommand(command, {});
-    
-    // Clean up the temporary script
-    fs.unlinkSync(tempScriptPath);
+    const command = `bash -s -- ${argsStr}`;
+    const success = await executeCommand(command, {}, processedScript);
     
     // If command failed and force flag is not set, exit
     if (!success && !forceFlag) {
