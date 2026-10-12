@@ -137,7 +137,7 @@ export function systemInfo(): [string, string][] {
             const [name, value] = disk.split('\t')
             return [name || `Disk ${index + 1}`, value] as [string, string]
           })]
-      : Object.entries(fields)),
+          : Object.entries(fields).filter(([label]) => !(heading === 'RAM' && label === 'Modules'))),
   ])
 }
 
