@@ -18,7 +18,7 @@ hlpr
 
 The help command automatically discovers all available commands in the `commands/` directory and displays them in an organized format. It shows:
 
-- Command categories (e.g., file, git, ssh, nvm)
+- Top-level commands (e.g., rename, mv, install) and categories (e.g., git, net, nvm)
 - Command names and full usage
 - Command type (TypeScript or Shell)
 - Command descriptions (when available)

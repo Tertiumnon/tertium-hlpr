@@ -39,4 +39,8 @@ function buildCommands(srcDir: string): void {
   }
 }
 
+// Remove generated commands so renamed or deleted commands cannot remain in help.
+const commandsOutput = path.resolve(BIN_OUTPUT_DIR, 'commands');
+if (commandsOutput !== path.resolve('bin/commands')) throw new Error('Unexpected command output directory');
+fs.rmSync(commandsOutput, { recursive: true, force: true });
 buildCommands(SRC_COMMANDS_DIR);

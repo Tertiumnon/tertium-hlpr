@@ -4,12 +4,13 @@ import * as fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { readFile } from "node:fs/promises";
 import type { CommandInfo } from "./help.types.js";
+import { HLPR_LOGO } from "../../core/command/logo.js";
 
 async function getVersion(): Promise<string> {
   try {
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = path.dirname(__filename);
-    const packagePath = path.join(__dirname, '..', '..', 'package.json');
+    const packagePath = path.join(__dirname, '..', '..', '..', 'package.json');
     const packageJson = JSON.parse(await readFile(packagePath, 'utf-8'));
     return packageJson.version;
   } catch {
@@ -85,7 +86,7 @@ async function discoverCommands(commandsDir: string): Promise<CommandInfo[]> {
           // Flat JavaScript command (e.g., help/help.js)
           const jsPath = path.join(categoryPath, item.name);
           const commandName = path.basename(item.name, '.js');
-          if (commandName !== 'test' && !commandName.endsWith('.test')) {
+          if (commandName === category.name) {
             const description = await getCommandDescription(jsPath);
             commands.push({
               category: category.name,
@@ -118,11 +119,10 @@ async function discoverCommands(commandsDir: string): Promise<CommandInfo[]> {
 }
 
 function printHelp(commands: CommandInfo[], version: string) {
-  console.log(`\n╔════════════════════════════════════════════════════════════╗`);
-  console.log(`║              hlpr - Helper CLI Tool v${version.padEnd(16)}║`);
-  console.log(`╚════════════════════════════════════════════════════════════╝\n`);
+  console.log(`\n${HLPR_LOGO}\n\nhlpr v${version}\n`);
   
   console.log('USAGE:');
+  console.log('  hlpr [options] <command> [args...]');
   console.log('  hlpr [options] <category> <command> [args...]\n');
   
   console.log('OPTIONS:');
@@ -166,6 +166,7 @@ function printHelp(commands: CommandInfo[], version: string) {
   
   console.log('EXAMPLES:');
   console.log('  hlpr help');
+  console.log('  hlpr net list -device   (or: hlpr net list -d)');
   console.log('  hlpr rename -dir ./src -style kebab -r -d -f');
   console.log('  hlpr ssh init-dir');
   console.log('  hlpr git create -b feature/example\n');

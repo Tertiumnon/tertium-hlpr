@@ -1,7 +1,7 @@
 {
   "name": "@tertium/hlpr",
   "version": "0.11.0",
-  "description": "Windows and *Nix utility for typical programming activity",
+  "description": "Useful CLI commands with natural, consistent names for everyday tasks across Windows, macOS, and Linux",
   "author": "Vitalii Balabanov",
   "email": "tertiumnon@gmail.com",
   "main": "bin/index.js",

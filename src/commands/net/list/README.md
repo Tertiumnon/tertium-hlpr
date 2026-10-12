@@ -1,11 +1,14 @@
-# net devices
+# net list -device
 
 List known local-network device IPv4 addresses, one per line.
 
 ```bash
-hlpr net devices
-hlpr net devices --help
+hlpr net list -device
+hlpr net list -d
+hlpr net list -device --help
 ```
+
+`-device` and `-d` are equivalent. One of these flags is required.
 
 Reads the system's neighbor/ARP cache using `arp -a` on Windows, `arp -an`
 on macOS, or `ip -4 neigh show` on Linux (requires iproute2). Duplicate IPs,

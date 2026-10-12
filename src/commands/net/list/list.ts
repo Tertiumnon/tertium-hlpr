@@ -28,13 +28,14 @@ export function parseDeviceIps(output: string): string[] {
 if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
   const args = process.argv.slice(2)
   if (args.includes('-h') || args.includes('--help')) {
-    console.log('Usage: hlpr net devices')
+    console.log('Usage: hlpr net list -device')
+    console.log('Alias: hlpr net list -d')
     console.log('List known local-network device IPv4 addresses, one per line.')
     console.log('Reads the neighbor cache; devices not yet contacted may be missing, and cached devices may be offline.')
     process.exit(0)
   }
-  if (args.length > 0) {
-    console.error('Usage: hlpr net devices')
+  if (args.length !== 1 || (args[0] !== '-device' && args[0] !== '-d')) {
+    console.error('Usage: hlpr net list -device')
     process.exit(1)
   }
 

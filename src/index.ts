@@ -6,6 +6,7 @@ import * as path from "node:path";
 import * as readline from "node:readline";
 import { fileURLToPath } from "node:url";
 import { resolveCommandAlias, resolveSubcommandAlias } from "./core/command/aliases.js";
+import { HLPR_LOGO } from "./core/command/logo.js";
 
 // Get package version from package.json
 async function getVersion(): Promise<string> {
@@ -64,7 +65,6 @@ async function executeCommand(command: string, variables: Record<string, string>
   }
 
   return new Promise((resolve) => {
-    console.log(`Executing: ${processedCommand}`);
     const childProcess = exec(processedCommand);
     if (input === undefined && childProcess.stdin) process.stdin.pipe(childProcess.stdin);
     else childProcess.stdin?.end(input);
@@ -166,7 +166,7 @@ async function showHelp() {
           } else if (item.name.endsWith('.js')) {
             const jsPath = path.join(categoryPath, item.name);
             const commandName = path.basename(item.name, '.js');
-            if (commandName !== 'test' && !commandName.endsWith('.test')) {
+            if (commandName === category.name) {
               const description = await getCommandDescription(jsPath);
               commands.push({
                 category: category.name,
@@ -211,11 +211,10 @@ async function showHelp() {
   );
   
   // Print help
-  console.log(`\n╔════════════════════════════════════════════════════════════╗`);
-  console.log(`║              hlpr - Helper CLI Tool v${version.padEnd(16)}║`);
-  console.log(`╚════════════════════════════════════════════════════════════╝\n`);
+  console.log(`\n${HLPR_LOGO}\n\nhlpr v${version}\n`);
   
   console.log('USAGE:');
+  console.log('  hlpr [options] <command> [args...]');
   console.log('  hlpr [options] <category> <command> [args...]\n');
   
   console.log('OPTIONS:');
@@ -257,6 +256,7 @@ async function showHelp() {
   
   console.log('EXAMPLES:');
   console.log('  hlpr help');
+  console.log('  hlpr net list -device   (or: hlpr net list -d)');
   console.log('  hlpr rename -dir ./src -style kebab -r -d -f');
   console.log('  hlpr ssh init-dir');
   console.log('  hlpr git create -b feature/example\n');
@@ -354,7 +354,6 @@ async function main() {
         success = result.status === 0;
       } else {
         const finalCommand = `node "${scriptPath}" ${tsArgs.join(' ')}`;
-        console.log(`Executing command: ${finalCommand}`);
         success = await executeCommand(finalCommand, {});
       }
       
@@ -367,7 +366,7 @@ async function main() {
         process.exit(1);
       }
       
-      console.log("Command completed successfully!");
+      console.log("Done!");
       rl.close();
       return;
     }
@@ -416,7 +415,7 @@ async function main() {
       process.exit(1);
     }
     
-    console.log("Command completed successfully!");
+    console.log("Done!");
   } catch (error) {
     console.error("Error:", error);
     process.exit(1);

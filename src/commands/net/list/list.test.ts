@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'bun:test'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
-import { devicesCommand, parseDeviceIps } from './devices.js'
+import { devicesCommand, parseDeviceIps } from './list.js'
 
-describe('net devices', () => {
+describe('net list -device', () => {
   test('selects the native IPv4 neighbor listing', () => {
     expect(devicesCommand('win32')).toEqual({ command: 'arp', args: ['-a'] })
     expect(devicesCommand('darwin')).toEqual({ command: 'arp', args: ['-an'] })
@@ -37,12 +37,14 @@ Interface: 192.168.1.5 --- 0x12
   })
 
   test('shows help and rejects unexpected arguments', () => {
-    const script = fileURLToPath(new URL('devices.ts', import.meta.url))
+    const script = fileURLToPath(new URL('list.ts', import.meta.url))
     const help = spawnSync(process.execPath, [script, '--help'], { encoding: 'utf8' })
     expect(help.status).toBe(0)
-    expect(help.stdout).toContain('Usage: hlpr net devices')
-    const invalid = spawnSync(process.execPath, [script, 'example.com'], { encoding: 'utf8' })
-    expect(invalid.status).toBe(1)
-    expect(invalid.stderr).toContain('Usage: hlpr net devices')
+    expect(help.stdout).toContain('Usage: hlpr net list -device')
+    for (const args of [[], ['example.com'], ['-device', '-d'], ['-device', 'extra']]) {
+      const invalid = spawnSync(process.execPath, [script, ...args], { encoding: 'utf8' })
+      expect(invalid.status).toBe(1)
+      expect(invalid.stderr).toContain('Usage: hlpr net list -device')
+    }
   })
 })
