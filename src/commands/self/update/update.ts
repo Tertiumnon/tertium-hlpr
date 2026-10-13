@@ -21,7 +21,7 @@ const args = process.argv.slice(2)
 if (args.includes('--help') || args.includes('-h')) {
   console.log('Usage: hlpr self update')
   console.log('Update hlpr through Volta or npm.')
-  console.log('Checks installed commands and repairs them if needed. Alias: hlpr self upgrade')
+  console.log('Checks the installed version and commands, repairing them if needed. Alias: hlpr self upgrade')
   process.exit(0)
 }
 if (args.length > 0) {
@@ -35,19 +35,21 @@ try {
   const currentVersion: string = JSON.parse(readFileSync(packagePath, 'utf-8')).version
   const latestVersion = execSync(`npm view ${PACKAGE_NAME} version`, { encoding: 'utf-8' }).trim()
 
-  if (isNewer(latestVersion, currentVersion)) {
+  const updateAvailable = isNewer(latestVersion, currentVersion)
+  if (updateAvailable) {
     console.log(`Updating hlpr v${currentVersion} -> v${latestVersion}`)
     execSync(selfUpdateInstallCommand(packagePath), { stdio: 'inherit' })
-    console.log(`✓ hlpr updated to v${latestVersion}`)
   } else {
     console.log(`hlpr is up to date (v${currentVersion}, npm latest v${latestVersion})`)
   }
-  if (!installedCommandsWork()) {
+  const expectedVersion = updateAvailable ? latestVersion : currentVersion
+  if (!installedCommandsWork(expectedVersion)) {
     console.log('Installed commands did not pass verification. Repairing hlpr...')
     repairInstallation(packagePath)
-    if (!installedCommandsWork()) throw new Error('hlpr commands still fail after repair')
+    if (!installedCommandsWork(expectedVersion)) throw new Error('hlpr commands still fail after repair')
     console.log('hlpr commands verified after repair.')
   }
+  if (updateAvailable) console.log(`✓ hlpr updated to v${latestVersion}`)
 } catch (error) {
   console.error(`Update failed: ${error instanceof Error ? error.message : error}`)
   process.exit(1)

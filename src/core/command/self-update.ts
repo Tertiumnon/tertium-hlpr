@@ -23,11 +23,13 @@ export function repairInstallation(packagePath: string): void {
   for (const command of selfFixCommands(packagePath)) execSync(command, { stdio: 'inherit' })
 }
 
-export function installedCommandsWork(): boolean {
+export function installedCommandsWork(expectedVersion: string): boolean {
   try {
+    if (execSync('hlpr -v', { encoding: 'utf8', stdio: 'pipe' }).trim() !== `hlpr version ${expectedVersion}`) return false
     for (const [command, usage] of [
       ['hlpr app list --help', 'Usage: hlpr app list'],
       ['hlpr self update --help', 'Usage: hlpr self update'],
+      ['hlpr self fix --help', 'Usage: hlpr self fix'],
     ]) {
       if (!execSync(command, { encoding: 'utf8', stdio: 'pipe' }).includes(usage)) return false
     }

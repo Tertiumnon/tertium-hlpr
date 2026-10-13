@@ -14,7 +14,7 @@ hlpr self update --help
 1. Reads the installed version from `package.json`
 2. Looks up the latest `@tertium/hlpr` version with `npm view`
 3. If npm has a newer version, updates the installation with `volta install @tertium/hlpr@latest` for Volta-managed copies or `npm install -g @tertium/hlpr@latest` otherwise. An older or equal npm version is never installed, so a locally newer build is not downgraded
-4. Checks that the installed `hlpr app list --help` and `hlpr self update --help` commands run. If either fails, runs the same reinstall steps as `hlpr self fix` and checks again
+4. Checks that `hlpr -v` reports the installed version and that `hlpr app list --help`, `hlpr self update --help`, and `hlpr self fix --help` run. If a check fails, runs the same reinstall steps as `hlpr self fix` and checks again
 
 ### Notes
 

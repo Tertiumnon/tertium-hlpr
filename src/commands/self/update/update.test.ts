@@ -26,10 +26,12 @@ test.each([
   { command: 'upgrade', args: [], latest: '999.0.0', fail: '', status: 0, calls: ['view', 'install'] },
   { command: 'update', args: [], latest: version, fail: '', broken: true, status: 0, calls: ['view', 'repair'] },
   { command: 'update', args: [], latest: '999.0.0', fail: '', broken: true, status: 0, calls: ['view', 'install', 'repair'] },
+  { command: 'update', args: [], latest: '999.0.0', fail: '', staleVersion: '0.14.0', status: 0, calls: ['view', 'install', 'repair'] },
+  { command: 'update', args: [], latest: version, fail: '', missingFix: true, status: 0, calls: ['view', 'repair'] },
   { command: 'update', args: [], latest: version, fail: '', broken: true, repairFails: true, status: 1, calls: ['view', 'repair'] },
   { command: 'update', args: [], latest: '999.0.0', fail: 'view', status: 1, calls: ['view'] },
   { command: 'update', args: [], latest: '999.0.0', fail: 'install', status: 1, calls: ['view', 'install'] },
-])('npm self-update: %j', ({ command, args, latest, fail, status, calls, broken, repairFails }) => {
+])('npm self-update: %j', ({ command, args, latest, fail, status, calls, broken, repairFails, staleVersion, missingFix }) => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'hlpr-update-'))
   const log = path.join(tmp, 'npm.log')
   const fixed = path.join(tmp, 'fixed')
@@ -40,15 +42,15 @@ test.each([
       : '#!/bin/sh\nprintf "%s\\n" "$*" >> "$HLPR_NPM_LOG"\n[ "$1" = "$HLPR_NPM_FAIL" ] && exit 1\n[ "$1" = view ] && printf "%s\\n" "$HLPR_NPM_VERSION"\n[ "$3" = --force ] && [ "$HLPR_REPAIR_WORKS" = 1 ] && : > "$HLPR_FIXED_FILE"\nexit 0\n',
     { mode: 0o755 })
     fs.writeFileSync(path.join(tmp, windows ? 'hlpr.cmd' : 'hlpr'), windows
-      ? '@echo off\r\nif "%HLPR_BROKEN%"=="1" if not exist "%HLPR_FIXED_FILE%" exit /b 1\r\nif "%1"=="app" echo Usage: hlpr app list\r\nif "%1"=="self" echo Usage: hlpr self update\r\n'
-      : '#!/bin/sh\n[ "$HLPR_BROKEN" = 1 ] && [ ! -f "$HLPR_FIXED_FILE" ] && exit 1\n[ "$1" = app ] && echo "Usage: hlpr app list"\n[ "$1" = self ] && echo "Usage: hlpr self update"\nexit 0\n',
+      ? '@echo off\r\nif "%1"=="-v" goto version\r\nif "%HLPR_BROKEN%"=="1" if not exist "%HLPR_FIXED_FILE%" exit /b 1\r\nif "%1"=="app" echo Usage: hlpr app list\r\nif "%1"=="self" if "%2"=="update" echo Usage: hlpr self update\r\nif "%1"=="self" if "%2"=="fix" if "%HLPR_MISSING_FIX%"=="1" if not exist "%HLPR_FIXED_FILE%" exit /b 1\r\nif "%1"=="self" if "%2"=="fix" echo Usage: hlpr self fix\r\nexit /b 0\r\n:version\r\nif not "%HLPR_STALE_VERSION%"=="" if not exist "%HLPR_FIXED_FILE%" (echo hlpr version %HLPR_STALE_VERSION% & exit /b 0)\r\necho hlpr version %HLPR_EXPECTED_VERSION%\r\n'
+      : '#!/bin/sh\nif [ "$1" = -v ]; then\n  if [ -n "$HLPR_STALE_VERSION" ] && [ ! -f "$HLPR_FIXED_FILE" ]; then echo "hlpr version $HLPR_STALE_VERSION"; else echo "hlpr version $HLPR_EXPECTED_VERSION"; fi\n  exit 0\nfi\n[ "$HLPR_BROKEN" = 1 ] && [ ! -f "$HLPR_FIXED_FILE" ] && exit 1\n[ "$1" = app ] && echo "Usage: hlpr app list"\n[ "$1" = self ] && [ "$2" = update ] && echo "Usage: hlpr self update"\n[ "$1" = self ] && [ "$2" = fix ] && [ "$HLPR_MISSING_FIX" = 1 ] && [ ! -f "$HLPR_FIXED_FILE" ] && exit 1\n[ "$1" = self ] && [ "$2" = fix ] && echo "Usage: hlpr self fix"\nexit 0\n',
     { mode: 0o755 })
     // Only the fake npm is on PATH, so tests cannot update a real installation.
     const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => key.toLowerCase() !== 'path'))
     const result = spawnSync(process.execPath, [path.join(import.meta.dir, '..', command, `${command}.ts`), ...args], {
       cwd: tmp,
       encoding: 'utf8',
-      env: { ...env, PATH: tmp, HLPR_NPM_LOG: log, HLPR_NPM_VERSION: latest, HLPR_NPM_FAIL: fail, HLPR_BROKEN: broken ? '1' : '0', HLPR_FIXED_FILE: fixed, HLPR_REPAIR_WORKS: repairFails ? '0' : '1' },
+      env: { ...env, PATH: tmp, HLPR_NPM_LOG: log, HLPR_NPM_VERSION: latest, HLPR_NPM_FAIL: fail, HLPR_BROKEN: broken ? '1' : '0', HLPR_FIXED_FILE: fixed, HLPR_REPAIR_WORKS: repairFails ? '0' : '1', HLPR_EXPECTED_VERSION: latest === '999.0.0' ? latest : version, HLPR_STALE_VERSION: staleVersion || '', HLPR_MISSING_FIX: missingFix ? '1' : '0' },
     })
     expect(result.status).toBe(status)
     const actual = fs.existsSync(log) ? fs.readFileSync(log, 'utf8').trim().split(/\r?\n/) : []
