@@ -32,7 +32,8 @@ test('help lists current commands, excludes helpers, and shows the package versi
     ? spawnSync('cmd.exe', ['/d', '/c', 'npm.cmd', 'pack', '--dry-run', '--ignore-scripts', '--json'], { encoding: 'utf8' })
     : spawnSync('npm', ['pack', '--dry-run', '--ignore-scripts', '--json'], { encoding: 'utf8' })
   expect(pack.status).toBe(0)
-  const packageFiles = new Set(JSON.parse(pack.stdout)[0].files.map((file: { path: string }) => file.path))
+  const packResult = JSON.parse(pack.stdout)
+  const packageFiles = new Set((Array.isArray(packResult) ? packResult[0] : packResult['@tertium/hlpr']).files.map((file: { path: string }) => file.path))
   for (const command of ['bin/index.js', 'bin/commands/app/list/list.js', 'bin/commands/self/update/update.js', 'bin/commands/self/fix/fix.js']) expect(packageFiles.has(command)).toBe(true)
   const incomplete = mkdtempSync(path.join(os.tmpdir(), 'hlpr-incomplete-'))
   try {

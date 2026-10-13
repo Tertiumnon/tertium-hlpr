@@ -41,7 +41,7 @@ test.each([
     { mode: 0o755 })
     fs.writeFileSync(path.join(tmp, windows ? 'hlpr.cmd' : 'hlpr'), windows
       ? '@echo off\r\nif "%HLPR_BROKEN%"=="1" if not exist "%HLPR_FIXED_FILE%" exit /b 1\r\nif "%1"=="app" echo Usage: hlpr app list\r\nif "%1"=="self" echo Usage: hlpr self update\r\n'
-      : '#!/bin/sh\n[ "$HLPR_BROKEN" = 1 ] && [ ! -f "$HLPR_FIXED_FILE" ] && exit 1\n[ "$1" = app ] && echo "Usage: hlpr app list"\n[ "$1" = self ] && echo "Usage: hlpr self update"\n',
+      : '#!/bin/sh\n[ "$HLPR_BROKEN" = 1 ] && [ ! -f "$HLPR_FIXED_FILE" ] && exit 1\n[ "$1" = app ] && echo "Usage: hlpr app list"\n[ "$1" = self ] && echo "Usage: hlpr self update"\nexit 0\n',
     { mode: 0o755 })
     // Only the fake npm is on PATH, so tests cannot update a real installation.
     const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => key.toLowerCase() !== 'path'))
