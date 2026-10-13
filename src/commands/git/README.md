@@ -29,3 +29,12 @@ hlpr git clean
 `remove` uses `git branch -d`, so Git refuses to delete an unmerged local branch. `-remote` deletes the branch from `origin`; `-both` safely deletes it locally and then remotely. `clean` uses `git clean -fd`; it permanently removes untracked files and directories but preserves ignored files.
 
 All commands require Git. On Windows, shell commands require Git Bash or WSL.
+
+## Hooks
+
+```bash
+# Write .githooks/pre-commit in the current repository and point core.hooksPath at it
+hlpr git setup -hooks [--force]
+```
+
+See [setup](setup/README.md).

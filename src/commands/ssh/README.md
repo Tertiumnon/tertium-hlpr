@@ -7,6 +7,10 @@ SSH configuration and setup utilities.
 Run `hlpr ssh mkconn` to create a key, authorize it on a remote host,
 and add a backed-up local SSH config entry. See [add connection](add/README.md).
 
+## read
+
+Run `hlpr ssh read -file <connection-name>` to print one connection's `Host` block from `~/.ssh/config`. See [read](read/README.md).
+
 ## Platform Support
 
 - ✅ **Linux** - Fully supported

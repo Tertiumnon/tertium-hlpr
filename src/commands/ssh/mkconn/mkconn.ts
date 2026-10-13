@@ -5,15 +5,9 @@ import { appendFile, chmod, copyFile, mkdir, readFile, stat, writeFile } from 'n
 import os from 'node:os'
 import path from 'node:path'
 import readline from 'node:readline'
+import { hasHostAlias } from '../../../core/ssh/config.js'
 
 // @description Create an SSH key, authorize it on a host, and save the connection
-
-export function hasHostAlias(config: string, alias: string): boolean {
-  return config.split(/\r?\n/).some(line => {
-    const match = line.match(/^\s*Host\s+(.+?)(?:\s+#.*)?$/i)
-    return match?.[1].split(/\s+/).some(name => name.toLowerCase() === alias.toLowerCase()) ?? false
-  })
-}
 
 export async function saveConnection(configPath: string, alias: string, user: string, host: string, keyPath: string): Promise<string | undefined> {
   let existing = ''

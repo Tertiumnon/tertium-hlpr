@@ -54,6 +54,11 @@ hlpr file rename -dir ./src -style kebab -r -d -f --dry
 | [file move](src/commands/file/move/README.md) | Move a file and update references |
 | [file find](src/commands/file/find/README.md) (`search`) | Find files by name |
 | [git](src/commands/git/README.md)                   | Manage branches and working files       |
+| [git setup -hooks](src/commands/git/setup/README.md) | Write a shared pre-commit hook |
+| [npm scripts](src/commands/npm/scripts/README.md) | Add missing start and dev npm scripts |
+| [gh setup](src/commands/gh/setup/README.md) | Write GitHub workflows: npm publish (trusted publishing) and SSH deploy |
+| [az setup](src/commands/az/setup/README.md) | Write an Azure Pipelines SSH deploy (`azure-pipelines.yml`) |
+| [angular setup](src/commands/angular/setup/README.md) | Set up an Angular project with bun, biome, hooks, and changelog |
 | [net list -device](src/commands/net/list/README.md)   | List cached local device IPv4 addresses |
 | [net scan](src/commands/net/scan/README.md)         | List local ports and connections        |
 | [net status](src/commands/net/status/README.md) (`info`) | Show network interface addresses |
@@ -69,6 +74,7 @@ hlpr file rename -dir ./src -style kebab -r -d -f --dry
 | [tool install](src/commands/tool/install/README.md) | Install supported tools |
 | [runtime install](src/commands/runtime/install/README.md) | Install Node.js, Python, Bun, Rust, or Go |
 | [ssh mkconn](src/commands/ssh/mkconn/README.md) | Set up an SSH connection |
+| [ssh read](src/commands/ssh/read/README.md) | Print one connection's Host block from ~/.ssh/config |
 | [hello](src/commands/hello/README.md) | Run a Matrix rain animation |
 | [hello world](src/commands/hello/world/README.md) | Display animated Hello World art |
 | [self update](src/commands/self/update/README.md) (`self upgrade`) | Update hlpr and repair broken command files |

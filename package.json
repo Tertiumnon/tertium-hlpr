@@ -18,6 +18,7 @@
     "release:patch": "bun node_modules/@tertium/js/scripts/release/release.ts patch",
     "release:minor": "bun node_modules/@tertium/js/scripts/release/release.ts minor",
     "release:major": "bun node_modules/@tertium/js/scripts/release/release.ts major",
+    "version": "bun node_modules/@tertium/js/scripts/changelog/changelog.ts && git add CHANGELOG.md",
     "setup:hooks": "git config core.hooksPath .githooks",
     "prepare": "git config core.hooksPath .githooks"
   },
