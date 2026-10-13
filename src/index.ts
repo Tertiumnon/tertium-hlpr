@@ -310,7 +310,7 @@ async function main() {
       if (fs.existsSync(scriptPathCandidate)) {
         scriptPath = scriptPathCandidate;
       } else {
-        console.error(`Script not found: ${scriptPathCandidate}`);
+        console.error(`Command not found: hlpr ${category} ${restArgs[0]}`);
         process.exit(1);
       }
     }

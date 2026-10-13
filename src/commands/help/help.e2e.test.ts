@@ -100,6 +100,10 @@ test('help lists current commands, excludes helpers, and shows the package versi
     expect(result.stdout).toContain(`Usage: hlpr ${category} ${original}`)
     expect(result.stdout).toContain(`Alias: hlpr ${category} ${alias}`)
   }
+  const typo = spawnSync('node', ['bin/index.js', 'self', 'ifx'], { encoding: 'utf8' })
+  expect(typo.status).toBe(1)
+  expect(typo.stderr).toContain('Command not found: hlpr self ifx')
+  expect(typo.stderr).not.toContain('.sh')
   for (const [domain, action] of [['file', 'rename'], ['file', 'move'], ['file', 'find'], ['file', 'search'], ['process', 'list'], ['process', 'kill'], ['app', 'list'], ['app', 'search'], ['app', 'find'], ['ssh', 'mkconn'], ['tool', 'install'], ['runtime', 'install'], ['self', 'update'], ['self', 'fix'], ['self', 'upgrade'], ['hello', 'world']]) {
     const result = spawnSync('node', ['bin/index.js', domain, action, '--help'], { encoding: 'utf8' })
     expect(result.status).toBe(0)
