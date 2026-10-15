@@ -3,7 +3,7 @@ import { spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { dockerInstallCommand, moveSelection, parseTool, selectsTool, updateProfile, updatePsReadLineProfile, utilityInstallCommand } from './install.js'
+import { dockerInstallCommand, menuFor, moveSelection, parseTool, selectsTool, toolArgs, updateProfile, updatePsReadLineProfile, utilityInstallCommand } from './install.js'
 
 describe('install', () => {
   test('recognizes an existing oh-my-zsh installation without running the installer', () => {
@@ -18,6 +18,28 @@ describe('install', () => {
     } finally {
       fs.rmSync(zshDir, { recursive: true, force: true })
     }
+  })
+
+  test('rejects extra arguments for every tool before installing', () => {
+    const result = spawnSync(process.execPath, [path.join(import.meta.dir, 'install.ts'), 'tldr', 'extra'], { encoding: 'utf8' })
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain('tldr does not accept extra arguments')
+  })
+
+  test('menu lists only tools that install on the platform', () => {
+    const names = (platform: string) => menuFor(platform).map(([tool]) => tool)
+    expect(names('win32')).toEqual(['oh-my-posh', 'starship', 'psreadline', 'pstop', 'docker', 'fastfetch', 'tldr', 'claude-cli', 'codex-cli', 'copilot-cli'])
+    expect(names('darwin')).toEqual(['docker', 'oh-my-zsh', 'htop', 'fastfetch', 'tldr', 'claude-cli', 'codex-cli', 'copilot-cli'])
+    expect(names('linux')).toEqual(['docker', 'oh-my-zsh', 'htop', 'fastfetch', 'tldr', 'claude-cli', 'codex-cli', 'copilot-cli'])
+  })
+
+  test('accepts a tool as a name, -name, or -n', () => {
+    expect(toolArgs(['claude-cli'])).toEqual({ value: 'claude-cli', extra: [] })
+    expect(toolArgs(['-name', 'codex-cli'])).toEqual({ value: 'codex-cli', extra: [] })
+    expect(toolArgs(['-n', 'copilot-cli'])).toEqual({ value: 'copilot-cli', extra: [] })
+    expect(toolArgs([])).toEqual({ value: undefined, extra: [] })
+    expect(() => toolArgs(['-name'])).toThrow('Missing tool name')
+    expect(() => toolArgs(['--claude-cli'])).toThrow('Unknown option: --claude-cli')
   })
 
   test('arrow selection wraps at both ends', () => {
@@ -51,6 +73,8 @@ describe('install', () => {
     expect(parseTool('oh-my-zsh')).toBe('oh-my-zsh')
     expect(parseTool('node')).toBeUndefined()
     expect(parseTool('TLDR')).toBe('tldr')
+    expect(parseTool('Claude-CLI')).toBe('claude-cli')
+    expect(parseTool('constructor')).toBeUndefined()
     expect(parseTool('HTOP')).toBe('htop')
     expect(parseTool('Fastfetch')).toBe('fastfetch')
   })
