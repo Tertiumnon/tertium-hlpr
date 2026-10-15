@@ -1,7 +1,20 @@
 import { expect, test } from 'bun:test'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
-import { knownSections, parseLinuxDisks, parsePhysicalCores, systemInfo } from './info.js'
+import { knownSections, parseLinuxDisks, parseLinuxMemory, parsePhysicalCores, systemInfo } from './info.js'
+
+test('parses dmidecode memory modules and skips empty slots', () => {
+  const output = [
+    'Handle 0x0010, DMI type 16, 23 bytes', 'Physical Memory Array', '\tNumber Of Devices: 4', '',
+    'Handle 0x0011, DMI type 17, 92 bytes', 'Memory Device', '\tSize: 16 GB', '\tLocator: ChannelA-DIMM0', '\tSpeed: 3200 MT/s', '\tManufacturer: Kingston', '\tPart Number: KF432C16BB/16 ', '\tConfigured Memory Speed: 3200 MT/s', '',
+    'Handle 0x0012, DMI type 17, 92 bytes', 'Memory Device', '\tSize: No Module Installed', '\tLocator: ChannelA-DIMM1', '',
+    'Handle 0x0013, DMI type 17, 92 bytes', 'Memory Device', '\tSize: 8192 MB', '\tLocator: ChannelB-DIMM0', '\tSpeed: Unknown', '\tManufacturer: Samsung', '',
+  ].join('\n')
+  expect(parseLinuxMemory(output)).toEqual({
+    slots: 4,
+    modules: 'ChannelA-DIMM0\tKF432C16BB/16, 16 GiB @ 3200 MHz (configured 3200 MHz)\nChannelB-DIMM0\tSamsung, 8 GiB @ Unknown MHz (configured Unknown MHz)',
+  })
+})
 
 test('keeps only reported fields and sections on Linux', () => {
   expect(knownSections({ CPU: { Name: 'Ryzen', 'Physical cores': 'Unavailable' }, RAM: { Slots: '0', Modules: 'Unavailable' }, GPU: { Name: 'Unavailable' } })).toEqual({ CPU: { Name: 'Ryzen' } })
