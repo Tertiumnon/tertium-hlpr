@@ -123,8 +123,8 @@ async function selectRuntime(value?: string): Promise<Runtime | undefined> {
 
 async function main(): Promise<void> {
   if (process.argv.slice(2).some(arg => arg === '--help' || arg === '-h')) {
-    console.log('Usage: hlpr runtime install [node|python|bun|rust|go] [-v <major>]')
-    console.log('Install a runtime, or select one interactively. -v is supported for Node.js, Python, and Bun.')
+    console.log('Usage: hlpr runtime install [name] [-v 24]')
+    console.log('Install Node.js, Python, Bun, Rust, or Go. Run without a name to choose from a keyboard menu. -v is supported for Node.js, Python, and Bun.')
     return
   }
   const runtime = await selectRuntime(process.argv[2])
