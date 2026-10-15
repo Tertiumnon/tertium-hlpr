@@ -12,11 +12,11 @@ tmpfs 0 0 0 0% /empty
     { name: '/dev/disk2s1', mount: '/Volumes/My Disk', total: 2048000, used: 1024000, free: 1024000 },
   ])
   expect(() => parseDf('header\ninvalid')).toThrow('Unrecognized df output')
-  expect(formatDisks(disks)).toContain('[##########----------] 50.0% used')
-  expect(formatDisks(disks)).toContain('Available | 450.0 KiB\n\n/Volumes/My Disk')
+    expect(formatDisks(disks, false)).toContain('[##########----------] 50.0% used')
+    expect(formatDisks(disks, false)).toContain('Available | 450.0 KiB\n\n/Volumes/My Disk')
 })
 
 test('handles empty and full volumes', () => {
-  expect(formatDisks([])).toBe('No mounted volumes found.')
-  expect(formatDisks([{ name: 'Full', mount: 'C:', total: 1024, used: 1024, free: 0 }])).toContain('[####################] 100.0% used')
+  expect(formatDisks([], false)).toBe('No mounted volumes found.')
+  expect(formatDisks([{ name: 'Full', mount: 'C:', total: 1024, used: 1024, free: 0 }], false)).toContain('[####################] 100.0% used')
 })

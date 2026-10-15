@@ -7,9 +7,8 @@ export function formatBytes(bytes: number): string {
   return `${(bytes / 1024 ** index).toFixed(index === 0 ? 0 : 1)} ${units[index]}`
 }
 
-export function formatInfo(rows: [string, string][]): string {
+export function formatInfo(rows: [string, string][], color = process.stdout.isTTY && process.env.NO_COLOR === undefined && process.env.TERM !== 'dumb'): string {
   const width = Math.max(0, ...rows.filter(([, value]) => value !== '').map(([label]) => label.length))
-  const color = Boolean(process.stdout.isTTY && process.env.NO_COLOR === undefined && process.env.TERM !== 'dumb')
   const paint = (code: number, value: string) => color ? `\x1b[${code}m${value}\x1b[0m` : value
   return rows.map(([label, value]) => value === ''
     ? paint(1, `--- ${label} ---`)
