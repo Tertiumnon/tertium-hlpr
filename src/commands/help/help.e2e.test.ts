@@ -85,7 +85,8 @@ test('help lists current commands, excludes helpers, and shows the package versi
     for (const command of ['file rename', 'file move', 'file find -name <name>', 'file search -name <name>', 'net scan', 'net list -device', 'net status', 'system info', 'battery status', 'disk info', 'memory info', 'git create', 'process list', 'process kill', 'app list', 'app search -name <name>', 'app find -name <name>', 'app remove -name <app name>', 'ssh mkcon', 'ssh mkkey', 'tool install', 'runtime install', 'self update', 'self fix', 'self upgrade', 'hello', 'hello world']) {
       expect(result.stdout).toContain(`hlpr ${command}`)
     }
-    expect(result.stdout).toContain('also: -d')
+    expect(result.stdout).toContain('also: hlpr net list -d')
+    expect(result.stdout).not.toMatch(/also: (?!hlpr )/)
     for (const obsolete of ['.types', 'hlpr demo ', 'hlpr rename ', 'hlpr mv ', 'hlpr list process', 'hlpr list app', 'hlpr kill process', 'hlpr ssh add connection', 'git precommit', 'git fodd', 'hlpr nvm', 'hlpr net devices']) {
       expect(result.stdout).not.toContain(obsolete)
     }

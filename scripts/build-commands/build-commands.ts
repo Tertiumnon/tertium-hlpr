@@ -35,6 +35,13 @@ function buildCommands(srcDir: string): void {
         console.error(`Failed to compile ${fullPath}:`, error);
         process.exit(1);
       }
+      // Bun strips comments, so keep @description for help discovery.
+      const description = fs.readFileSync(fullPath, "utf8").match(/(?:\/\/|#)\s*@description\s+(.+)/);
+      if (description) {
+        const compiled = fs.readFileSync(outPath, "utf8");
+        const insertAt = compiled.startsWith("#!") ? compiled.indexOf("\n") + 1 : 0;
+        fs.writeFileSync(outPath, `${compiled.slice(0, insertAt)}// @description ${description[1].trim()}\n${compiled.slice(insertAt)}`);
+      }
     }
   }
 }
