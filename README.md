@@ -69,7 +69,7 @@ hlpr file rename -dir ./src -style kebab -r -d -f --dry
 | [process list](src/commands/process/list/README.md) | List running processes |
 | [process kill](src/commands/process/kill/README.md) | Kill a process by ID or port |
 | [app list](src/commands/app/list/README.md) | List installed apps |
-| [app search](src/commands/app/search/README.md) (`find`) | Find installed apps by name |
+| [app search](src/commands/app/search/README.md) (`find`) | Find installed apps or remote packages by name |
 | [app remove](src/commands/app/remove/README.md) (`delete`, `uninstall`) | Find and uninstall an app |
 | [tool install](src/commands/tool/install/README.md) | Install supported tools |
 | [runtime install](src/commands/runtime/install/README.md) | Install Node.js, Python, Bun, Rust, or Go |
