@@ -3,8 +3,8 @@ import { spawnSync } from 'node:child_process'
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
-import { hasHostAlias } from '../../../core/ssh/config.js'
-import { remoteAuthorizationCommand, saveConnection } from './mkconn.js'
+import { hasHostAlias, saveConnection } from '../../../core/ssh/config.js'
+import { remoteAuthorizationCommand } from './mkcon.js'
 
 test('backs up SSH config before adding a connection and refuses duplicate aliases', async () => {
   const dir = await mkdtemp(path.join(os.tmpdir(), 'hlpr-ssh-'))
