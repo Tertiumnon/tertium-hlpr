@@ -91,7 +91,7 @@ test('help lists current commands, excludes helpers, and shows the package versi
     }
     expect(result.stdout).toContain('hlpr [options] <domain> <command> [params...]')
     expect(result.stdout).toContain('hlpr git create <-branch|-b> <branch>')
-    expect(result.stdout).toContain('hlpr process kill (-id <id> | -port <port>) [options]')
+    expect(result.stdout).toContain('hlpr process kill (-id <id> | -port <port> | -folder|-file|-path <path>) [options]')
     expect(result.stdout).toContain('hlpr file rename -dir <dir> -style <style> [-r] [-d] [-f]')
     for (const alias of ['battery info', 'net info', 'disk status', 'memory status', 'system status', 'app delete -name <app name>', 'app uninstall -name <app name>', 'file mv', 'git rm']) expect(result.stdout).toContain(`hlpr ${alias}`)
   }
