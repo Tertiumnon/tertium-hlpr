@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import { installedApps, type App } from '../../../core/command/apps.js'
+import { installedApps, remoteApps, type App } from '../../../core/command/apps.js'
 
-// @description Find installed apps by part of their name
+// @description Find installed apps or remote packages by part of their name
 
 export function matchingAppNames(apps: App[], name: string): string[] {
   const query = name.toLowerCase()
@@ -9,18 +9,28 @@ export function matchingAppNames(apps: App[], name: string): string[] {
     .sort((a, b) => a.localeCompare(b))
 }
 
+export function matchingRemoteApps(apps: App[], name: string): string[] {
+  const query = name.toLowerCase()
+  return [...new Set(apps.filter(app => app.name.toLowerCase().includes(query)).map(app => `${app.name} [${app.manager}]`))]
+    .sort((a, b) => a.localeCompare(b))
+}
+
 function main(): void {
   const args = process.argv.slice(2)
   if (args.length === 1 && (args[0] === '-h' || args[0] === '--help')) {
-    console.log('Usage: hlpr app search -name <name>\nAlias: hlpr app find -name <name>')
+    console.log('Usage: hlpr app search -name <name> [--remote]\nAlias: hlpr app find -name <name> [--remote]')
     return
   }
-  if (args.length < 2 || args[0] !== '-name' || args.slice(1).some(value => !value.trim())) throw new Error('Usage: hlpr app search -name <name>')
+  const remote = args.includes('--remote')
+  const nameArgs = args.filter(value => value !== '--remote')
+  if (nameArgs.length < 2 || nameArgs[0] !== '-name' || nameArgs.slice(1).some(value => !value.trim())) throw new Error('Usage: hlpr app search -name <name> [--remote]')
 
-  const name = args.slice(1).join(' ')
-  const matches = matchingAppNames(installedApps(process.platform), name)
+  const name = nameArgs.slice(1).join(' ')
+  const matches = remote
+    ? matchingRemoteApps(remoteApps(process.platform, name), name)
+    : matchingAppNames(installedApps(process.platform), name)
   if (matches.length) console.log(matches.join('\n'))
-  else console.log(`No installed apps found matching "${name}".`)
+  else console.log(remote ? `No remote packages found matching "${name}".` : `No installed apps found matching "${name}".`)
 }
 
 if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {

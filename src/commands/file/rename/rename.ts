@@ -1,3 +1,4 @@
+// @description Rename selected files and directories to a case style
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import type { Style } from './rename.types.js'

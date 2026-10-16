@@ -1,15 +1,15 @@
-# ssh mkconn
+# ssh mkcon
 
 Create an SSH key for a remote account, install its public key, and save a local
 connection:
 
 ```sh
-hlpr ssh mkconn
+hlpr ssh mkcon
 ```
 
 The command asks for the SSH user, host or IP address, and a connection name
 (default: the host). It creates a dedicated Ed25519 key pair named
-`~/.ssh/<connection-name>-<user>`, unless that pair already exists. `ssh-keygen`
+`~/.ssh/<host>-<user>`, unless that pair already exists. `ssh-keygen`
 asks for the key passphrase. SSH then connects
 to the remote host and may ask for the account password or host-key confirmation.
 The remote account must provide a POSIX shell and `mktemp`; the command creates

@@ -2,10 +2,17 @@
 
 SSH configuration and setup utilities.
 
-## add connection
+## mkcon
 
-Run `hlpr ssh mkconn` to create a key, authorize it on a remote host,
-and add a backed-up local SSH config entry. See [add connection](add/README.md).
+Run `hlpr ssh mkcon` to create a key, authorize it on a remote host,
+and add a backed-up local SSH config entry. See [mkcon](mkcon/README.md).
+
+## mkkey
+
+Run `hlpr ssh mkkey` to create a key pair and add a backed-up local SSH config entry
+without connecting to the remote host. It shows the public key at the end. See [mkkey](mkkey/README.md).
+
+Both commands name keys `~/.ssh/<host>-<user>`.
 
 ## read
 
@@ -19,19 +26,33 @@ Run `hlpr ssh read -file <connection-name>` to print one connection's `Host` blo
   - Git Bash (included with Git for Windows) provides Unix-like `~/.ssh` directory
   - Native Windows SSH uses `%USERPROFILE%\.ssh` instead
 
-## init-dir
+## fix
 
-Initialize SSH directory with proper permissions.
+Run `hlpr ssh fix --permissions` to set the permissions of your existing `~/.ssh` and its files:
+
+- `~/.ssh` → 700
+- `*.pub`, `config`, `known_hosts`, `known_hosts.old` → 644
+- every other file (private keys, `authorized_keys`, config backups) → 600
+
+It only changes modes. It does not create, move, or delete files, and it does not ask for confirmation.
+It needs an existing `~/.ssh`; run `hlpr ssh setup` first if there is none. On Windows, the Git Bash `chmod` may not reflect Unix modes on NTFS, so check the result with the SSH client.
+
+## setup
+
+Create `~/.ssh` with the permissions SSH requires.
 
 ### Usage
 
 ```bash
-hlpr ssh init-dir
+hlpr ssh setup
 ```
 
 ### What it does
 
-Creates the `~/.ssh` directory and essential SSH configuration files with correct permissions:
+Creates the `~/.ssh` directory and essential SSH configuration files with correct permissions.
+If `~/.ssh` already exists, the command asks before changing its permissions; answer `y` to continue, or press Enter to leave everything unchanged.
+
+Steps:
 
 1. Creates `~/.ssh` directory (if it doesn't exist)
 2. Creates `~/.ssh/known_hosts` file
@@ -56,7 +77,7 @@ These permissions are required by SSH for security. If permissions are incorrect
 ### Example
 
 ```bash
-$ hlpr ssh init-dir
+$ hlpr ssh setup
 # Creates ~/.ssh/ with proper structure and permissions
 ```
 
@@ -72,7 +93,7 @@ ls -la ~/.ssh/
 
 ### Note
 
-This command will fail if `~/.ssh` already exists. If you need to fix permissions on an existing directory, you can:
+Existing `known_hosts` and `config` files are kept; the command only adds missing files and sets permissions. To fix permissions by hand instead, run:
 
 ```bash
 chmod 700 ~/.ssh

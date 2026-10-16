@@ -8,7 +8,7 @@ Reuse existing patterns and native tools; avoid unnecessary dependencies and opt
 
 - Name user commands `hlpr <domain> <command> [params]`: put the noun first and the operation second (`hlpr net scan`, `hlpr file rename`, `hlpr process list`). Do not add flat action commands or action-first categories.
 - Keep TypeScript commands at `src/commands/<domain>/<action>/<action>.ts`; shell commands may use `src/commands/<domain>/<action>.sh`. Put command docs and tests beside the implementation. The path, CLI syntax, and help entry must agree.
-- Use one command token for one operation (`hlpr ssh mkconn`), with flags or positional values after it. Use aliases only for established synonyms of the same operation.
+- Use one command token for one operation (`hlpr ssh mkcon`), with flags or positional values after it. Use aliases only for established synonyms of the same operation.
 - `hlpr hello` and `hlpr hello world` are deliberate naming exceptions. Keep their flat and nested paths under `src/commands/hello/`.
 - `hlpr help`, version flags, and the bare splash screen are CLI entry points, outside the domain/action scheme.
 

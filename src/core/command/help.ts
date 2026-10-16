@@ -47,7 +47,7 @@ export function renderHelp(commands: HelpCommand[], version: string, color = pro
       const syntax = usages.some(usage => usage.includes('<')) ? [usages.find(usage => usage.includes('<')) ?? base] : usages
       const [first, ...alternatives] = syntax.length ? syntax : [base]
       lines.push(`  ${paint('36', first)}${command.description ? paint('2', `  ${command.description}`) : ''}`)
-      const variants = alternatives.filter(usage => !commandNames.has(usage)).map(usage => usage.startsWith(`${base} `) ? usage.slice(base.length + 1) : usage)
+      const variants = alternatives.filter(usage => !commandNames.has(usage)).map(usage => usage.startsWith(`${base} `) || usage === base ? usage : `${base} ${usage}`)
       variants.push(...subcommandAliases(category, command.name).map(alias => first.replace(base, `hlpr ${category} ${alias}`)))
       if (variants.length) lines.push(`    ${paint('2', `also: ${variants.join('  ·  ')}`)}`)
     }

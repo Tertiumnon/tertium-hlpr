@@ -33,6 +33,27 @@ export function parsePackages(manager: string, output: string): App[] {
   })
 }
 
+export function parseRemoteSearch(manager: string, output: string): App[] {
+  if (manager === 'winget') {
+    const rows = output.split(/\r?\n/)
+    const header = rows.findIndex(row => /\bName\b/i.test(row) && /\bId\b/i.test(row))
+    if (header < 0) throw new Error('Could not read winget search columns')
+    const tail = rows[header].trim().split(/\s+/).length - 1
+    return rows.slice(header + 2)
+      .map(row => row.trim().split(/\s+/))
+      .filter(tokens => tokens.length > tail)
+      .map(tokens => ({ manager, name: tokens.slice(0, -tail).join(' '), id: tokens[tokens.length - tail] }))
+  }
+  if (manager === 'dnf') return lines(output).filter(line => /^Name\s*:/i.test(line)).map(line => {
+    const id = line.replace(/^Name\s*:\s*/i, '').trim()
+    return { manager, name: id, id }
+  })
+  return lines(output).map(line => {
+    const id = line.split(/\s+/)[0]
+    return { manager, name: id, id }
+  })
+}
+
 export function packageQueries(platform: NodeJS.Platform): Query[] {
   if (platform === 'win32') return [
     { manager: 'winget', command: 'winget', args: ['list'] },
@@ -52,6 +73,24 @@ export function packageQueries(platform: NodeJS.Platform): Query[] {
   return []
 }
 
+export function remoteSearchQueries(platform: NodeJS.Platform, name: string): Query[] {
+  if (platform === 'win32') return [
+    { manager: 'winget', command: 'winget', args: ['search', name] },
+    { manager: 'choco', command: 'cmd.exe', args: ['/d', '/c', 'choco', 'search', name] },
+    { manager: 'scoop', command: 'cmd.exe', args: ['/d', '/c', 'scoop', 'search', name] },
+  ]
+  if (platform === 'darwin') return [
+    { manager: 'brew', command: 'brew', args: ['search', name] },
+  ]
+  if (platform === 'linux') return [
+    { manager: 'apt', command: 'apt-cache', args: ['search', name] },
+    { manager: 'dnf', command: 'dnf', args: ['search', name] },
+    { manager: 'pacman', command: 'pacman', args: ['-Ss', name] },
+    { manager: 'brew', command: 'brew', args: ['search', name] },
+  ]
+  return []
+}
+
 export function installedApps(platform: NodeJS.Platform): App[] {
   const apps: App[] = []
   let available = 0
@@ -63,6 +102,22 @@ export function installedApps(platform: NodeJS.Platform): App[] {
     available++
     if (result.error || result.status !== 0) throw new Error(`${query.manager} listing failed: ${result.error?.message || result.stderr.trim() || `exit code ${result.status}`}`)
     apps.push(...parsePackages(query.manager, result.stdout))
+  }
+  if (!available) throw new Error(`No supported package manager found on ${platform}`)
+  return apps
+}
+
+export function remoteApps(platform: NodeJS.Platform, name: string): App[] {
+  const apps: App[] = []
+  let available = 0
+  for (const query of remoteSearchQueries(platform, name)) {
+    if (platform === 'win32' && (query.manager === 'choco' || query.manager === 'scoop') && spawnSync('where.exe', [query.manager], { stdio: 'ignore' }).status !== 0) continue
+    if (query.manager === 'dnf' && spawnSync('dnf', ['--version'], { stdio: 'ignore' }).error) continue
+    const result = spawnSync(query.command, query.args, { encoding: 'utf8', windowsHide: true })
+    if ((result.error as NodeJS.ErrnoException | undefined)?.code === 'ENOENT') continue
+    available++
+    if (result.error || result.status !== 0) throw new Error(`${query.manager} search failed: ${result.error?.message || result.stderr.trim() || `exit code ${result.status}`}`)
+    apps.push(...parseRemoteSearch(query.manager, result.stdout))
   }
   if (!available) throw new Error(`No supported package manager found on ${platform}`)
   return apps

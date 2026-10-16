@@ -6,7 +6,7 @@ test('formats byte quantities and unavailable values', () => {
   expect(formatBytes(1024 ** 3 * 1.5)).toBe('1.5 GiB')
   expect(formatBytes(-1)).toBe('Unavailable')
   expect(formatBytes(Number.NaN)).toBe('Unavailable')
-  expect(formatInfo([['CPU', ''], ['Name', 'Example'], ['RAM total', '16.0 GiB']])).toBe('--- CPU ---\nName      | Example\nRAM total | 16.0 GiB')
+  expect(formatInfo([['CPU', ''], ['Name', 'Example'], ['RAM total', '16.0 GiB']], false)).toBe('--- CPU ---\nName      | Example\nRAM total | 16.0 GiB')
 })
 
 test.skipIf(process.platform !== 'win32')('PowerShell preserves single-item and empty disk arrays', () => {

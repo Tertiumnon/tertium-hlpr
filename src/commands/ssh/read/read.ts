@@ -32,7 +32,7 @@ export async function readConnection(alias: string, configPath = path.join(os.ho
 async function main(): Promise<void> {
   const args = process.argv.slice(2)
   if (args.includes('-h') || args.includes('--help')) {
-    console.log(`${USAGE}\nPrints the Host block for the connection from ~/.ssh/config (the entry mkconn writes).`)
+    console.log(`${USAGE}\nPrints the Host block for the connection from ~/.ssh/config (the entry mkcon or mkkey writes).`)
     return
   }
   process.stdout.write(await readConnection(parseReadArgs(args)))

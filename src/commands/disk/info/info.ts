@@ -31,14 +31,14 @@ export function diskInfo(): DiskInfo[] {
   return parseDf(execFileSync('df', ['-kP'], { encoding: 'utf8', timeout: 20_000, env: { ...process.env, LC_ALL: 'C' } }))
 }
 
-export function formatDisks(disks: DiskInfo[]): string {
+export function formatDisks(disks: DiskInfo[], color?: boolean): string {
   if (!disks.length) return 'No mounted volumes found.'
   return disks.map(disk => {
     const fraction = disk.total > 0 ? Math.max(0, Math.min(1, disk.used / disk.total)) : 0
     const filled = Math.round(fraction * 20)
     return `${disk.mount} (${disk.name})\n[${'#'.repeat(filled)}${'-'.repeat(20 - filled)}] ${(fraction * 100).toFixed(1)}% used\n${formatInfo([
       ['Total', formatBytes(disk.total)], ['Used', formatBytes(disk.used)], ['Available', formatBytes(disk.free)],
-    ])}`
+    ], color)}`
   }).join('\n\n')
 }
 

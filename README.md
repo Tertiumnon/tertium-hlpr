@@ -41,7 +41,8 @@ hlpr net scan
 hlpr memory info
 hlpr system info
 hlpr battery status
-hlpr ssh mkconn
+hlpr ssh mkcon
+hlpr ssh mkkey
 hlpr git create -b feature/example
 hlpr file rename -dir ./src -style kebab -r -d -f --dry
 ```
@@ -69,11 +70,15 @@ hlpr file rename -dir ./src -style kebab -r -d -f --dry
 | [process list](src/commands/process/list/README.md) | List running processes |
 | [process kill](src/commands/process/kill/README.md) | Kill a process by ID, port, folder, or file |
 | [app list](src/commands/app/list/README.md) | List installed apps |
-| [app search](src/commands/app/search/README.md) (`find`) | Find installed apps by name |
+| [app search](src/commands/app/search/README.md) (`find`) | Find installed apps or remote packages by name |
 | [app remove](src/commands/app/remove/README.md) (`delete`, `uninstall`) | Find and uninstall an app |
-| [tool install](src/commands/tool/install/README.md) | Install supported tools |
+| [tool install](src/commands/tool/install/README.md) | Install Docker, htop, fastfetch, Starship, Claude CLI, Codex CLI, Copilot CLI, or another supported tool |
 | [runtime install](src/commands/runtime/install/README.md) | Install Node.js, Python, Bun, Rust, or Go |
-| [ssh mkconn](src/commands/ssh/mkconn/README.md) | Set up an SSH connection |
+| [ssh mkcon](src/commands/ssh/mkcon/README.md) | Create a key, authorize it on a host, and save the connection |
+| [ssh mkkey](src/commands/ssh/mkkey/README.md) | Create a key pair and save the connection locally |
+| [zsh fix --bun](src/commands/zsh/README.md) | Add bun to PATH in ~/.zshrc |
+| [ssh setup](src/commands/ssh/README.md#setup) | Create ~/.ssh with the permissions SSH requires |
+| [ssh fix --permissions](src/commands/ssh/README.md#fix) | Fix permissions of ~/.ssh and its files |
 | [ssh read](src/commands/ssh/read/README.md) | Print one connection's Host block from ~/.ssh/config |
 | [hello](src/commands/hello/README.md) | Run a Matrix rain animation |
 | [hello world](src/commands/hello/world/README.md) | Display animated Hello World art |
