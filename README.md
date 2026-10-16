@@ -67,7 +67,7 @@ hlpr file rename -dir ./src -style kebab -r -d -f --dry
 | [memory info](src/commands/memory/info/README.md) (`status`) | Show total, used, and free memory |
 | [disk info](src/commands/disk/info/README.md) (`status`) | Show disk usage and available space |
 | [process list](src/commands/process/list/README.md) | List running processes |
-| [process kill](src/commands/process/kill/README.md) | Kill a process by ID or port |
+| [process kill](src/commands/process/kill/README.md) | Kill a process by ID, port, folder, or file |
 | [app list](src/commands/app/list/README.md) | List installed apps |
 | [app search](src/commands/app/search/README.md) (`find`) | Find installed apps or remote packages by name |
 | [app remove](src/commands/app/remove/README.md) (`delete`, `uninstall`) | Find and uninstall an app |
