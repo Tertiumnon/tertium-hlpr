@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+// @description Show commands grouped by category, with their syntax and short descriptions
 import * as path from "node:path";
 import * as fs from "node:fs";
 import { fileURLToPath } from "node:url";

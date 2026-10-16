@@ -112,6 +112,11 @@ function systemSections(): Record<string, Section> {
       if (cores) sections.CPU['Physical cores'] = String(cores)
     } catch { /* CPU topology can be unavailable in containers. */ }
     try {
+      const memory = parseLinuxMemory(execFileSync('dmidecode', ['-t', 'memory'], { encoding: 'utf8', timeout: 5000, stdio: ['ignore', 'pipe', 'ignore'] }))
+      if (memory.slots) sections.RAM.Slots = String(memory.slots)
+      if (memory.modules) sections.RAM.Modules = memory.modules
+    } catch { sections.RAM['Module details'] = 'Needs dmidecode and root access' }
+    try {
       const disks = parseLinuxDisks(execFileSync('lsblk', ['-J', '-d', '-o', 'NAME,MODEL,SIZE,TYPE'], { encoding: 'utf8', timeout: 5000 }))
       if (disks) sections.Disks.Devices = disks
     } catch { /* Block devices can be hidden in containers. */ }
@@ -129,6 +134,30 @@ function systemSections(): Record<string, Section> {
 export function parsePhysicalCores(output: string): number {
   const cores = output.split('\n').filter(line => !line.startsWith('#')).map(line => line.trim()).filter(line => /^\d+,\d+$/.test(line))
   return new Set(cores).size
+}
+
+// Reads "dmidecode -t memory" output. Empty slots are skipped; the array's device count gives the total.
+export function parseLinuxMemory(output: string): { slots: number; modules: string } {
+  let slots = 0
+  const modules: string[] = []
+  for (const block of output.split(/\n\s*\n/)) {
+    const lines = block.split('\n')
+    const title = lines.find(line => line.trim() && !line.startsWith('Handle'))?.trim()
+    const fields: Record<string, string> = {}
+    for (const line of lines) {
+      const index = line.indexOf(':')
+      if (index !== -1) fields[line.slice(0, index).trim()] = line.slice(index + 1).trim()
+    }
+    if (title === 'Physical Memory Array') slots = Number(fields['Number Of Devices']) || 0
+    const size = fields.Size?.match(/^(\d+) (MB|GB)$/)
+    if (title !== 'Memory Device' || !size) continue
+    const gib = size[2] === 'GB' ? Number(size[1]) : Math.round(Number(size[1]) / 1024 * 10) / 10
+    const speed = fields.Speed?.match(/^(\d+) MT\/s$/)?.[1] ?? 'Unknown'
+    const configured = fields['Configured Memory Speed']?.match(/^(\d+) MT\/s$/)?.[1] ?? 'Unknown'
+    const name = fields['Part Number'] || fields.Manufacturer || 'Unknown'
+    modules.push(`${fields.Locator || 'Unknown'}\t${name}, ${gib} GiB @ ${speed} MHz (configured ${configured} MHz)`)
+  }
+  return { slots, modules: modules.join('\n') }
 }
 
 export function parseLinuxDisks(output: string): string {

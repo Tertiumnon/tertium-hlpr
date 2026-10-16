@@ -5,7 +5,7 @@ import os from 'node:os'
 import path from 'node:path'
 import readline from 'node:readline'
 
-// @description Install compatible command-line tools
+// @description Install Docker, htop, fastfetch, Starship, Claude CLI, Codex CLI, Copilot CLI, or another supported tool
 
 const tools = {
   'oh-my-posh': {
@@ -20,8 +20,17 @@ const tools = {
   },
 } as const
 
+// Global npm packages; each prints a hint about the command to run afterward.
+const npmTools = {
+  tldr: { package: 'tldr', next: 'Try: tldr tar' },
+  'claude-cli': { package: '@anthropic-ai/claude-code', next: 'Run: claude' },
+  'codex-cli': { package: '@openai/codex', next: 'Run: codex' },
+  'copilot-cli': { package: '@github/copilot', next: 'Run: copilot' },
+} as const
+
 type PromptTool = keyof typeof tools
-type Tool = PromptTool | 'psreadline' | 'pstop' | 'docker' | 'oh-my-zsh' | 'tldr' | 'htop' | 'fastfetch'
+type NpmTool = keyof typeof npmTools
+type Tool = PromptTool | NpmTool | 'psreadline' | 'pstop' | 'docker' | 'oh-my-zsh' | 'htop' | 'fastfetch'
 type Platform = 'win32' | 'darwin' | 'linux'
 type PackageManager = 'winget' | 'choco' | 'scoop' | 'brew' | 'apt-get' | 'dnf' | 'pacman'
 
@@ -32,7 +41,28 @@ export interface InstallCommand {
 
 export function parseTool(value?: string): Tool | undefined {
   const normalized = value?.toLowerCase()
-  return normalized === 'psreadline' || normalized === 'pstop' || normalized === 'docker' || normalized === 'oh-my-zsh' || normalized === 'tldr' || normalized === 'htop' || normalized === 'fastfetch' || (normalized && normalized in tools) ? normalized as Tool : undefined
+  return normalized === 'psreadline' || normalized === 'pstop' || normalized === 'docker' || normalized === 'oh-my-zsh' || normalized === 'htop' || normalized === 'fastfetch' || (normalized && Object.keys(tools).includes(normalized)) || (normalized && isNpmTool(normalized)) ? normalized as Tool : undefined
+}
+
+function isNpmTool(value: string): value is NpmTool {
+  return Object.keys(npmTools).includes(value)
+}
+
+// Accepts "claude-cli" or "-name claude-cli" / "-n claude-cli". Other dash-prefixed arguments are rejected.
+export function toolArgs(args: string[]): { value?: string; extra: string[] } {
+  const [first, second, ...rest] = args
+  if (first === '-n' || first === '-name') {
+    if (!second) throw new Error('Missing tool name after -name')
+    return { value: second, extra: rest }
+  }
+  if (first?.startsWith('-')) throw new Error(`Unknown option: ${first}`)
+  return { value: first, extra: args.slice(1) }
+}
+
+function npmInstallCommand(pkg: string, platform: string): InstallCommand {
+  return platform === 'win32'
+    ? { command: 'cmd.exe', args: ['/d', '/c', 'npm.cmd', 'install', '--global', pkg] }
+    : { command: 'npm', args: ['install', '--global', pkg] }
 }
 
 export function dockerInstallCommand(manager: PackageManager): InstallCommand {
@@ -97,17 +127,30 @@ export function updatePsReadLineProfile(content: string): string {
   return `${lines.join('\n')}\n`
 }
 
-const menu: Array<[Tool, string]> = [
-  ['oh-my-posh', 'Windows · PowerShell'],
-  ['starship', 'Windows · PowerShell'],
-  ['psreadline', 'Windows · PowerShell'],
-  ['pstop', 'Windows'],
-  ['docker', 'Windows/macOS/Linux'],
-  ['oh-my-zsh', 'Linux/macOS · Zsh; Windows · WSL'],
-  ['htop', 'macOS/Linux'],
-  ['fastfetch', 'Windows/macOS/Linux'],
-  ['tldr', 'Windows/macOS/Linux · Node.js/npm'],
+const allPlatforms: Platform[] = ['win32', 'darwin', 'linux']
+const toolPlatforms: Array<[Tool, string, Platform[]]> = [
+  ['oh-my-posh', 'Windows · PowerShell', ['win32']],
+  ['starship', 'Windows · PowerShell', ['win32']],
+  ['psreadline', 'Windows · PowerShell', ['win32']],
+  ['pstop', 'Windows', ['win32']],
+  ['docker', 'Windows/macOS/Linux', allPlatforms],
+  ['oh-my-zsh', 'Linux/macOS · Zsh; Windows · WSL', ['darwin', 'linux']],
+  ['htop', 'macOS/Linux', ['darwin', 'linux']],
+  ['fastfetch', 'Windows/macOS/Linux', allPlatforms],
+  ['tldr', 'Windows/macOS/Linux · Node.js/npm', allPlatforms],
+  ['claude-cli', 'Windows/macOS/Linux · Node.js/npm', allPlatforms],
+  ['codex-cli', 'Windows/macOS/Linux · Node.js/npm', allPlatforms],
+  ['copilot-cli', 'Windows/macOS/Linux · Node.js/npm', allPlatforms],
 ]
+
+// Only tools that install on this platform, so the menu never offers a dead end.
+export function menuFor(platform: string): Array<[Tool, string]> {
+  return toolPlatforms
+    .filter(([, , platforms]) => platforms.includes(platform as Platform))
+    .map(([tool, compatibility]) => [tool, compatibility])
+}
+
+const menu = menuFor(process.platform)
 
 export function moveSelection(index: number, direction: 'up' | 'down', count: number): number {
   return (index + (direction === 'up' ? -1 : 1) + count) % count
@@ -160,15 +203,16 @@ async function selectTool(value?: string): Promise<Tool | undefined> {
 
 async function main(): Promise<void> {
   if (process.argv.slice(2).some(arg => arg === '--help' || arg === '-h')) {
-    console.log('Usage: hlpr tool install [tool]')
-    console.log('Install a supported tool, or select one interactively. Tools include Docker, htop, and fastfetch.')
+    console.log('Usage: hlpr tool install [name]')
+    console.log('Install Docker, htop, fastfetch, Starship, Claude CLI, Codex CLI, Copilot CLI, or another supported tool. Run without a name to choose from a keyboard menu. Also accepts -name <name>.')
     return
   }
-  const tool = await selectTool(process.argv[2])
+  const { value, extra } = toolArgs(process.argv.slice(2))
+  const tool = await selectTool(value)
   if (!tool) return
+  if (extra.length) throw new Error(`${tool} does not accept extra arguments`)
 
   if (tool === 'docker') {
-    if (process.argv.length > 3) throw new Error('docker does not accept extra arguments')
     const platform = process.platform
     if (platform !== 'win32' && platform !== 'darwin' && platform !== 'linux') throw new Error(`docker installation is not supported on ${platform}`)
     run([dockerInstallCommand(availableManager(tool, platform))])
@@ -177,7 +221,6 @@ async function main(): Promise<void> {
   }
 
   if (tool === 'htop' || tool === 'fastfetch') {
-    if (process.argv.length > 3) throw new Error(`${tool} does not accept extra arguments`)
     const platform = process.platform
     if (platform !== 'win32' && platform !== 'darwin' && platform !== 'linux') throw new Error(`${tool} installation is not supported on ${platform}`)
     run([utilityInstallCommand(tool, availableManager(tool, platform))])
@@ -185,11 +228,10 @@ async function main(): Promise<void> {
     return
   }
 
-  if (tool === 'tldr') {
-    run([process.platform === 'win32'
-      ? { command: 'cmd.exe', args: ['/d', '/c', 'npm.cmd', 'install', '--global', 'tldr'] }
-      : { command: 'npm', args: ['install', '--global', 'tldr'] }])
-    console.log('Installed tldr. Try: tldr tar')
+  if (isNpmTool(tool)) {
+    const { package: pkg, next } = npmTools[tool]
+    run([npmInstallCommand(pkg, process.platform)])
+    console.log(`Installed ${tool}. ${next}`)
     return
   }
 
