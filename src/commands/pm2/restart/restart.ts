@@ -4,7 +4,7 @@ import { type Pm2Args, parsePm2Args, runPm2 } from '../../../core/pm2/pm2.js'
 // @description Restart a PM2 process on a remote host, so it reads its current environment
 
 // Literal on purpose: `hlpr help` scrapes "Usage:" lines from this source file.
-const USAGE = 'Usage: hlpr pm2 restart -host <hostname> -name <pm2 name>'
+const USAGE = 'Usage: hlpr pm2 restart [-ssh-host <host>] [-ssh-user <user>] [-ssm-param <name>] -name <pm2 name>'
 
 export function parseRestartArgs(args: string[]): Pm2Args {
   return parsePm2Args('restart', args, USAGE)

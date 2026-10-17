@@ -1,6 +1,6 @@
 import { spawnSync } from 'node:child_process'
 import { parseFlags } from '../args.js'
-import { type SshResolver, resolveSshHost } from '../ssh/remote.js'
+import { type DestinationDeps, destinationFor, sshTargetFromFlags } from '../ssh/destination.js'
 
 // PM2 on a remote host, over ssh. Shared by every `hlpr pm2 <action>` command.
 
@@ -16,34 +16,27 @@ export interface Pm2Args {
 const NAME = /^[A-Za-z0-9._-]+$/
 
 /**
- * Parses the flags of one action: `-host` always; `-name` for restart, stop and status;
- * `-dir` and `-config` for start (pm2 start <config> from that directory).
+ * Parses the flags of one action: `-ssh-host` and `-ssh-user`, or `-ssm-param` (the host and user it names), always; `-name` for
+ * restart, stop and status; `-dir` and `-config` for start (pm2 start <config> from that directory).
  */
-export function parsePm2Args(action: Pm2Action, args: string[], usage: string, resolve: SshResolver = resolveSshHost): Pm2Args {
+export function parsePm2Args(action: Pm2Action, args: string[], usage: string, deps: DestinationDeps = {}): Pm2Args {
   const needsName = action !== 'start';
-  const valued = needsName ? ['-host', '-name'] : ['-host', '-dir', '-config'];
+  const valued = needsName ? ['-ssh-host', '-ssh-user', '-ssm-param', '-name'] : ['-ssh-host', '-ssh-user', '-ssm-param', '-dir', '-config'];
   let values: Record<string, string | true>;
   try {
     values = parseFlags(args, valued);
   } catch (error) {
     throw new Error(`${error instanceof Error ? error.message : error}\n${usage}`);
   }
-  const host = values['-host'];
-  if (typeof host !== 'string') throw new Error(usage);
   if (needsName) {
     const name = values['-name'];
     if (typeof name !== 'string') throw new Error(usage);
-    return { sshConfig: validateSshConfig(resolve(host)), name: validatePm2Name(name) };
+    return { sshConfig: destinationFor(sshTargetFromFlags(values), deps), name: validatePm2Name(name) };
   }
   const dir = values['-dir'];
   const config = values['-config'];
   if (typeof dir !== 'string' || typeof config !== 'string') throw new Error(usage);
-  return { sshConfig: validateSshConfig(resolve(host)), dir: validateRemoteDir(dir), config: validateConfigFile(config) };
-}
-
-function validateSshConfig(name: string): string {
-  if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]*$/.test(name)) throw new Error('Invalid -host: use a HostName or Host alias from ~/.ssh/config');
-  return name;
+  return { sshConfig: destinationFor(sshTargetFromFlags(values), deps), dir: validateRemoteDir(dir), config: validateConfigFile(config) };
 }
 
 /** Single-quoted shell word for the remote shell. */

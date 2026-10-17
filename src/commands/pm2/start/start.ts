@@ -4,7 +4,7 @@ import { type Pm2Args, parsePm2Args, runPm2 } from '../../../core/pm2/pm2.js'
 // @description Start the PM2 apps of an ecosystem config on a remote host
 
 // Literal on purpose: `hlpr help` scrapes "Usage:" lines from this source file.
-const USAGE = 'Usage: hlpr pm2 start -host <hostname> -dir <dir> -config <file>'
+const USAGE = 'Usage: hlpr pm2 start [-ssh-host <host>] [-ssh-user <user>] [-ssm-param <name>] -dir <dir> -config <file>'
 
 export function parseStartArgs(args: string[]): Pm2Args {
   return parsePm2Args('start', args, USAGE)

@@ -7,28 +7,28 @@ const resolve = (host: string) => host
 describe('pm2 args', () => {
   test('restart, stop and status take -host and -name', () => {
     for (const action of ['restart', 'stop', 'status'] as const) {
-      expect(parsePm2Args(action, ['-host', 'app-deploy', '-name', 'app'], 'usage', resolve))
+      expect(parsePm2Args(action, ['-ssh-host', 'app-deploy', '-name', 'app'], 'usage', { resolve }))
         .toEqual({ sshConfig: 'app-deploy', name: 'app' })
     }
   })
 
   test('start takes -host, -dir and -config and no name', () => {
-    expect(parsePm2Args('start', ['-dir', '/var/www/app', '-host', 'drh-mini', '-config', 'pm2.config.cjs'], 'usage', resolve))
+    expect(parsePm2Args('start', ['-dir', '/var/www/app', '-ssh-host', 'drh-mini', '-config', 'pm2.config.cjs'], 'usage', { resolve }))
       .toEqual({ sshConfig: 'drh-mini', dir: '/var/www/app', config: 'pm2.config.cjs' })
   })
 
   test('reports the usage line when a required flag is missing or unknown', () => {
-    expect(() => parsePm2Args('restart', ['-host', 'a'], 'Usage: hlpr pm2 restart', resolve)).toThrow('Usage: hlpr pm2 restart')
-    expect(() => parsePm2Args('start', ['-host', 'a', '-dir', '/x'], 'Usage: hlpr pm2 start', resolve)).toThrow('Usage: hlpr pm2 start')
-    expect(() => parsePm2Args('stop', ['-host', 'a', '-name', 'x', '-force'], 'Usage: hlpr pm2 stop', resolve)).toThrow('Unknown or misplaced argument: -force')
+    expect(() => parsePm2Args('restart', ['-ssh-host', 'a'], 'Usage: hlpr pm2 restart', { resolve })).toThrow('Usage: hlpr pm2 restart')
+    expect(() => parsePm2Args('start', ['-ssh-host', 'a', '-dir', '/x'], 'Usage: hlpr pm2 start', { resolve })).toThrow('Usage: hlpr pm2 start')
+    expect(() => parsePm2Args('stop', ['-ssh-host', 'a', '-name', 'x', '-force'], 'Usage: hlpr pm2 stop', { resolve })).toThrow('Unknown or misplaced argument: -force')
   })
 
   test('validates the name, the directory and the config file', () => {
-    expect(() => parsePm2Args('restart', ['-host', 'a', '-name', 'x y'], 'u', resolve)).toThrow('Invalid -name')
-    expect(() => parsePm2Args('start', ['-host', 'a', '-dir', 'var/x', '-config', 'pm2.config.cjs'], 'u', resolve)).toThrow('Invalid -dir')
-    expect(() => parsePm2Args('start', ['-host', 'a', '-dir', '/var/x', '-config', '--x'], 'u', resolve)).toThrow('-config needs a value')
-    expect(() => parsePm2Args('start', ['-host', 'a', '-dir', '/var/x', '-config', 'a b'], 'u', resolve)).toThrow('Invalid -config')
-    expect(() => parsePm2Args('restart', ['-host', 'bad host', '-name', 'x'], 'u', resolve)).toThrow('Invalid -host')
+    expect(() => parsePm2Args('restart', ['-ssh-host', 'a', '-name', 'x y'], 'u', { resolve })).toThrow('Invalid -name')
+    expect(() => parsePm2Args('start', ['-ssh-host', 'a', '-dir', 'var/x', '-config', 'pm2.config.cjs'], 'u', { resolve })).toThrow('Invalid -dir')
+    expect(() => parsePm2Args('start', ['-ssh-host', 'a', '-dir', '/var/x', '-config', '--x'], 'u', { resolve })).toThrow('-config needs a value')
+    expect(() => parsePm2Args('start', ['-ssh-host', 'a', '-dir', '/var/x', '-config', 'a b'], 'u', { resolve })).toThrow('Invalid -config')
+    expect(() => parsePm2Args('restart', ['-ssh-host', 'bad host', '-name', 'x'], 'u', { resolve })).toThrow('Invalid -ssh-host')
   })
 
   test('the validators accept what pm2 and paths normally use', () => {

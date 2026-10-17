@@ -4,7 +4,7 @@ import { type Pm2Args, parsePm2Args, pm2Status } from '../../../core/pm2/pm2.js'
 // @description Print the PM2 status of a process on a remote host (exit code 1 unless it is online)
 
 // Literal on purpose: `hlpr help` scrapes "Usage:" lines from this source file.
-const USAGE = 'Usage: hlpr pm2 status -host <hostname> -name <pm2 name>'
+const USAGE = 'Usage: hlpr pm2 status [-ssh-host <host>] [-ssh-user <user>] [-ssm-param <name>] -name <pm2 name>'
 
 export function parseStatusArgs(args: string[]): Pm2Args {
   return parsePm2Args('status', args, USAGE)
