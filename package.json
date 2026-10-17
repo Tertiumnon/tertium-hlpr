@@ -15,9 +15,9 @@
     "typecheck": "tsc --noEmit",
     "test:e2e": "bun scripts/test-rename/test-rename.ts",
     "prepublishOnly": "bun run build",
-    "release:patch": "bun node_modules/@tertium/js/scripts/release/release.ts patch",
-    "release:minor": "bun node_modules/@tertium/js/scripts/release/release.ts minor",
-    "release:major": "bun node_modules/@tertium/js/scripts/release/release.ts major",
+    "release:patch": "gith release --patch",
+    "release:minor": "gith release --minor",
+    "release:major": "gith release --major",
     "version": "bun node_modules/@tertium/js/scripts/changelog/changelog.ts && git add CHANGELOG.md",
     "setup:hooks": "git config core.hooksPath .githooks",
     "prepare": "git config core.hooksPath .githooks"
