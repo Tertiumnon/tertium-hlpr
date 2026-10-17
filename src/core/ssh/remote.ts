@@ -2,7 +2,7 @@ import { spawn } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { hostAliasesFor } from './config.js'
+import { hasHostAlias, hostAliasesFor } from './config.js'
 
 // What the user typed: the host name as written in ~/.ssh/config (HostName) and the remote file.
 export interface RemoteFileArgs {
@@ -37,7 +37,8 @@ export function parseRemoteFileArgs(args: string[], usage: string): RemoteFileAr
 
 export type SshResolver = (host: string) => string
 
-// Finds the one ~/.ssh/config entry whose HostName is host, and returns its Host alias for ssh.
+// Returns the Host alias for ssh. A name that is itself a Host alias is used as written, so one of several
+// aliases with the same HostName can be chosen (`app-deploy`). Otherwise finds the one entry whose HostName is host.
 export function resolveSshHost(host: string, configPath = path.join(os.homedir(), '.ssh', 'config')): string {
   let config: string
   try {
@@ -46,6 +47,7 @@ export function resolveSshHost(host: string, configPath = path.join(os.homedir()
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') throw new Error(`No SSH config found at ${configPath}`)
     throw error
   }
+  if (hasHostAlias(config, host)) return host
   const aliases = hostAliasesFor(config, host)
   if (aliases.length === 0) throw new Error(`No SSH config entry with HostName "${host}" in ${configPath}`)
   if (aliases.length > 1) throw new Error(`Several SSH config entries use HostName "${host}": ${aliases.join(', ')}. Keep one.`)
