@@ -53,6 +53,8 @@ hlpr file rename -dir ./src -style kebab -r -d -f --dry
 | [file rename](src/commands/file/rename/README.md) | Rename files and directories |
 | [file move](src/commands/file/move/README.md) | Move a file and update references |
 | [file find](src/commands/file/find/README.md) (`search`) | Find files by name |
+| [file read](src/commands/file/read/README.md) | Print a remote file over SSH |
+| [file edit](src/commands/file/edit/README.md) | Edit a remote file in your editor over SSH |
 | git commands | Moved to [@tertium/gith](https://www.npmjs.com/package/@tertium/gith) (`gith setup -n npm` writes the pre-commit hook); see the changelog |
 | [npm scripts](src/commands/npm/scripts/README.md) | Add missing start and dev npm scripts |
 | [gh setup](src/commands/gh/setup/README.md) | Write GitHub workflows: npm publish (trusted publishing) and SSH deploy |
@@ -79,7 +81,11 @@ hlpr file rename -dir ./src -style kebab -r -d -f --dry
 | [zsh fix --bun](src/commands/zsh/README.md) | Add bun to PATH in ~/.zshrc |
 | [ssh setup](src/commands/ssh/README.md#setup) | Create ~/.ssh with the permissions SSH requires |
 | [ssh fix --permissions](src/commands/ssh/README.md#fix) | Fix permissions of ~/.ssh and its files |
-| [ssh read](src/commands/ssh/read/README.md) | Print one connection's Host block from ~/.ssh/config |
+| [mariadb backup](src/commands/mariadb/backup/README.md) | Dump a MariaDB database over SSH into a local .sql file |
+| [mariadb sync](src/commands/mariadb/sync/README.md) | Copy one MariaDB database over another, backing up the target first |
+| [mariadb user-password](src/commands/mariadb/user-password/README.md) | Set a MariaDB user's password on a remote host over SSH |
+| [aws-param-store read](src/commands/aws-param-store/read/README.md) | Print one AWS Parameter Store value, decrypted |
+| [aws-param-store edit](src/commands/aws-param-store/edit/README.md) | Edit one AWS Parameter Store value in your editor and write it back |
 | [hello](src/commands/hello/README.md) | Run a Matrix rain animation |
 | [hello world](src/commands/hello/world/README.md) | Display animated Hello World art |
 | [self update](src/commands/self/update/README.md) (`self upgrade`) | Update hlpr and repair broken command files |
