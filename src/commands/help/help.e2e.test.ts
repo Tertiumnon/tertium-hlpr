@@ -82,19 +82,18 @@ test('help lists current commands, excludes helpers, and shows the package versi
     expect(result.stdout).not.toContain('(TS)')
     expect(result.stdout).not.toContain('EXAMPLES:')
     expect(result.stdout).not.toContain('\u001b[')
-    for (const command of ['file rename', 'file move', 'file find -name <name>', 'file search -name <name>', 'net scan', 'net list -device', 'net status', 'system info', 'battery status', 'disk info', 'memory info', 'git create', 'process list', 'process kill', 'app list', 'app search -name <name>', 'app find -name <name>', 'app remove -name <app name>', 'ssh mkcon', 'ssh mkkey', 'tool install', 'runtime install', 'self update', 'self fix', 'self upgrade', 'hello', 'hello world']) {
+    for (const command of ['file rename', 'file move', 'file find -name <name>', 'file search -name <name>', 'net scan', 'net list -device', 'net status', 'system info', 'battery status', 'disk info', 'memory info', 'process list', 'process kill', 'app list', 'app search -name <name>', 'app find -name <name>', 'app remove -name <app name>', 'ssh mkcon', 'ssh mkkey', 'tool install', 'runtime install', 'self update', 'self fix', 'self upgrade', 'hello', 'hello world']) {
       expect(result.stdout).toContain(`hlpr ${command}`)
     }
     expect(result.stdout).toContain('also: hlpr net list -d')
     expect(result.stdout).not.toMatch(/also: (?!hlpr )/)
-    for (const obsolete of ['.types', 'hlpr demo ', 'hlpr rename ', 'hlpr mv ', 'hlpr list process', 'hlpr list app', 'hlpr kill process', 'hlpr ssh add connection', 'git precommit', 'git fodd', 'hlpr nvm', 'hlpr net devices']) {
+    for (const obsolete of ['.types', 'hlpr demo ', 'hlpr rename ', 'hlpr mv ', 'hlpr list process', 'hlpr list app', 'hlpr kill process', 'hlpr ssh add connection', 'git precommit', 'git fodd', 'hlpr nvm', 'hlpr net devices', 'hlpr git ']) {
       expect(result.stdout).not.toContain(obsolete)
     }
     expect(result.stdout).toContain('hlpr [options] <domain> <command> [params...]')
-    expect(result.stdout).toContain('hlpr git create <-branch|-b> <branch>')
     expect(result.stdout).toContain('hlpr process kill (-id <id> | -port <port> | -folder|-file|-path <path>) [options]')
     expect(result.stdout).toContain('hlpr file rename -dir <dir> -style <style> [-r] [-d] [-f]')
-    for (const alias of ['battery info', 'net info', 'disk status', 'memory status', 'system status', 'app delete -name <app name>', 'app uninstall -name <app name>', 'file mv', 'git rm']) expect(result.stdout).toContain(`hlpr ${alias}`)
+    for (const alias of ['battery info', 'net info', 'disk status', 'memory status', 'system status', 'app delete -name <app name>', 'app uninstall -name <app name>', 'file mv']) expect(result.stdout).toContain(`hlpr ${alias}`)
   }
   for (const [category, alias, original] of [['battery', 'info', 'status'], ['net', 'info', 'status'], ['disk', 'status', 'info'], ['memory', 'status', 'info'], ['system', 'status', 'info']]) {
     const result = spawnSync('node', ['bin/index.js', category, alias, '--help'], { encoding: 'utf8' })

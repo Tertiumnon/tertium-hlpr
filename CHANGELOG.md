@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+- **Removed: `hlpr git` commands.** They now live in [`@tertium/gith`](https://www.npmjs.com/package/@tertium/gith), the git helper that also covers the branch flow (`create`, `merge`, `release`). Why: git workflow belongs in one tool, and the branch and cleanup commands were duplicated there. `hlpr git setup -hooks` is also gone; `hlpr angular setup` still writes the same shared pre-commit hook.
+
+  | Removed from hlpr | Use in gith |
+  | --- | --- |
+  | `hlpr git create -branch <b>` (branch without switching) | `gith create -b <b>` starts a work branch from develop and switches to it |
+  | `hlpr git switch -branch <b>` | `gith switch -b <b>` |
+  | `hlpr git remove -branch <b>` / `rm -b` | `gith remove -b <b>` (`gith rm` also works) |
+  | `hlpr git rm <b> -remote` | `gith remove -b <b> --remote` |
+  | `hlpr git rm <b> -both` | `gith remove -b <b> --both` |
+  | `hlpr git sync` | `gith sync` |
+  | `hlpr git clean` | `gith clean` |
+  | `hlpr git setup -hooks [--force]` | `gith setup --hooks [--force]` |
+
 ## 0.18.0 - 2026-10-16
 
 - docs: update root command table and AGENTS example

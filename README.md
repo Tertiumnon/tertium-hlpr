@@ -43,7 +43,6 @@ hlpr system info
 hlpr battery status
 hlpr ssh mkcon
 hlpr ssh mkkey
-hlpr git create -b feature/example
 hlpr file rename -dir ./src -style kebab -r -d -f --dry
 ```
 
@@ -54,8 +53,7 @@ hlpr file rename -dir ./src -style kebab -r -d -f --dry
 | [file rename](src/commands/file/rename/README.md) | Rename files and directories |
 | [file move](src/commands/file/move/README.md) | Move a file and update references |
 | [file find](src/commands/file/find/README.md) (`search`) | Find files by name |
-| [git](src/commands/git/README.md)                   | Manage branches and working files       |
-| [git setup -hooks](src/commands/git/setup/README.md) | Write a shared pre-commit hook |
+| git commands | Moved to [@tertium/gith](https://www.npmjs.com/package/@tertium/gith); see the changelog |
 | [npm scripts](src/commands/npm/scripts/README.md) | Add missing start and dev npm scripts |
 | [gh setup](src/commands/gh/setup/README.md) | Write GitHub workflows: npm publish (trusted publishing) and SSH deploy |
 | [az setup](src/commands/az/setup/README.md) | Write an Azure Pipelines SSH deploy (`azure-pipelines.yml`) |
