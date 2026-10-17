@@ -18,12 +18,9 @@
     "release:patch": "gith release --patch",
     "release:minor": "gith release --minor",
     "release:major": "gith release --major",
-    "version": "bun node_modules/@tertium/js/scripts/changelog/changelog.ts && git add CHANGELOG.md",
+    "version": "gith changelog --no-commit && git add CHANGELOG.md",
     "setup:hooks": "git config core.hooksPath .githooks",
     "prepare": "git config core.hooksPath .githooks"
-  },
-  "dependencies": {
-    "@tertium/js": "^3.2.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
