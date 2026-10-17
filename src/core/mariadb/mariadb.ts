@@ -1,6 +1,6 @@
 import { spawnSync } from 'node:child_process'
 
-// Shared by `mariadb backup`, `mariadb sync` and `mariadb user-password`: parse flags, read a
+// Shared by `mariadb backup`, `mariadb sync` and `mariadb set-user-password`: parse flags, read a
 // DATABASE_URL, and run the MariaDB client on a host over SSH.
 
 // A non-interactive SSH session on macOS often lacks Homebrew's bin on PATH, so its keg paths are probed
@@ -35,25 +35,7 @@ export interface DbTarget {
   database: string
 }
 
-// Parses `-flag value` pairs and bare switches. Rejects unknown flags, repeats and missing values.
-export function parseFlags(args: string[], valued: string[], switches: string[] = []): Record<string, string | true> {
-  const values: Record<string, string | true> = {}
-  for (let index = 0; index < args.length; index++) {
-    const arg = args[index]
-    if (switches.includes(arg)) {
-      if (values[arg]) throw new Error(`Repeated flag ${arg}`)
-      values[arg] = true
-      continue
-    }
-    if (!valued.includes(arg)) throw new Error(`Unknown or misplaced argument: ${arg}`)
-    if (values[arg]) throw new Error(`Repeated flag ${arg}`)
-    const value = args[index + 1]
-    if (value === undefined || value.startsWith('-')) throw new Error(`${arg} needs a value`)
-    values[arg] = value
-    index++
-  }
-  return values
-}
+export { parseFlags } from '../args.js'
 
 // Single-quoted shell word for the remote POSIX shell that ssh hands the command string to.
 export function sq(value: string): string {
