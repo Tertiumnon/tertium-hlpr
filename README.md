@@ -53,8 +53,7 @@ hlpr file rename -dir ./src -style kebab -r -d -f --dry
 | [file rename](src/commands/file/rename/README.md) | Rename files and directories |
 | [file move](src/commands/file/move/README.md) | Move a file and update references |
 | [file find](src/commands/file/find/README.md) (`search`) | Find files by name |
-| [git setup](src/commands/git/setup/README.md) | Write a shared pre-commit hook for npm projects (`--hooks --npm`) |
-| git commands | Moved to [@tertium/gith](https://www.npmjs.com/package/@tertium/gith); see the changelog |
+| git commands | Moved to [@tertium/gith](https://www.npmjs.com/package/@tertium/gith) (`gith setup -n npm` writes the pre-commit hook); see the changelog |
 | [npm scripts](src/commands/npm/scripts/README.md) | Add missing start and dev npm scripts |
 | [gh setup](src/commands/gh/setup/README.md) | Write GitHub workflows: npm publish (trusted publishing) and SSH deploy |
 | [gh rename](src/commands/gh/rename/README.md) | Rename a GitHub repository (`-repo <owner/repo> -to <new name>`) |
