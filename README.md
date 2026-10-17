@@ -57,6 +57,8 @@ hlpr file rename -dir ./src -style kebab -r -d -f --dry
 | git commands | Moved to [@tertium/gith](https://www.npmjs.com/package/@tertium/gith); see the changelog |
 | [npm scripts](src/commands/npm/scripts/README.md) | Add missing start and dev npm scripts |
 | [gh setup](src/commands/gh/setup/README.md) | Write GitHub workflows: npm publish (trusted publishing) and SSH deploy |
+| [gh rename](src/commands/gh/rename/README.md) | Rename a GitHub repository (`-repo <owner/repo> -to <new name>`) |
+| [gh change](src/commands/gh/change/README.md) | Rename the default branch of the current repository (`-default-branch <name> -to <new name>`) |
 | [az setup](src/commands/az/setup/README.md) | Write an Azure Pipelines SSH deploy (`azure-pipelines.yml`) |
 | [angular setup](src/commands/angular/setup/README.md) | Set up an Angular project with bun, biome, hooks, and changelog |
 | [net list -device](src/commands/net/list/README.md)   | List cached local device IPv4 addresses |

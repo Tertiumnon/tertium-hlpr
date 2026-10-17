@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- **Added: `hlpr gh rename -repo <owner/repo> -to <new name>`.** Renames a GitHub repository with `gh repo rename`, which still asks for confirmation.
+- **Added: `hlpr gh change -default-branch <name> -to <new name>`.** Renames the default branch of the current repository, after checking that it is the branch named by `-default-branch`.
+
 - **Removed: `hlpr git` commands.** They now live in [`@tertium/gith`](https://www.npmjs.com/package/@tertium/gith), the git helper that also covers the branch flow (`create`, `merge`, `release`). Why: git workflow belongs in one tool, and the branch and cleanup commands were duplicated there. `hlpr git setup --hooks --npm` (the shared pre-commit hook for npm projects) is back in hlpr, and `hlpr angular setup` writes the same hook.
 
   | Removed from hlpr | Use in gith |
