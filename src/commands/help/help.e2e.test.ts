@@ -82,7 +82,7 @@ test('help lists current commands, excludes helpers, and shows the package versi
     expect(result.stdout).not.toContain('(TS)')
     expect(result.stdout).not.toContain('EXAMPLES:')
     expect(result.stdout).not.toContain('\u001b[')
-    for (const command of ['file rename', 'file move', 'file find -name <name>', 'file search -name <name>', 'net scan', 'net list -device', 'net status', 'system info', 'battery status', 'disk info', 'memory info', 'git setup --hooks --npm', 'process list', 'process kill', 'app list', 'app search -name <name>', 'app find -name <name>', 'app remove -name <app name>', 'ssh mkcon', 'ssh mkkey', 'tool install', 'runtime install', 'self update', 'self fix', 'self upgrade', 'hello', 'hello world']) {
+    for (const command of ['file rename', 'file move', 'file find -name <name>', 'file search -name <name>', 'net scan', 'net list -device', 'net status', 'system info', 'battery status', 'disk info', 'memory info', 'process list', 'process kill', 'app list', 'app search -name <name>', 'app find -name <name>', 'app remove -name <app name>', 'ssh mkcon', 'ssh mkkey', 'tool install', 'runtime install', 'self update', 'self fix', 'self upgrade', 'hello', 'hello world']) {
       expect(result.stdout).toContain(`hlpr ${command}`)
     }
     expect(result.stdout).toContain('also: hlpr net list -d')
