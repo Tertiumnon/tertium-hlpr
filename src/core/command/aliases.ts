@@ -3,7 +3,6 @@ const aliases: Record<string, Record<string, string>> = {
   battery: { info: 'status' },
   disk: { status: 'info' },
   file: { mv: 'move', search: 'find' },
-  git: { rm: 'remove' },
   memory: { status: 'info' },
   net: { info: 'status' },
   system: { status: 'info' },

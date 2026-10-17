@@ -6,13 +6,15 @@ import path from 'node:path'
 import { buildPreCommitHook, setupGitHooks } from '../../../core/git/hooks.js'
 import { parseSetupArgs } from './setup.js'
 
-describe('git setup -hooks', () => {
-  test('requires -hooks, takes no project path, and accepts --force', () => {
-    expect(parseSetupArgs(['-hooks'])).toEqual({ force: false })
-    expect(parseSetupArgs(['-hooks', '--force'])).toEqual({ force: true })
-    expect(() => parseSetupArgs([])).toThrow('Usage: hlpr git setup -hooks')
-    expect(() => parseSetupArgs(['-hooks', './app'])).toThrow('Unknown option ./app')
-    expect(() => parseSetupArgs(['-hooks', '-force'])).toThrow('Unknown option -force')
+describe('git setup --hooks --npm', () => {
+  test('requires --hooks and --npm, takes no project path, and accepts --force', () => {
+    expect(parseSetupArgs(['--hooks', '--npm'])).toEqual({ force: false })
+    expect(parseSetupArgs(['--hooks', '--npm', '--force'])).toEqual({ force: true })
+    expect(parseSetupArgs(['-hooks', '--npm'])).toEqual({ force: false })
+    expect(() => parseSetupArgs([])).toThrow('Usage: hlpr git setup --hooks --npm')
+    expect(() => parseSetupArgs(['--hooks'])).toThrow('--npm is required')
+    expect(() => parseSetupArgs(['--hooks', '--npm', './app'])).toThrow('Unknown option ./app')
+    expect(() => parseSetupArgs(['--hooks', '--npm', '-force'])).toThrow('Unknown option -force')
   })
 
   test('TypeScript projects always check lint and typecheck, test only when defined', () => {
