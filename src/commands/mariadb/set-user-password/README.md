@@ -1,9 +1,9 @@
-# mariadb user-password
+# mariadb set-user-password
 
 Set the password of a MariaDB user on a remote host:
 
 ```sh
-hlpr mariadb user-password -db-name <name> -db-password <password> -host <hostname>
+hlpr mariadb set-user-password -db-name <name> -db-password <password> -host <hostname>
 ```
 
 - `-db-name` is the MariaDB user name (letters, digits and underscores).

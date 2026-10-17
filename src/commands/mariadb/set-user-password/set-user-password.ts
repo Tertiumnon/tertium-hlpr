@@ -1,24 +1,22 @@
 #!/usr/bin/env node
-import { spawn } from 'node:child_process'
-import { sqlString, validateSshConfig } from '../../../core/mariadb/mariadb.js'
+import { readFileSync } from 'node:fs'
+import { validateSshConfig } from '../../../core/mariadb/mariadb.js'
+import { setUserPassword } from '../../../core/mariadb/users.js'
 import { type SshResolver, resolveSshHost } from '../../../core/ssh/remote.js'
 
 // @description Set a MariaDB user's password on a remote host over SSH
 
 // Literal on purpose: `hlpr help` scrapes "Usage:" lines from this source file.
-const USAGE = 'Usage: hlpr mariadb user-password -db-name <name> -db-password <password> -host <hostname>'
+const USAGE = 'Usage: hlpr mariadb set-user-password -db-name <name> [-db-password <password>] -host <hostname>'
 
-export interface UserPasswordOptions {
+export interface UserPasswordArgs {
   dbName: string
-  dbPassword: string
+  /** Absent when the password is read from stdin, so it stays off the command line. */
+  dbPassword?: string
   sshConfig: string
 }
 
-// Runs one SQL script as root on the remote host and returns its output. The script travels over stdin,
-// so the password never appears in the remote process list.
-export type RemoteSql = (sshConfig: string, sql: string) => Promise<string>
-
-export function parseUserPasswordArgs(args: string[], resolve: SshResolver = resolveSshHost): UserPasswordOptions {
+export function parseUserPasswordArgs(args: string[], resolve: SshResolver = resolveSshHost): UserPasswordArgs {
   const values: Record<string, string> = {}
   for (let index = 0; index < args.length; index++) {
     const arg = args[index]
@@ -29,60 +27,34 @@ export function parseUserPasswordArgs(args: string[], resolve: SshResolver = res
     index++
   }
   const dbName = values['-db-name']
-  const dbPassword = values['-db-password']
   const host = values['-host']
-  if (!dbName || dbPassword === undefined || !host) throw new Error(USAGE)
+  if (!dbName || !host) throw new Error(USAGE)
   if (!/^[A-Za-z0-9_]+$/.test(dbName)) throw new Error('Invalid -db-name: use letters, digits and underscores')
-  if (dbPassword === '' || /[\r\n\0]/.test(dbPassword)) throw new Error('Invalid -db-password: it must not be empty or contain line breaks')
+  const dbPassword = values['-db-password']
+  if (dbPassword !== undefined && (dbPassword === '' || /[\r\n\0]/.test(dbPassword))) throw new Error('Invalid -db-password: it must not be empty or contain line breaks')
   return { dbName, dbPassword, sshConfig: validateSshConfig(resolve(host), '-host') }
 }
 
-export { sqlString }
-
-// Every account row of the user (one per host it may connect from), so the password changes everywhere.
-function hostsQuery(name: string): string {
-  return `SELECT host FROM mysql.user WHERE user = ${sqlString(name)};\n`
+// The password from stdin: one line, without its line break.
+export function readPasswordFromStdin(): string {
+  if (process.stdin.isTTY) throw new Error('No -db-password given: pipe the password on stdin, or pass -db-password')
+  const password = readFileSync(0, 'utf-8').replace(/\r?\n$/, '')
+  if (password === '' || /[\r\n\0]/.test(password)) throw new Error('Invalid password on stdin: it must not be empty or contain line breaks')
+  return password
 }
 
-export function alterUserStatement(name: string, host: string, password: string): string {
-  return `ALTER USER ${sqlString(name)}@${sqlString(host)} IDENTIFIED BY ${sqlString(password)};\n`
-}
-
-// Returns the hosts whose password was changed. Throws if the user does not exist on the remote server.
-export async function setUserPassword(options: UserPasswordOptions, runSql: RemoteSql = runRemoteSql): Promise<string[]> {
-  const hosts = (await runSql(options.sshConfig, hostsQuery(options.dbName)))
-    .split(/\r?\n/).map(line => line.trim()).filter(Boolean)
-  if (hosts.length === 0) throw new Error(`No MariaDB user "${options.dbName}" on ${options.sshConfig}`)
-  const script = hosts.map(host => alterUserStatement(options.dbName, host, options.dbPassword)).join('')
-  await runSql(options.sshConfig, script)
-  return hosts
-}
-
-// `sudo -n` fails instead of prompting; mariadb as root uses the local socket on the host.
-export function runRemoteSql(sshConfig: string, sql: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const child = spawn('ssh', ['-o', 'BatchMode=yes', sshConfig, 'sudo -n mariadb --batch --skip-column-names'])
-    let stdout = ''
-    let stderr = ''
-    child.stdout.on('data', chunk => { stdout += chunk })
-    child.stderr.on('data', chunk => { stderr += chunk })
-    child.on('error', reject)
-    child.on('close', code => {
-      if (code === 0) resolve(stdout)
-      else reject(new Error(`mariadb on ${sshConfig} failed (exit ${code}): ${stderr.trim()}`))
-    })
-    child.stdin.end(sql)
-  })
-}
+export { sqlString } from '../../../core/mariadb/mariadb.js'
+export { alterUserStatement, runRemoteSql, setUserPassword } from '../../../core/mariadb/users.js'
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2)
   if (args.includes('-h') || args.includes('--help')) {
-    console.log(`${USAGE}\nSets the password of the MariaDB user <name> on every host it is defined for. Connects over SSH and runs mariadb as root there (sudo -n).`)
+    console.log(`${USAGE}\nSets the password of the MariaDB user <name> on every host it is defined for. Connects over SSH and runs mariadb as root there (sudo -n). The password is read from stdin when -db-password is not given.`)
     return
   }
   const options = parseUserPasswordArgs(args)
-  const hosts = await setUserPassword(options)
+  const dbPassword = options.dbPassword ?? readPasswordFromStdin()
+  const hosts = await setUserPassword({ dbName: options.dbName, dbPassword, sshConfig: options.sshConfig })
   console.log(`Password set for MariaDB user ${options.dbName} on ${options.sshConfig}: ${hosts.join(', ')}`)
 }
 

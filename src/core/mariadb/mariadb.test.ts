@@ -45,7 +45,7 @@ describe('mariadb core', () => {
   })
 
   test('validates SSH config and SSM names', () => {
-    expect(validateSshConfig('tertium-deploy', '-ssh-config')).toBe('tertium-deploy')
+    expect(validateSshConfig('app-deploy', '-ssh-config')).toBe('app-deploy')
     expect(() => validateSshConfig('a b', '-ssh-config')).toThrow('Invalid -ssh-config')
     expect(validateParamName('/env/app/env.dev', '-ssm-param')).toBe('/env/app/env.dev')
     expect(() => validateParamName('env/app', '-ssm-param')).toThrow('Invalid -ssm-param')

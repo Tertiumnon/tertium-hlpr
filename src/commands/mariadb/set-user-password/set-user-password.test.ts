@@ -1,12 +1,14 @@
 import { describe, expect, test } from 'bun:test'
-import { alterUserStatement, parseUserPasswordArgs, setUserPassword, sqlString } from './user-password.js'
+import { alterUserStatement, parseUserPasswordArgs, setUserPassword, sqlString } from './set-user-password.js'
 
 // Host names are used as Host aliases here, so no ~/.ssh/config lookup happens.
 const parse = (args: string[]) => parseUserPasswordArgs(args, host => host)
 
 const valid = ['-db-name', 'dungeons', '-db-password', 's3cret', '-host', 'tertium']
+// The full target, as main() builds it once the password is known.
+const target = () => ({ ...parse(valid), dbPassword: 's3cret' })
 
-describe('mariadb user-password', () => {
+describe('mariadb set-user-password', () => {
   test('parses the flags in any order', () => {
     expect(parse(valid)).toEqual({ dbName: 'dungeons', dbPassword: 's3cret', sshConfig: 'tertium' })
     expect(parse(['-host', 'tertium', '-db-password', 's3cret', '-db-name', 'dungeons']))
@@ -18,10 +20,11 @@ describe('mariadb user-password', () => {
   })
 
   test('requires every flag once and rejects unknown flags', () => {
-    expect(() => parse(valid.slice(2))).toThrow('Usage: hlpr mariadb user-password')
-    expect(() => parse(['-db-name', 'dungeons', '-host', 'tertium'])).toThrow('Usage: hlpr mariadb user-password')
-    expect(() => parse([...valid, '-db-name', 'other'])).toThrow('Usage: hlpr mariadb user-password')
-    expect(() => parse([...valid, '-extra', 'x'])).toThrow('Usage: hlpr mariadb user-password')
+    expect(() => parse(valid.slice(2))).toThrow('Usage: hlpr mariadb set-user-password')
+    expect(() => parse(['-db-name', 'dungeons'])).toThrow('Usage: hlpr mariadb set-user-password')
+    expect(parse(['-db-name', 'dungeons', '-host', 'tertium'])).toEqual({ dbName: 'dungeons', dbPassword: undefined, sshConfig: 'tertium' })
+    expect(() => parse([...valid, '-db-name', 'other'])).toThrow('Usage: hlpr mariadb set-user-password')
+    expect(() => parse([...valid, '-extra', 'x'])).toThrow('Usage: hlpr mariadb set-user-password')
   })
 
   test('rejects unsafe names and empty or multi-line passwords', () => {
@@ -44,7 +47,7 @@ describe('mariadb user-password', () => {
       calls.push({ sshConfig, sql })
       return sql.startsWith('SELECT') ? 'localhost\n%\n' : ''
     }
-    const hosts = await setUserPassword(parse(valid), fake)
+    const hosts = await setUserPassword(target(), fake)
     expect(hosts).toEqual(['localhost', '%'])
     expect(calls).toHaveLength(2)
     expect(calls[0].sshConfig).toBe('tertium')
@@ -56,7 +59,7 @@ describe('mariadb user-password', () => {
   test('fails without changing anything when the user does not exist', async () => {
     const calls: string[] = []
     const fake = async (_sshConfig: string, sql: string) => { calls.push(sql); return '' }
-    await expect(setUserPassword(parse(valid), fake)).rejects.toThrow('No MariaDB user "dungeons" on tertium')
+    await expect(setUserPassword(target(), fake)).rejects.toThrow('No MariaDB user "dungeons" on tertium')
     expect(calls).toHaveLength(1)
   })
 })
