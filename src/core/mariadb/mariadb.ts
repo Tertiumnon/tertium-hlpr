@@ -47,10 +47,6 @@ export function sqlString(value: string): string {
   return `'${value.replace(/\\/g, '\\\\').replace(/'/g, "''")}'`
 }
 
-export function validateSshConfig(name: string, flag: string): string {
-  if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]*$/.test(name)) throw new Error(`Invalid ${flag}: use a connection name from ~/.ssh/config`)
-  return name
-}
 
 export function parseDatabaseUrl(databaseUrl: string, ssh: string): DbTarget {
   let url: URL

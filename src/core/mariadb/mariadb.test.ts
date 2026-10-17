@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import { validateParamName } from '../aws/param-store.js'
-import { parseDatabaseUrl, parseFlags, readDatabaseUrl, remoteCommand, sq, sqlString, validateSshConfig } from './mariadb.js'
+import { parseDatabaseUrl, parseFlags, readDatabaseUrl, remoteCommand, sq, sqlString } from './mariadb.js'
 
 describe('mariadb core', () => {
   test('parseFlags reads valued flags and switches, and rejects bad input', () => {
@@ -45,8 +45,6 @@ describe('mariadb core', () => {
   })
 
   test('validates SSH config and SSM names', () => {
-    expect(validateSshConfig('app-deploy', '-ssh-config')).toBe('app-deploy')
-    expect(() => validateSshConfig('a b', '-ssh-config')).toThrow('Invalid -ssh-config')
     expect(validateParamName('/env/app/env.dev', '-ssm-param')).toBe('/env/app/env.dev')
     expect(() => validateParamName('env/app', '-ssm-param')).toThrow('Invalid -ssm-param')
   })

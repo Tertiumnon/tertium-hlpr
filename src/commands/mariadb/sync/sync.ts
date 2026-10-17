@@ -14,14 +14,13 @@ import {
   sq,
   sqlString,
   sshRun,
-  validateSshConfig,
 } from '../../../core/mariadb/mariadb.js'
-import { type SshResolver, resolveSshHost } from '../../../core/ssh/remote.js'
+import { type DestinationDeps, destinationFor } from '../../../core/ssh/destination.js'
 
 // @description Copy one MariaDB database over another over SSH, backing up the target first
 
 // Literal on purpose: `hlpr help` scrapes "Usage:" lines from this source file.
-const USAGE = 'Usage: hlpr mariadb sync -from-host <hostname> (-from-db-url <url> | -from-ssm-param <name>) -to-host <hostname> (-to-db-url <url> | -to-ssm-param <name>) [-dry-run] [-skip-backup] [-backup-dir <dir>]'
+const USAGE = 'Usage: hlpr mariadb sync [-from-ssh-host <host>] [-from-ssh-user <user>] [-from-ssm-param <name>] (-from-db-url <url> | -from-ssm-param <name>) [-to-ssh-host <host>] [-to-ssh-user <user>] [-to-ssm-param <name>] (-to-db-url <url> | -to-ssm-param <name>) [-dry-run] [-skip-backup] [-backup-dir <dir>]'
 
 interface Side {
   ssh: string
@@ -36,26 +35,27 @@ export interface SyncOptions {
   backupDir: string
 }
 
-function parseSide(values: Record<string, string | true>, name: 'from' | 'to', resolve: SshResolver): Side {
-  const host = values[`-${name}-host`]
+function parseSide(values: Record<string, string | true>, name: 'from' | 'to', deps: DestinationDeps): Side {
+  const sshHost = typeof values[`-${name}-ssh-host`] === 'string' ? values[`-${name}-ssh-host`] as string : undefined
+  const sshUser = typeof values[`-${name}-ssh-user`] === 'string' ? values[`-${name}-ssh-user`] as string : undefined
   const url = values[`-${name}-db-url`]
-  const ssm = values[`-${name}-ssm-param`]
-  if (typeof host !== 'string') throw new Error(USAGE)
+  const ssm = typeof values[`-${name}-ssm-param`] === 'string' ? values[`-${name}-ssm-param`] as string : undefined
+  if (url === undefined && ssm === undefined) throw new Error(USAGE)
   if ((url === undefined) === (ssm === undefined)) throw new Error(`${USAGE}\nGive exactly one of -${name}-db-url or -${name}-ssm-param`)
   const source = typeof url === 'string' ? url : `ssm:${validateParamName(String(ssm), `-${name}-ssm-param`)}`
-  return { ssh: validateSshConfig(resolve(host), `-${name}-host`), source }
+  return { ssh: destinationFor({ sshHost, sshUser, ssmParam: ssm }, deps), source }
 }
 
-export function parseSyncArgs(args: string[], resolve: SshResolver = resolveSshHost): SyncOptions {
+export function parseSyncArgs(args: string[], deps: DestinationDeps = {}): SyncOptions {
   const values = parseFlags(args, [
-    '-from-host', '-from-db-url', '-from-ssm-param',
-    '-to-host', '-to-db-url', '-to-ssm-param',
+    '-from-ssh-host', '-from-ssh-user', '-from-db-url', '-from-ssm-param',
+    '-to-ssh-host', '-to-ssh-user', '-to-db-url', '-to-ssm-param',
     '-backup-dir',
   ], ['-dry-run', '-skip-backup'])
   const backupDir = typeof values['-backup-dir'] === 'string' ? values['-backup-dir'] : 'backups'
   return {
-    from: parseSide(values, 'from', resolve),
-    to: parseSide(values, 'to', resolve),
+    from: parseSide(values, 'from', deps),
+    to: parseSide(values, 'to', deps),
     dryRun: values['-dry-run'] === true,
     skipBackup: values['-skip-backup'] === true,
     backupDir,

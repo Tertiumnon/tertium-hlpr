@@ -2,24 +2,24 @@
 import path from 'node:path'
 import { validateParamName } from '../../../core/aws/param-store.js'
 import { type BackupOptions, backupDatabase } from '../../../core/mariadb/backup.js'
-import { parseFlags, validateSshConfig } from '../../../core/mariadb/mariadb.js'
-import { type SshResolver, resolveSshHost } from '../../../core/ssh/remote.js'
+import { parseFlags } from '../../../core/mariadb/mariadb.js'
+import { type DestinationDeps, destinationFor, sshTargetFromFlags } from '../../../core/ssh/destination.js'
 
 // @description Dump a MariaDB database over SSH into a local .sql file
 
 // Literal on purpose: `hlpr help` scrapes "Usage:" lines from this source file.
-const USAGE = 'Usage: hlpr mariadb backup -host <hostname> (-db-url <url> | -ssm-param <name>) [-backup-dir <dir>] [-prefix <name>]'
+const USAGE = 'Usage: hlpr mariadb backup [-ssh-host <host>] [-ssh-user <user>] [-ssm-param <name>] (-db-url <url> | -ssm-param <name>) [-backup-dir <dir>] [-prefix <name>]'
 
-export function parseBackupArgs(args: string[], resolve: SshResolver = resolveSshHost): BackupOptions {
-  const values = parseFlags(args, ['-host', '-db-url', '-ssm-param', '-backup-dir', '-prefix'])
-  const host = values['-host']
-  if (typeof host !== 'string') throw new Error(USAGE)
-  if ((values['-db-url'] === undefined) === (values['-ssm-param'] === undefined)) throw new Error(`${USAGE}\nGive exactly one of -db-url or -ssm-param`)
+export function parseBackupArgs(args: string[], deps: DestinationDeps = {}): BackupOptions {
+  const values = parseFlags(args, ['-ssh-host', '-ssh-user', '-db-url', '-ssm-param', '-backup-dir', '-prefix'])
+  const ssmParam = typeof values['-ssm-param'] === 'string' ? values['-ssm-param'] : undefined
+  if (values['-db-url'] === undefined && ssmParam === undefined) throw new Error(USAGE)
+  if ((values['-db-url'] === undefined) === (ssmParam === undefined)) throw new Error(`${USAGE}\nGive exactly one of -db-url or -ssm-param`)
   const prefix = typeof values['-prefix'] === 'string' ? values['-prefix'] : 'backup'
   if (prefix !== path.basename(prefix) || prefix === '.' || prefix === '..') throw new Error('-prefix must be a file name, not a path')
-  const source = typeof values['-db-url'] === 'string' ? values['-db-url'] : `ssm:${validateParamName(String(values['-ssm-param']), '-ssm-param')}`
+  const source = typeof values['-db-url'] === 'string' ? values['-db-url'] : `ssm:${validateParamName(String(ssmParam), '-ssm-param')}`
   return {
-    ssh: validateSshConfig(resolve(host), '-host'),
+    ssh: destinationFor(sshTargetFromFlags(values), deps),
     source,
     backupDir: typeof values['-backup-dir'] === 'string' ? values['-backup-dir'] : 'backups',
     prefix,

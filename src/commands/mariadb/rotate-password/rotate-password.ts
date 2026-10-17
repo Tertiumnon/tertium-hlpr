@@ -1,21 +1,20 @@
 #!/usr/bin/env node
 import { validateParamName } from '../../../core/aws/param-store.js'
-import { parseFlags, validateSshConfig } from '../../../core/mariadb/mariadb.js'
+import { parseFlags } from '../../../core/mariadb/mariadb.js'
 import { type RotateOptions, realRotateSystem, rotatePassword } from '../../../core/mariadb/rotate.js'
-import { type SshResolver, resolveSshHost } from '../../../core/ssh/remote.js'
+import { type DestinationDeps, destinationFor, sshTargetFromFlags } from '../../../core/ssh/destination.js'
 
 // @description Change a database user's password: the database and the SSM parameter that holds DATABASE_URL
 
 // Literal on purpose: `hlpr help` scrapes "Usage:" lines from this source file.
-const USAGE = 'Usage: hlpr mariadb rotate-password -host <hostname> -ssm-param <name> [-dry-run]'
+const USAGE = 'Usage: hlpr mariadb rotate-password -ssm-param <name> [-ssh-host <host>] [-ssh-user <user>] [-dry-run]'
 
-export function parseRotateArgs(args: string[], resolve: SshResolver = resolveSshHost): RotateOptions {
-  const values = parseFlags(args, ['-host', '-ssm-param'], ['-dry-run'])
-  const host = values['-host']
+export function parseRotateArgs(args: string[], deps: DestinationDeps = {}): RotateOptions {
+  const values = parseFlags(args, ['-ssh-host', '-ssh-user', '-ssm-param'], ['-dry-run'])
   const ssm = values['-ssm-param']
-  if (typeof host !== 'string' || typeof ssm !== 'string') throw new Error(USAGE)
+  if (typeof ssm !== 'string') throw new Error(USAGE)
   return {
-    sshConfig: validateSshConfig(resolve(host), '-host'),
+    sshConfig: destinationFor(sshTargetFromFlags(values), deps),
     paramName: validateParamName(ssm, '-ssm-param'),
     dryRun: values['-dry-run'] === true,
   }

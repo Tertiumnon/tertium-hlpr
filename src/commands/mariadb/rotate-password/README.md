@@ -3,10 +3,10 @@
 Change a database user's password, and the SSM parameter that holds its `DATABASE_URL`, with no manual step:
 
 ```sh
-hlpr mariadb rotate-password -host <hostname> -ssm-param <name> [-dry-run]
+hlpr mariadb rotate-password -ssh-host <host> -ssm-param <name> [-dry-run]
 ```
 
-- `-host` is the host the database runs on: a `HostName` or a `Host` alias from `~/.ssh/config`. Use the alias when
+- `-ssh-host` is the host the database runs on: a `HostName` or a `Host` alias from `~/.ssh/config`. Use the alias when
   several aliases share one HostName.
 - `-ssm-param` is the parameter whose value is an env file. Its `DATABASE_URL` names the user and the database.
 - `-dry-run` prints what would change and changes nothing.
@@ -31,3 +31,10 @@ If a later step fails, the completed steps are undone in reverse. A failed rollb
   (for example a local database tool) need the new password too.
 - Needs `ssh` to the host, the AWS CLI with read and write access to the parameter, and a MariaDB administrator
   login on the host for `ALTER USER` (the same requirement as `mariadb set-user-password`).
+
+## Host
+
+`-ssh-host` names the host: a HostName or Host alias from `~/.ssh/config`. `-ssh-user` sets the login user. Without
+`-ssh-host`, the host and the user come from the `-ssm-param` value: `DB_SSH_HOST` and `DB_SSH_USER` when set, else
+`DEPLOY_HOST` and `DEPLOY_USER`, the keys the deploy uses. A flag always wins for its own field: with `-ssh-host`, the
+parameter's user is not used, so the login comes from `-ssh-user` or the ssh config.
