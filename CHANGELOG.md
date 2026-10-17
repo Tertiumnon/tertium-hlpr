@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.20.0 - 2026-10-17
+
+- docs(changelog): drop hand-written Unreleased; release entries are generated
+- chore: use gith changelog for the version script
+- refactor(git)!: move git setup to gith setup -n npm
+
 ## 0.19.0 - 2026-10-17
 
 - feat(gh): add rename and change commands
