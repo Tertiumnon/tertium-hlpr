@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.19.0 - 2026-10-17
+
+- feat(gh): add rename and change commands
+- chore: update to a new gith cli util approach
+- feat(git): restore setup with --hooks --npm
+- refactor(git)!: remove hlpr git commands, moved to @tertium/gith
+
 ## Unreleased
 
 - **Added: `hlpr gh rename -repo <owner/repo> -to <new name>`.** Renames a GitHub repository with `gh repo rename`, which still asks for confirmation.
