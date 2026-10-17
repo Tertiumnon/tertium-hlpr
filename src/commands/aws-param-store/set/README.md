@@ -28,7 +28,7 @@ Change the password on the database first, then store it in the `.env` parameter
 
 ```sh
 NEW_PASSWORD=$(openssl rand -base64 24)
-hlpr mariadb user-password -db-name app -db-password "$NEW_PASSWORD" -host 10.0.0.5
+hlpr mariadb set-user-password -db-name app -db-password "$NEW_PASSWORD" -host 10.0.0.5
 printf '%s' "$NEW_PASSWORD" | hlpr aws-param-store set -name /env/app/env.prod -key DB_PASSWORD
 ```
 

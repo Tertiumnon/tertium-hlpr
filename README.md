@@ -83,10 +83,15 @@ hlpr file rename -dir ./src -style kebab -r -d -f --dry
 | [ssh fix --permissions](src/commands/ssh/README.md#fix) | Fix permissions of ~/.ssh and its files |
 | [mariadb backup](src/commands/mariadb/backup/README.md) | Dump a MariaDB database over SSH into a local .sql file |
 | [mariadb sync](src/commands/mariadb/sync/README.md) | Copy one MariaDB database over another, backing up the target first |
-| [mariadb user-password](src/commands/mariadb/user-password/README.md) | Set a MariaDB user's password on a remote host over SSH |
+| [mariadb set-user-password](src/commands/mariadb/set-user-password/README.md) | Set a MariaDB user's password on a remote host over SSH |
+| [mariadb rotate-password](src/commands/mariadb/rotate-password/README.md) | Rotate a database user's password and the SSM parameter that holds its DATABASE_URL |
 | [aws-param-store read](src/commands/aws-param-store/read/README.md) | Print one AWS Parameter Store value, decrypted |
 | [aws-param-store edit](src/commands/aws-param-store/edit/README.md) | Edit one AWS Parameter Store value in your editor and write it back |
 | [aws-param-store set](src/commands/aws-param-store/set/README.md) | Replace one KEY=value line in a stored .env value, for example to rotate a password |
+| [pm2 restart](src/commands/pm2/restart/README.md) | Restart a PM2 process on a remote host |
+| [pm2 stop](src/commands/pm2/stop/README.md) | Stop a PM2 process on a remote host |
+| [pm2 start](src/commands/pm2/start/README.md) | Start the apps of a PM2 config on a remote host |
+| [pm2 status](src/commands/pm2/status/README.md) | Print a PM2 process status on a remote host |
 | [hello](src/commands/hello/README.md) | Run a Matrix rain animation |
 | [hello world](src/commands/hello/world/README.md) | Display animated Hello World art |
 | [self update](src/commands/self/update/README.md) (`self upgrade`) | Update hlpr and repair broken command files |
