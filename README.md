@@ -88,6 +88,8 @@ hlpr file rename -dir ./src -style kebab -r -d -f --dry
 | [aws-param-store read](src/commands/aws-param-store/read/README.md) | Print one AWS Parameter Store value, decrypted |
 | [aws-param-store edit](src/commands/aws-param-store/edit/README.md) | Edit one AWS Parameter Store value in your editor and write it back |
 | [aws-param-store set](src/commands/aws-param-store/set/README.md) | Replace one KEY=value line in a stored .env value, for example to rotate a password |
+| [aws-param-store add](src/commands/aws-param-store/add/README.md) | Create a new parameter; the name must not exist yet |
+| [aws-param-store remove](src/commands/aws-param-store/remove/README.md) | Delete a parameter, with `-confirm` repeating its name |
 | [pm2 restart](src/commands/pm2/restart/README.md) | Restart a PM2 process on a remote host |
 | [pm2 stop](src/commands/pm2/stop/README.md) | Stop a PM2 process on a remote host |
 | [pm2 start](src/commands/pm2/start/README.md) | Start the apps of a PM2 config on a remote host |
