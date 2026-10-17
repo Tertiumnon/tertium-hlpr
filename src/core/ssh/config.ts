@@ -11,14 +11,26 @@ export function hasHostAlias(config: string, alias: string): boolean {
   return config.split(/\r?\n/).some(line => isHostLineFor(line, alias))
 }
 
-// Returns the Host block for alias, from its Host line up to the next Host or Match line.
-export function readHostBlock(config: string, alias: string): string | undefined {
-  const lines = config.split(/\r?\n/)
-  const start = lines.findIndex(line => isHostLineFor(line, alias))
-  if (start === -1) return undefined
-  const next = lines.findIndex((line, index) => index > start && /^\s*(Host|Match)\s/i.test(line))
-  const block = lines.slice(start, next === -1 ? lines.length : next)
-  return `${block.join('\n').trimEnd()}\n`
+// Returns the Host aliases of every block whose HostName is host. Wildcard patterns are skipped.
+export function hostAliasesFor(config: string, host: string): string[] {
+  const aliases: string[] = []
+  let current: string[] = []
+  let hostName: string | undefined
+  const finishBlock = () => {
+    if (hostName?.toLowerCase() === host.toLowerCase()) aliases.push(...current)
+  }
+  for (const line of config.split(/\r?\n/)) {
+    if (/^\s*(Host|Match)\s/i.test(line)) {
+      finishBlock()
+      const names = line.match(/^\s*Host\s+(.+?)(?:\s+#.*)?$/i)?.[1].split(/\s+/) ?? []
+      current = names.filter(name => !/[*?!]/.test(name))
+      hostName = undefined
+      continue
+    }
+    hostName ??= line.match(/^\s*HostName\s+(\S+)/i)?.[1]
+  }
+  finishBlock()
+  return aliases
 }
 
 // Backs up the config, then appends a Host entry. Returns the backup path.

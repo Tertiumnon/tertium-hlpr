@@ -14,10 +14,6 @@ without connecting to the remote host. It shows the public key at the end. See [
 
 Both commands name keys `~/.ssh/<host>-<user>`.
 
-## read
-
-Run `hlpr ssh read -file <connection-name>` to print one connection's `Host` block from `~/.ssh/config`. See [read](read/README.md).
-
 ## Platform Support
 
 - ✅ **Linux** - Fully supported
