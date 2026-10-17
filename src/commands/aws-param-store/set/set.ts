@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-import { readFileSync } from 'node:fs'
-import { type AwsRunner, getParameter, putParameter, runAws, validateParamName } from '../../../core/aws/param-store.js'
+import { type AwsRunner, getParameter, putParameter, readValueFromStdin, runAws, validateParamName } from '../../../core/aws/param-store.js'
 import { setEnvKey, validateEnvKey } from '../../../core/env-file.js'
 
 // @description Replace one KEY=value line in a .env value stored in AWS Parameter Store
@@ -27,11 +26,6 @@ export function parseSetArgs(args: string[]): SetOptions {
   return { name: validateParamName(values['-name']), key: validateEnvKey(values['-key']), value: values['-value'] }
 }
 
-// The new value comes from stdin when -value is not given, so it stays off the command line.
-export function readValueFromStdin(): string {
-  if (process.stdin.isTTY) throw new Error('No -value given: pipe the new value on stdin, or pass -value')
-  return readFileSync(0, 'utf-8').replace(/\r?\n$/, '')
-}
 
 /** Replaces only the key line. Returns the new version, or undefined when the line already holds the value. */
 export function setParameterKey(name: string, key: string, value: string, aws: AwsRunner = runAws): number | undefined {

@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process'
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -48,4 +48,30 @@ export function putParameter(parameter: Parameter, value: string, aws: AwsRunner
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }
+}
+
+export type ParameterType = 'SecureString' | 'String';
+
+// Creates a parameter. It must not exist yet: AWS refuses an existing name, so nothing is overwritten. Returns the version.
+export function createParameter(name: string, value: string, type: ParameterType, aws: AwsRunner = runAws): number {
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'hlpr-param-'));
+  const file = path.join(dir, 'value');
+  try {
+    writeFileSync(file, value, { mode: 0o600 });
+    const output = aws(['ssm', 'put-parameter', '--name', name, '--type', type, '--value', `file://${file}`, '--output', 'json']);
+    return JSON.parse(output).Version;
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+// Deletes a parameter. The caller decides whether that is allowed; this only runs the delete.
+export function deleteParameter(name: string, aws: AwsRunner = runAws): void {
+  aws(['ssm', 'delete-parameter', '--name', name]);
+}
+
+// The new value from stdin, without its last line break, so it stays off the command line.
+export function readValueFromStdin(): string {
+  if (process.stdin.isTTY) throw new Error('No -value given: pipe the value on stdin, or pass -value');
+  return readFileSync(0, 'utf-8').replace(/\r?\n$/, '');
 }
