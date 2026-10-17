@@ -53,3 +53,9 @@ export function setEnvKey(text: string, key: string, value: string): string {
   lines[index] = `${indent}${key}=${quoteEnvValue(value)}${lineEnd}`
   return lines.join('\n')
 }
+
+// Like readEnvKey, but undefined when the key is not set at all. A repeated key is still refused.
+export function readOptionalEnvKey(text: string, key: string): string | undefined {
+  if (assignmentLines(text.split('\n'), key).length === 0) return undefined
+  return readEnvKey(text, key)
+}
