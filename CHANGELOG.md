@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- **Removed: `hlpr git` commands.** They now live in [`@tertium/gith`](https://www.npmjs.com/package/@tertium/gith), the git helper that also covers the branch flow (`create`, `merge`, `release`). Why: git workflow belongs in one tool, and the branch and cleanup commands were duplicated there. `hlpr git setup -hooks` is also gone; `hlpr angular setup` still writes the same shared pre-commit hook.
+- **Removed: `hlpr git` commands.** They now live in [`@tertium/gith`](https://www.npmjs.com/package/@tertium/gith), the git helper that also covers the branch flow (`create`, `merge`, `release`). Why: git workflow belongs in one tool, and the branch and cleanup commands were duplicated there. `hlpr git setup --hooks --npm` (the shared pre-commit hook for npm projects) is back in hlpr, and `hlpr angular setup` writes the same hook.
 
   | Removed from hlpr | Use in gith |
   | --- | --- |
@@ -13,7 +13,6 @@
   | `hlpr git rm <b> -both` | `gith remove -b <b> --both` |
   | `hlpr git sync` | `gith sync` |
   | `hlpr git clean` | `gith clean` |
-  | `hlpr git setup -hooks [--force]` | `gith setup --hooks [--force]` |
 
 ## 0.18.0 - 2026-10-16
 
