@@ -8,4 +8,4 @@ Alias for `hlpr self update`. Update hlpr itself to the latest version published
 hlpr self upgrade
 ```
 
-See [update](../update/README.md) for details.
+See [update](../update/update.md) for details.

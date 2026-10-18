@@ -28,9 +28,9 @@ async function getCommandDescription(filePath: string): Promise<string | undefin
       return descMatch[1].trim();
     }
     
-    // Try to find README.md in the same directory
+    // Try to find the command doc, named after its folder, in the same directory
     const dir = path.dirname(filePath);
-    const readmePath = path.join(dir, 'README.md');
+    const readmePath = path.join(dir, `${path.basename(dir)}.md`);
     if (fs.existsSync(readmePath)) {
       const readme = await readFile(readmePath, 'utf-8');
       // Extract first line after heading

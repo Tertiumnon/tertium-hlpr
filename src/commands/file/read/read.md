@@ -27,4 +27,4 @@ hlpr file read -host 10.0.0.5 -path ~/app/.env > local.env
 
 ## See Also
 
-- [file edit](../edit/README.md) - edit the same remote file in your editor
+- [file edit](../edit/edit.md) - edit the same remote file in your editor

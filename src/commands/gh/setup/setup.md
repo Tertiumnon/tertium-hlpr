@@ -22,7 +22,7 @@ Requirements: GitHub-hosted runners, and a public repository or a paid npm plan 
 
 ## deploy
 
-Writes `deploy.yml`, the GitHub Actions equivalent of [`hlpr az setup -workflow deploy`](../../az/setup/README.md). On `v*` tag pushes or manual dispatch it connects to the production server over SSH and runs the same deploy commands: git sync, `.env` loading, `bun install`, Prisma or build, and `pm2 restart`.
+Writes `deploy.yml`, the GitHub Actions equivalent of [`hlpr az setup -workflow deploy`](../../az/setup/setup.md). On `v*` tag pushes or manual dispatch it connects to the production server over SSH and runs the same deploy commands: git sync, `.env` loading, `bun install`, Prisma or build, and `pm2 restart`.
 
 The command asks the same questions as the Azure setup (project name, environment, Prisma, deploy path), with defaults from `.env.{environment}`. The job runs in a GitHub environment named after the target environment, so the server secrets stay scoped to it:
 

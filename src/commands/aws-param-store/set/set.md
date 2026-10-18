@@ -39,4 +39,4 @@ the new value. This command does not restart anything.
 ## Requirements
 
 Needs the AWS CLI with credentials that can read and write the parameter. Use
-[`read -key`](../read/README.md) to check the stored value of one variable.
+[`read -key`](../read/read.md) to check the stored value of one variable.

@@ -3,7 +3,8 @@ import path from 'node:path'
 import { subcommandAliases } from './aliases.js'
 
 export async function commandUsages(filePath: string, command: string): Promise<string[]> {
-  const sources = [filePath, path.join(path.dirname(filePath), 'README.md')]
+  const dir = path.dirname(filePath)
+  const sources = [filePath, path.join(dir, `${path.basename(dir)}.md`)]
   const usages = new Set<string>()
   for (const source of sources) {
     try {
@@ -16,7 +17,7 @@ export async function commandUsages(filePath: string, command: string): Promise<
         if (usage === command || usage.startsWith(`${command} `)) usages.add(usage)
       }
     } catch {
-      // A command may have no README or embedded usage string.
+      // A command may have no doc file or embedded usage string.
     }
   }
   return usages.size ? [...usages] : [command]

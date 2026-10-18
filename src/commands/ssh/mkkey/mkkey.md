@@ -18,7 +18,7 @@ At the end, the command prints the public key so you can add it to a remote
 host, for example with `ssh-copy-id` or a provider's key settings. Use
 `ssh <connection-name>` after the remote side has the key.
 
-Use [`hlpr ssh mkcon`](../mkcon/README.md) instead if you also want the key
+Use [`hlpr ssh mkcon`](../mkcon/mkcon.md) instead if you also want the key
 installed on the remote host automatically.
 
 Requires `ssh-keygen` on the local PATH.

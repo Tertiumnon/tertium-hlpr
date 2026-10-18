@@ -99,6 +99,6 @@ const result = await renameFile('docs/old-name.md', 'new-name.md', {
 ## See Also
 
 - [Main hlpr README](../../../../README.md)
-- [rename](../rename/README.md) - bulk case-style renaming for directory trees
+- [rename](../rename/rename.md) - bulk case-style renaming for directory trees
 - [TypeScript Implementation](./move.ts)
 - [Tests](./move.test.ts)

@@ -116,7 +116,7 @@ async function showHelp() {
       }
 
       const dir = path.dirname(filePath);
-      const readmePath = path.join(dir, 'README.md');
+      const readmePath = path.join(dir, `${path.basename(dir)}.md`);
       if (fs.existsSync(readmePath)) {
         const readme = await readFile(readmePath, 'utf-8');
         const firstLine = readme.split('\n').find(line => line.trim() && !line.startsWith('#'));

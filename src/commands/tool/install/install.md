@@ -17,7 +17,7 @@ hlpr tool install -name codex-cli
 hlpr tool install -n copilot-cli
 ```
 
-The menu uses ↑/↓, Enter or Space to install, and Esc to cancel. Name a tool as `hlpr tool install claude-cli` or with `-name claude-cli` (`-n` also works). Extra arguments are rejected. For Node.js, Python, Bun, Rust, and Go, use [`hlpr runtime install`](../../runtime/install/README.md).
+The menu uses ↑/↓, Enter or Space to install, and Esc to cancel. Name a tool as `hlpr tool install claude-cli` or with `-name claude-cli` (`-n` also works). Extra arguments are rejected. For Node.js, Python, Bun, Rust, and Go, use [`hlpr runtime install`](../../runtime/install/install.md).
 
 | Tool | Supported environment |
 | --- | --- |

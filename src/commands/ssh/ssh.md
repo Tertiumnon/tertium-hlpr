@@ -5,12 +5,12 @@ SSH configuration and setup utilities.
 ## mkcon
 
 Run `hlpr ssh mkcon` to create a key, authorize it on a remote host,
-and add a backed-up local SSH config entry. See [mkcon](mkcon/README.md).
+and add a backed-up local SSH config entry. See [mkcon](mkcon/mkcon.md).
 
 ## mkkey
 
 Run `hlpr ssh mkkey` to create a key pair and add a backed-up local SSH config entry
-without connecting to the remote host. It shows the public key at the end. See [mkkey](mkkey/README.md).
+without connecting to the remote host. It shows the public key at the end. See [mkkey](mkkey/mkkey.md).
 
 Both commands name keys `~/.ssh/<host>-<user>`.
 

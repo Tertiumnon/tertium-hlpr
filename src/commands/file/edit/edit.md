@@ -39,4 +39,4 @@ hlpr file edit -host 10.0.0.5 -path ~/app/.env -editor nano
 
 ## See Also
 
-- [file read](../read/README.md) - print the same remote file
+- [file read](../read/read.md) - print the same remote file
