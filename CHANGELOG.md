@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.23.1 - 2026-10-18
+
+- docs(app): list snap, flatpak and zypper in app command docs
+- feat(app): remove apps from a keyboard menu
+- feat(app): install apps from a keyboard-selected package
+- docs: update to standard way
+
 ## 0.23.0 - 2026-10-17
 
 - docs: list aws-param-store add and remove and the new ssh destination flags
