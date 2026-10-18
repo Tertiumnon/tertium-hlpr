@@ -1,4 +1,4 @@
-# hlpr
+# @tertium/hlpr
 
 ```text
     |==|   |==|
