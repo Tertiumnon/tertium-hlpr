@@ -5,6 +5,22 @@ type Query = { manager: string; command: string; args: string[] }
 
 const lines = (output: string) => output.split(/\r?\n/).map(line => line.trim()).filter(Boolean)
 
+// snap prints a table headed by "Name"; output without that header means nothing matched.
+function snapRows(manager: string, output: string): App[] {
+  const rows = lines(output)
+  const header = rows.findIndex(row => /^Name\s/.test(row))
+  if (header < 0) return []
+  return rows.slice(header + 1).map(row => row.split(/\s+/)[0]).filter(Boolean).map(id => ({ manager, name: id, id }))
+}
+
+// zypper prints "| S | Name | Summary | Type |" style tables; separator rows have one cell.
+function zypperRows(manager: string, output: string): App[] {
+  return output.split(/\r?\n/).flatMap(row => {
+    const cells = row.split('|').map(cell => cell.trim())
+    return cells.length >= 3 && cells[1] && cells[1] !== 'Name' ? [{ manager, name: cells[1], id: cells[1] }] : []
+  })
+}
+
 export function parsePackages(manager: string, output: string): App[] {
   if (manager === 'winget') {
     const rows = output.split(/\r?\n/)
@@ -20,6 +36,9 @@ export function parsePackages(manager: string, output: string): App[] {
     const [id] = line.split('|')
     return { manager, name: id, id }
   })
+  if (manager === 'snap') return snapRows(manager, output)
+  if (manager === 'flatpak') return lines(output).filter(line => !/^Application/i.test(line)).map(id => ({ manager, name: id, id }))
+  if (manager === 'zypper') return zypperRows(manager, output)
   if (manager === 'scoop') {
     if (/There aren't any apps installed\./i.test(output)) return []
     const rows = lines(output)
@@ -48,6 +67,37 @@ export function parseRemoteSearch(manager: string, output: string): App[] {
     const id = line.replace(/^Name\s*:\s*/i, '').trim()
     return { manager, name: id, id }
   })
+  if (manager === 'choco') return parsePackages(manager, output)
+  if (manager === 'scoop') {
+    // Colored table after "Results from ..." notes; the first column is the app name.
+    const rows = lines(output.replace(new RegExp(`${String.fromCharCode(27)}\\[[\\d;]*m`, 'g'), ''))
+    const header = rows.findIndex(row => /^Name\s/i.test(row))
+    if (header < 0) return []
+    return rows.slice(header + 2).map(row => row.split(/\s+/)[0]).filter(Boolean).map(id => ({ manager, name: id, id }))
+  }
+  if (manager === 'snap') return snapRows(manager, output)
+  if (manager === 'flatpak') return lines(output).flatMap(line => {
+    const [id, name] = line.split('\t')
+    return /^[\w-]+(\.[\w-]+)+$/.test(id) ? [{ manager, name: name?.trim() || id, id }] : []
+  })
+  if (manager === 'zypper') return zypperRows(manager, output)
+  if (manager === 'pacman') return output.split(/\r?\n/).flatMap(row => {
+    // Results start with "repo/name version" at column 0; indented lines are descriptions.
+    const match = /^[^\s/]+\/(\S+)\s/.exec(row)
+    return match ? [{ manager, name: match[1], id: match[1] }] : []
+  })
+  if (manager === 'brew') {
+    // brew groups results under "==> Formulae" and "==> Casks" headers, several names per line.
+    let section = 'brew'
+    return lines(output).flatMap(line => {
+      if (line.startsWith('==>')) {
+        section = /Casks/.test(line) ? 'brew-cask' : 'brew'
+        return []
+      }
+      if (line.startsWith('Error')) return []
+      return line.split(/\s+/).filter(token => /^[\w@.+/-]+$/.test(token)).map(id => ({ manager: section, name: id, id }))
+    })
+  }
   return lines(output).map(line => {
     const id = line.split(/\s+/)[0]
     return { manager, name: id, id }
@@ -68,6 +118,9 @@ export function packageQueries(platform: NodeJS.Platform): Query[] {
     { manager: 'apt', command: 'dpkg-query', args: ['-W', `-f=\${binary:Package}\n`] },
     { manager: 'dnf', command: 'rpm', args: ['-qa', '--qf', '%{NAME}\n'] },
     { manager: 'pacman', command: 'pacman', args: ['-Qq'] },
+    { manager: 'zypper', command: 'zypper', args: ['search', '--installed-only'] },
+    { manager: 'snap', command: 'snap', args: ['list'] },
+    { manager: 'flatpak', command: 'flatpak', args: ['list', '--app', '--columns=application'] },
     { manager: 'brew', command: 'brew', args: ['list', '--formula', '--versions'] },
   ]
   return []
@@ -76,7 +129,7 @@ export function packageQueries(platform: NodeJS.Platform): Query[] {
 export function remoteSearchQueries(platform: NodeJS.Platform, name: string): Query[] {
   if (platform === 'win32') return [
     { manager: 'winget', command: 'winget', args: ['search', name] },
-    { manager: 'choco', command: 'cmd.exe', args: ['/d', '/c', 'choco', 'search', name] },
+    { manager: 'choco', command: 'cmd.exe', args: ['/d', '/c', 'choco', 'search', name, '--limit-output'] },
     { manager: 'scoop', command: 'cmd.exe', args: ['/d', '/c', 'scoop', 'search', name] },
   ]
   if (platform === 'darwin') return [
@@ -86,6 +139,9 @@ export function remoteSearchQueries(platform: NodeJS.Platform, name: string): Qu
     { manager: 'apt', command: 'apt-cache', args: ['search', name] },
     { manager: 'dnf', command: 'dnf', args: ['search', name] },
     { manager: 'pacman', command: 'pacman', args: ['-Ss', name] },
+    { manager: 'zypper', command: 'zypper', args: ['search', name] },
+    { manager: 'snap', command: 'snap', args: ['find', name] },
+    { manager: 'flatpak', command: 'flatpak', args: ['search', '--columns=application,name', name] },
     { manager: 'brew', command: 'brew', args: ['search', name] },
   ]
   return []
@@ -123,6 +179,31 @@ export function remoteApps(platform: NodeJS.Platform, name: string): App[] {
   return apps
 }
 
+// One menu entry per package and manager, sorted by name.
+export function appChoices(apps: App[]): App[] {
+  const unique = new Map(apps.map(app => [`${app.manager} ${app.id}`, app]))
+  return [...unique.values()].sort((a, b) => a.name.localeCompare(b.name) || a.manager.localeCompare(b.manager))
+}
+
+export function appLabel(app: App): string {
+  return `${app.name} (${app.id}) [${app.manager}]`
+}
+
+export function installCommand(app: App): { command: string; args: string[] } {
+  if (!/^[\w@.+/-]+$/.test(app.id) || app.id.startsWith('-')) throw new Error(`Invalid ${app.manager} package ID`)
+  if (app.manager === 'winget') return { command: 'winget', args: ['install', '--id', app.id, '--exact'] }
+  if (app.manager === 'choco') return { command: 'cmd.exe', args: ['/d', '/c', 'choco', 'install', app.id, '-y'] }
+  if (app.manager === 'scoop') return { command: 'cmd.exe', args: ['/d', '/c', 'scoop', 'install', app.id] }
+  if (app.manager === 'brew-cask') return { command: 'brew', args: ['install', '--cask', app.id] }
+  if (app.manager === 'brew') return { command: 'brew', args: ['install', '--formula', app.id] }
+  if (app.manager === 'flatpak') return { command: 'flatpak', args: ['install', '-y', 'flathub', app.id] }
+  if (app.manager === 'snap') return { command: 'sudo', args: ['snap', 'install', app.id] }
+  if (app.manager === 'zypper') return { command: 'sudo', args: ['zypper', 'install', '-y', app.id] }
+  if (app.manager === 'dnf') return { command: 'sudo', args: ['dnf', 'install', app.id] }
+  if (app.manager === 'pacman') return { command: 'sudo', args: ['pacman', '-S', app.id] }
+  return { command: 'sudo', args: ['apt-get', 'install', app.id] }
+}
+
 export function uninstallCommand(app: App): { command: string; args: string[] } {
   if (app.manager === 'winget') return { command: 'winget', args: ['uninstall', '--id', app.id, '--exact'] }
   if (app.manager === 'choco' || app.manager === 'scoop') {
@@ -131,6 +212,9 @@ export function uninstallCommand(app: App): { command: string; args: string[] } 
   }
   if (app.manager === 'brew-cask') return { command: 'brew', args: ['uninstall', '--cask', app.id] }
   if (app.manager === 'brew') return { command: 'brew', args: ['uninstall', '--formula', app.id] }
+  if (app.manager === 'flatpak') return { command: 'flatpak', args: ['uninstall', '-y', app.id] }
+  if (app.manager === 'snap') return { command: 'sudo', args: ['snap', 'remove', app.id] }
+  if (app.manager === 'zypper') return { command: 'sudo', args: ['zypper', 'remove', '-y', app.id] }
   if (app.manager === 'dnf') return { command: 'sudo', args: ['dnf', 'remove', app.id] }
   if (app.manager === 'pacman') return { command: 'sudo', args: ['pacman', '-R', app.id] }
   return { command: 'sudo', args: ['apt-get', 'remove', app.id] }

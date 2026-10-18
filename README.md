@@ -73,6 +73,7 @@ hlpr file rename -dir ./src -style kebab -r -d -f --dry
 | [process kill](src/commands/process/kill/kill.md) | Kill a process by ID, port, folder, or file |
 | [app list](src/commands/app/list/list.md) | List installed apps |
 | [app search](src/commands/app/search/search.md) (`find`) | Find installed apps or remote packages by name |
+| [app install](src/commands/app/install/install.md) | Find an app by name in package managers and install the one you select |
 | [app remove](src/commands/app/remove/remove.md) (`delete`, `uninstall`) | Find and uninstall an app |
 | [tool install](src/commands/tool/install/install.md) | Install Docker, htop, fastfetch, Starship, Claude CLI, Codex CLI, Copilot CLI, or another supported tool |
 | [runtime install](src/commands/runtime/install/install.md) | Install Node.js, Python, Bun, Rust, or Go |

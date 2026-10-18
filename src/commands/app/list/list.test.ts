@@ -6,7 +6,7 @@ describe('app list', () => {
   test('checks typical package managers on each platform', () => {
     expect(packageQueries('win32').map(query => query.manager)).toEqual(['winget', 'choco', 'scoop'])
     expect(packageQueries('darwin').map(query => query.manager)).toEqual(['brew', 'brew-cask'])
-    expect(packageQueries('linux').map(query => query.manager)).toEqual(['apt', 'dnf', 'pacman', 'brew'])
+    expect(packageQueries('linux').map(query => query.manager)).toEqual(['apt', 'dnf', 'pacman', 'zypper', 'snap', 'flatpak', 'brew'])
   })
 
   test('shows at most ten names per page', () => {
