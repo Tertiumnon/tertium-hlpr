@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.23.2 - 2026-10-18
+
+- fix: app install/uninstall - search strongly by name
+
 ## 0.23.1 - 2026-10-18
 
 - docs(app): list snap, flatpak and zypper in app command docs
