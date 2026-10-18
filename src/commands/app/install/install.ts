@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process'
-import { appChoices, appLabel, installCommand, remoteApps } from '../../../core/command/apps.js'
+import { appChoices, appLabel, installCommand, matchingApps, remoteApps } from '../../../core/command/apps.js'
 import { selectFromMenu } from '../../../core/command/menu.js'
 
 // @description Find an app by name in package managers and install the one you select
@@ -16,7 +16,7 @@ async function main(): Promise<void> {
   if (!process.stdin.isTTY || !process.stdout.isTTY) throw new Error('Select an app in an interactive terminal')
 
   const name = args.slice(1).join(' ')
-  const choices = appChoices(remoteApps(process.platform, name))
+  const choices = appChoices(matchingApps(remoteApps(process.platform, name), name))
   if (!choices.length) { console.log(`No packages found matching "${name}".`); return }
 
   const index = await selectFromMenu(choices.map(appLabel))

@@ -6,7 +6,7 @@ Find an app by a case-insensitive part of its name in the available package mana
 hlpr app install -name <app name>
 ```
 
-Use quotes for names with spaces, for example `hlpr app install -name "Visual Studio"`. The command searches the same remote catalogs as `hlpr app search -name <name> --remote`, then lists each match with its ID and manager, for example `Visual Studio Code (Microsoft.VisualStudioCode) [winget]`.
+Use quotes for names with spaces, for example `hlpr app install -name "Visual Studio"`. The command searches the same remote catalogs as `hlpr app search -name <name> --remote`, then lists each match whose name contains the text, with its ID and manager. Descriptions are not searched, for example `Visual Studio Code (Microsoft.VisualStudioCode) [winget]`.
 
 Use ↑/↓ to move through the list, Enter to install the selected package, and Esc to cancel. Long lists show twelve entries at a time. The menu needs an interactive terminal.
 

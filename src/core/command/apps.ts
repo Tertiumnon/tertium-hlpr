@@ -179,6 +179,12 @@ export function remoteApps(platform: NodeJS.Platform, name: string): App[] {
   return apps
 }
 
+// Package managers also match descriptions, so the name is checked again here.
+export function matchingApps(apps: App[], name: string): App[] {
+  const query = name.toLowerCase()
+  return apps.filter(app => app.name.toLowerCase().includes(query))
+}
+
 // One menu entry per package and manager, sorted by name.
 export function appChoices(apps: App[]): App[] {
   const unique = new Map(apps.map(app => [`${app.manager} ${app.id}`, app]))

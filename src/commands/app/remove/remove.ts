@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process'
-import { appChoices, appLabel, installedApps, uninstallCommand } from '../../../core/command/apps.js'
+import { appChoices, appLabel, installedApps, matchingApps, uninstallCommand } from '../../../core/command/apps.js'
 import { selectFromMenu } from '../../../core/command/menu.js'
 
 export { parsePackages, uninstallCommand } from '../../../core/command/apps.js'
@@ -17,8 +17,7 @@ async function main(): Promise<void> {
   if (!process.stdin.isTTY || !process.stdout.isTTY) throw new Error('Select an app in an interactive terminal')
 
   const name = args.slice(1).join(' ')
-  const search = name.toLowerCase()
-  const choices = appChoices(installedApps(process.platform).filter(app => `${app.name} ${app.id}`.toLowerCase().includes(search)))
+  const choices = appChoices(matchingApps(installedApps(process.platform), name))
   if (!choices.length) { console.log(`No installed apps found matching "${name}".`); return }
 
   const index = await selectFromMenu(choices.map(appLabel))

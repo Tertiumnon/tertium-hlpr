@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test'
-import { appChoices, appLabel, installCommand, parsePackages, parseRemoteSearch, uninstallCommand } from '../../../core/command/apps.js'
+import { appChoices, appLabel, installCommand, matchingApps, parsePackages, parseRemoteSearch, uninstallCommand } from '../../../core/command/apps.js'
 
 test('parses remote results from each manager', () => {
   expect(parseRemoteSearch('winget', 'Name              Id                 Version Source\n----------------------------------------------------------\nVisual Studio Code Microsoft.VisualStudioCode 1.2 winget\n')).toEqual([
@@ -71,4 +71,14 @@ test('installs and removes snap, flatpak, and zypper packages', () => {
   expect(uninstallCommand({ manager: 'flatpak', name: 'Firefox', id: 'org.mozilla.firefox' })).toEqual({ command: 'flatpak', args: ['uninstall', '-y', 'org.mozilla.firefox'] })
   expect(uninstallCommand({ manager: 'snap', name: 'firefox', id: 'firefox' })).toEqual({ command: 'sudo', args: ['snap', 'remove', 'firefox'] })
   expect(uninstallCommand({ manager: 'zypper', name: 'git', id: 'git' })).toEqual({ command: 'sudo', args: ['zypper', 'remove', '-y', 'git'] })
+})
+
+test('matches only package names, not descriptions', () => {
+  const apps = [
+    { manager: 'apt', name: 'curl', id: 'curl' },
+    { manager: 'winget', name: 'Visual Studio Code', id: 'Microsoft.VisualStudioCode' },
+  ]
+  expect(matchingApps(apps, 'tool')).toEqual([])
+  expect(matchingApps(apps, 'CODE')).toEqual([apps[1]])
+  expect(matchingApps(apps, 'microsoft')).toEqual([])
 })

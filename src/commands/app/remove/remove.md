@@ -1,6 +1,6 @@
 # app remove
 
-Find and uninstall an app by part of its name or ID.
+Find and uninstall an app by part of its name. Descriptions are not searched.
 
 ```sh
 hlpr app remove -name <app name>
