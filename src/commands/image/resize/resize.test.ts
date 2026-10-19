@@ -9,12 +9,12 @@ const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR
 
 describe('parseResizeArgs', () => {
   test('reads the image from -path and the size in any order', () => {
-    expect(parseResizeArgs(['-size', '256', '-path', 'photo.png'])).toEqual({ image: 'photo.png', all: false, size: 256 })
+    expect(parseResizeArgs(['-size', '256', '-path', 'photo.png'])).toEqual({ image: 'photo.png', all: false, favicon: false, size: 256 })
   })
 
-  test('reads --all in any position', () => {
-    expect(parseResizeArgs(['--all', '-path', 'photo.png'])).toEqual({ image: 'photo.png', all: true })
-    expect(parseResizeArgs(['-path', 'photo.png', '--all'])).toEqual({ image: 'photo.png', all: true })
+  test('reads --all and --favicon in any position', () => {
+    expect(parseResizeArgs(['--all', '-path', 'photo.png'])).toEqual({ image: 'photo.png', all: true, favicon: false })
+    expect(parseResizeArgs(['-path', 'photo.png', '--favicon'])).toEqual({ image: 'photo.png', all: false, favicon: true })
   })
 
   test('rejects a missing image, a missing size, or a size that is not a positive whole number', () => {
@@ -28,8 +28,10 @@ describe('parseResizeArgs', () => {
     expect(() => parseResizeArgs(['photo.png', '-size', '256'])).toThrow('Unknown option: photo.png')
   })
 
-  test('rejects -size combined with --all', () => {
-    expect(() => parseResizeArgs(['-path', 'photo.png', '-size', '256', '--all'])).toThrow('not both')
+  test('rejects combining -size, --all, and --favicon', () => {
+    expect(() => parseResizeArgs(['-path', 'photo.png', '-size', '256', '--all'])).toThrow('Use only one')
+    expect(() => parseResizeArgs(['-path', 'photo.png', '--all', '--favicon'])).toThrow('Use only one')
+    expect(() => parseResizeArgs(['-path', 'photo.png', '-size', '256', '--favicon'])).toThrow('Use only one')
   })
 })
 
@@ -48,6 +50,19 @@ describe('resizeAll', () => {
       )
       expect(skipped).toEqual([existing])
       expect(fs.readFileSync(existing, 'utf8')).toBe('keep me')
+    } finally {
+      fs.rmSync(tmp, { recursive: true, force: true })
+    }
+  }, 30_000)
+
+  test('creates a copy for each favicon size below the image size when given those widths', () => {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'hlpr-resize-'))
+    try {
+      const dot = path.join(tmp, 'dot.png')
+      fs.writeFileSync(dot, png)
+      const square = resizeImage(dot, 300)
+      const { created } = resizeAll(square, [16, 32, 180, 512])
+      expect(created.map(file => path.basename(file))).toEqual(['dot--300px--16px.png', 'dot--300px--32px.png', 'dot--300px--180px.png'])
     } finally {
       fs.rmSync(tmp, { recursive: true, force: true })
     }

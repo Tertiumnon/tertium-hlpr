@@ -7,6 +7,7 @@ Create resized copies of an image. Each copy is written next to the original as 
 ```bash
 hlpr image resize -path <image> -size <px>
 hlpr image resize -path <image> --all
+hlpr image resize -path <image> --favicon
 ```
 
 ### Arguments
@@ -14,6 +15,9 @@ hlpr image resize -path <image> --all
 - `-path <image>` - Path to the image file
 - `-size <px>` - Length of the longest side in pixels (positive whole number)
 - `--all` - Create one copy for each popular width that is smaller than the image
+- `--favicon` - Create one copy for each favicon and app icon size that is smaller than the image
+
+Use only one of `-size`, `--all`, or `--favicon`.
 
 ## Examples
 
@@ -26,11 +30,15 @@ hlpr image resize -path icons/logo.png -size 64
 
 # photo.jpg -> photo--16px.jpg, photo--32px.jpg, ... for every popular width below the image size
 hlpr image resize -path photo.jpg --all
+
+# photo.jpg -> photo--16px.jpg, photo--32px.jpg, ... photo--512px.jpg for each favicon size below the image size
+hlpr image resize -path photo.jpg --favicon
 ```
 
 ## Popular widths
 
 `--all` uses these sizes: 16, 32, 48, 64, 128, 256, 320, 375, 414, 512, 640, 768, 1024, 1280, 1366, 1440, 1920, 2560, 3840.
+`--favicon` uses these sizes: 16, 32, 48, 64, 180, 192, 512. It writes PNG-style copies only; it does not create a `.ico` file.
 Only sizes smaller than the image's longest side are created. A copy that already exists is skipped and listed, so a rerun fills in what is missing.
 
 ## Supported formats

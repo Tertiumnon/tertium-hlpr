@@ -55,7 +55,7 @@ hlpr file rename -dir ./src -style kebab -r -d -f --dry
 | [file find](src/commands/file/find/find.md) (`search`) | Find files by name |
 | [file read](src/commands/file/read/read.md) | Print a remote file over SSH |
 | [file edit](src/commands/file/edit/edit.md) | Edit a remote file in your editor over SSH |
-| [image resize](src/commands/image/resize/resize.md) | Create resized copies of an image (`-size <px>` or `--all` popular widths) |
+| [image resize](src/commands/image/resize/resize.md) | Create resized copies of an image (`-size <px>`, `--all` popular widths, or `--favicon` sizes) |
 | git commands | Moved to [@tertium/gith](https://www.npmjs.com/package/@tertium/gith) (`gith setup -n npm` writes the pre-commit hook); see the changelog |
 | [npm scripts](src/commands/npm/scripts/scripts.md) | Add missing start and dev npm scripts |
 | [gh setup](src/commands/gh/setup/setup.md) | Write GitHub workflows: npm publish (trusted publishing) and SSH deploy |

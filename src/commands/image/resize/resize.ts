@@ -7,28 +7,31 @@ import path from 'node:path'
 
 const extensions = ['.png', '.jpg', '.jpeg', '.bmp', '.gif', '.tif', '.tiff']
 const popularWidths = [16, 32, 48, 64, 128, 256, 320, 375, 414, 512, 640, 768, 1024, 1280, 1366, 1440, 1920, 2560, 3840]
+const faviconSizes = [16, 32, 48, 64, 180, 192, 512]
 
 const windowsResize = `$ErrorActionPreference = 'Stop'; Add-Type -AssemblyName System.Drawing; $src = [System.Drawing.Image]::FromFile($env:HLPR_SRC); $scale = [int]$env:HLPR_SIZE / [Math]::Max($src.Width, $src.Height); $width = [Math]::Max(1, [int][Math]::Round($src.Width * $scale)); $height = [Math]::Max(1, [int][Math]::Round($src.Height * $scale)); $bitmap = New-Object System.Drawing.Bitmap $width, $height; $graphics = [System.Drawing.Graphics]::FromImage($bitmap); $graphics.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic; $graphics.DrawImage($src, 0, 0, $width, $height); $graphics.Dispose(); $src.Dispose(); $format = switch ([IO.Path]::GetExtension($env:HLPR_DST).ToLower()) { '.jpg' { [System.Drawing.Imaging.ImageFormat]::Jpeg } '.jpeg' { [System.Drawing.Imaging.ImageFormat]::Jpeg } '.bmp' { [System.Drawing.Imaging.ImageFormat]::Bmp } '.gif' { [System.Drawing.Imaging.ImageFormat]::Gif } '.tif' { [System.Drawing.Imaging.ImageFormat]::Tiff } '.tiff' { [System.Drawing.Imaging.ImageFormat]::Tiff } default { [System.Drawing.Imaging.ImageFormat]::Png } }; $bitmap.Save($env:HLPR_DST, $format); $bitmap.Dispose()`
 
 const windowsSize = `$ErrorActionPreference = 'Stop'; Add-Type -AssemblyName System.Drawing; $img = [System.Drawing.Image]::FromFile($env:HLPR_SRC); "$($img.Width) $($img.Height)"; $img.Dispose()`
 
-export type ResizeArgs = { image: string } & ({ all: true } | { all: false; size: number })
+export type ResizeArgs = { image: string; all: boolean; favicon: boolean; size?: number }
 
 export const parseResizeArgs = (args: string[]): ResizeArgs => {
   let image: string | undefined
   let size: number | undefined
   let all = false
+  let favicon = false
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '-path') image = args[++i]
     else if (args[i] === '-size') size = Number(args[++i])
     else if (args[i] === '--all') all = true
+    else if (args[i] === '--favicon') favicon = true
     else throw new Error(`Unknown option: ${args[i]}`)
   }
-  if (!image) throw new Error('Required: -path <image> and either -size <px> or --all')
-  if (all && size !== undefined) throw new Error('Use either -size <px> or --all, not both')
-  if (all) return { image, all }
-  if (size === undefined || !Number.isInteger(size) || size <= 0) throw new Error('Required: -path <image> -size <px> (a positive whole number) or --all')
-  return { image, all, size }
+  if (!image) throw new Error('Required: -path <image> and one of -size <px>, --all, or --favicon')
+  if ([size !== undefined, all, favicon].filter(Boolean).length > 1) throw new Error('Use only one of -size <px>, --all, or --favicon')
+  if (all || favicon) return { image, all, favicon }
+  if (size === undefined || !Number.isInteger(size) || size <= 0) throw new Error('Required: -path <image> -size <px> (a positive whole number), --all, or --favicon')
+  return { image, all, favicon, size }
 }
 
 export const resizedPath = (image: string, size: number): string => {
@@ -102,13 +105,13 @@ export const resizeImage = (image: string, size: number): string => {
   return dst
 }
 
-export const resizeAll = (image: string): { created: string[]; skipped: string[] } => {
+export const resizeAll = (image: string, widths: number[] = popularWidths): { created: string[]; skipped: string[] } => {
   const src = path.resolve(image)
   checkImage(src)
   const longest = imageSize(src)
   const created: string[] = []
   const skipped: string[] = []
-  for (const width of popularWidths.filter(width => width < longest)) {
+  for (const width of widths.filter(width => width < longest)) {
     const dst = resizedPath(src, width)
     if (fs.existsSync(dst)) {
       skipped.push(dst)
@@ -123,16 +126,16 @@ export const resizeAll = (image: string): { created: string[]; skipped: string[]
 if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
   const args = process.argv.slice(2)
   if (args.includes('--help') || args.includes('-h')) {
-    console.log('Usage: hlpr image resize -path <image> (-size <px> | --all)\nCreate <name>--<px>px.<ext> next to the image, with its longest side set to <px>.\n--all creates a copy for each popular width smaller than the image; existing copies are skipped.')
+    console.log('Usage: hlpr image resize -path <image> (-size <px> | --all | --favicon)\nCreate <name>--<px>px.<ext> next to the image, with its longest side set to <px>.\n--all creates a copy for each popular width smaller than the image; --favicon creates copies for favicon and app icon sizes (16, 32, 48, 64, 180, 192, 512). Existing copies are skipped.')
     process.exit(0)
   }
   try {
     const parsed = parseResizeArgs(args)
-    if (parsed.all) {
-      const { created, skipped } = resizeAll(parsed.image)
+    if (parsed.size === undefined) {
+      const { created, skipped } = resizeAll(parsed.image, parsed.favicon ? faviconSizes : popularWidths)
       for (const file of created) console.log(`Created ${file}`)
       for (const file of skipped) console.log(`Skipped, already exists: ${file}`)
-      if (created.length === 0 && skipped.length === 0) console.log('No popular width is smaller than the image.')
+      if (created.length === 0 && skipped.length === 0) console.log('No size is smaller than the image.')
     } else {
       console.log(`Created ${resizeImage(parsed.image, parsed.size)}`)
     }
