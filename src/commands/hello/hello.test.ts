@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { renderMatrixFrame } from './hello.js'
+import { renderMatrixFrame } from '../../core/matrix.js'
 
 describe('hello', () => {
   test('renders active drops at their terminal coordinates', () => {

@@ -95,8 +95,10 @@ hlpr file rename -dir ./src -style kebab -r -d -f --dry
 | [pm2 stop](src/commands/pm2/stop/stop.md) | Stop a PM2 process on a remote host |
 | [pm2 start](src/commands/pm2/start/start.md) | Start the apps of a PM2 config on a remote host |
 | [pm2 status](src/commands/pm2/status/status.md) | Print a PM2 process status on a remote host |
-| [hello](src/commands/hello/hello.md) | Run a Matrix rain animation |
+| [hello](src/commands/hello/hello.md) | Run a Matrix rain animation until q or Esc |
 | [hello world](src/commands/hello/world/world.md) | Display animated Hello World art |
+| [animation play](src/commands/animation/play/play.md) | Play a wave, starfield, fire, pipes, or matrix animation until q or Esc |
+| [tui run](src/commands/tui/run/run.md) | Run a small full-screen terminal app, such as browse (a simple file list) |
 | [self update](src/commands/self/update/update.md) (`self upgrade`) | Update hlpr and repair broken command files |
 | [self fix](src/commands/self/fix/fix.md) | Reinstall hlpr when command files are missing |
 | [help](src/commands/help/help.md)                 | Show available commands                 |

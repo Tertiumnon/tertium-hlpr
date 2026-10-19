@@ -8,7 +8,7 @@ Run a Matrix rain animation.
 - ✅ **macOS** - Fully supported
 - ✅ **Windows** - PowerShell, Command Prompt, or Windows Terminal
 
-Type the classic Wake Up Neo sequence, then display a short Matrix rain animation.
+Type the classic Wake Up Neo sequence, then display a Matrix rain animation that keeps running until you press `q` or `Esc` (Ctrl+C also exits). Requires an interactive terminal.
 
 ```bash
 hlpr hello
