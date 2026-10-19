@@ -15,7 +15,7 @@ hlpr image resize -path <image> --favicon
 - `-path <image>` - Path to the image file
 - `-size <px>` - Length of the longest side in pixels (positive whole number)
 - `--all` - Create one copy for each popular width that is smaller than the image
-- `--favicon` - Create one copy for each favicon and app icon size that is smaller than the image
+- `--favicon` - Create one `favicon.ico` file next to the image, holding 16, 32, 48, 64, 128, and 256 px icons (only sizes smaller than the image)
 
 Use only one of `-size`, `--all`, or `--favicon`.
 
@@ -31,15 +31,15 @@ hlpr image resize -path icons/logo.png -size 64
 # photo.jpg -> photo--16px.jpg, photo--32px.jpg, ... for every popular width below the image size
 hlpr image resize -path photo.jpg --all
 
-# photo.jpg -> photo--16px.jpg, photo--32px.jpg, ... photo--512px.jpg for each favicon size below the image size
-hlpr image resize -path photo.jpg --favicon
+# photo.png -> favicon.ico (16, 32, 48, 64, 128, 256 px inside one file)
+hlpr image resize -path photo.png --favicon
 ```
 
 ## Popular widths
 
 `--all` uses these sizes: 16, 32, 48, 64, 128, 256, 320, 375, 414, 512, 640, 768, 1024, 1280, 1366, 1440, 1920, 2560, 3840.
-`--favicon` uses these sizes: 16, 32, 48, 64, 180, 192, 512. It writes PNG-style copies only; it does not create a `.ico` file.
-Only sizes smaller than the image's longest side are created. A copy that already exists is skipped and listed, so a rerun fills in what is missing.
+`--favicon` uses these sizes: 16, 32, 48, 64, 128, 256. The ICO stores each size as PNG data, which Windows Vista and later and all modern browsers read. Sizes are capped at 256 px by the ICO format, so 180, 192, and 512 px icons are not included.
+Only sizes smaller than the image's longest side are created. `--all` skips copies that already exist; `--favicon` refuses to overwrite an existing `favicon.ico`.
 
 ## Supported formats
 

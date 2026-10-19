@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { parseResizeArgs, resizedPath, resizeAll, resizeImage } from './resize.js'
+import { parseResizeArgs, resizedPath, resizeAll, resizeFavicon, resizeImage } from './resize.js'
 
 // 1x1 transparent PNG
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64')
@@ -55,25 +55,42 @@ describe('resizeAll', () => {
     }
   }, 30_000)
 
-  test('creates a copy for each favicon size below the image size when given those widths', () => {
-    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'hlpr-resize-'))
-    try {
-      const dot = path.join(tmp, 'dot.png')
-      fs.writeFileSync(dot, png)
-      const square = resizeImage(dot, 300)
-      const { created } = resizeAll(square, [16, 32, 180, 512])
-      expect(created.map(file => path.basename(file))).toEqual(['dot--300px--16px.png', 'dot--300px--32px.png', 'dot--300px--180px.png'])
-    } finally {
-      fs.rmSync(tmp, { recursive: true, force: true })
-    }
-  }, 30_000)
-
   test('creates nothing when no popular width is smaller than the image', () => {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'hlpr-resize-'))
     try {
       const src = path.join(tmp, 'dot.png')
       fs.writeFileSync(src, png)
       expect(resizeAll(src)).toEqual({ created: [], skipped: [] })
+    } finally {
+      fs.rmSync(tmp, { recursive: true, force: true })
+    }
+  })
+})
+
+describe('resizeFavicon', () => {
+  test('writes favicon.ico that holds every favicon size below the image size', () => {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'hlpr-resize-'))
+    try {
+      const dot = path.join(tmp, 'dot.png')
+      fs.writeFileSync(dot, png)
+      const square = resizeImage(dot, 800)
+      const ico = resizeFavicon(square)
+      expect(path.basename(ico)).toBe('favicon.ico')
+      const data = fs.readFileSync(ico)
+      expect(data.readUInt16LE(2)).toBe(1)
+      expect(data.readUInt16LE(4)).toBe(6)
+      expect([...Array(6)].map((_, i) => data[6 + 16 * i] || 256)).toEqual([16, 32, 48, 64, 128, 256])
+    } finally {
+      fs.rmSync(tmp, { recursive: true, force: true })
+    }
+  }, 60_000)
+
+  test('rejects an image too small for any favicon size', () => {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'hlpr-resize-'))
+    try {
+      const src = path.join(tmp, 'dot.png')
+      fs.writeFileSync(src, png)
+      expect(() => resizeFavicon(src)).toThrow('too small')
     } finally {
       fs.rmSync(tmp, { recursive: true, force: true })
     }
