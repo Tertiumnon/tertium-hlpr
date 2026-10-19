@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.25.0 - 2026-10-19
+
+- feat: add image resize command
+
 ## 0.24.0 - 2026-10-19
 
 - feat: add animation play and tui run commands
