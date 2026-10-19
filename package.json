@@ -1,6 +1,6 @@
 {
   "name": "@tertium/hlpr",
-  "version": "0.23.2",
+  "version": "0.24.0",
   "description": "Useful CLI commands with natural, consistent names for everyday tasks across Windows, macOS, and Linux",
   "author": "Vitalii Balabanov",
   "email": "tertiumnon@gmail.com",

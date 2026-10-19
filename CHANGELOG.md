@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.24.0 - 2026-10-19
+
+- feat: add animation play and tui run commands
+- docs: remove project.json, replaced by project.yml
+- docs: project attributes in project.yml
+- docs: add project.json attributes
+- docs: use the scoped package name as the project title
+
 ## 0.23.2 - 2026-10-18
 
 - fix: app install/uninstall - search strongly by name
