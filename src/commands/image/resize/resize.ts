@@ -19,15 +19,15 @@ export const parseResizeArgs = (args: string[]): ResizeArgs => {
   let size: number | undefined
   let all = false
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '-size') size = Number(args[++i])
+    if (args[i] === '-path') image = args[++i]
+    else if (args[i] === '-size') size = Number(args[++i])
     else if (args[i] === '--all') all = true
-    else if (image === undefined && !args[i].startsWith('-')) image = args[i]
     else throw new Error(`Unknown option: ${args[i]}`)
   }
-  if (!image) throw new Error('Required: <image> and either -size <px> or --all')
+  if (!image) throw new Error('Required: -path <image> and either -size <px> or --all')
   if (all && size !== undefined) throw new Error('Use either -size <px> or --all, not both')
   if (all) return { image, all }
-  if (size === undefined || !Number.isInteger(size) || size <= 0) throw new Error('Required: <image> -size <px> (a positive whole number) or --all')
+  if (size === undefined || !Number.isInteger(size) || size <= 0) throw new Error('Required: -path <image> -size <px> (a positive whole number) or --all')
   return { image, all, size }
 }
 
@@ -123,7 +123,7 @@ export const resizeAll = (image: string): { created: string[]; skipped: string[]
 if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
   const args = process.argv.slice(2)
   if (args.includes('--help') || args.includes('-h')) {
-    console.log('Usage: hlpr image resize <image> (-size <px> | --all)\nCreate <name>--<px>px.<ext> next to the image, with its longest side set to <px>.\n--all creates a copy for each popular width smaller than the image; existing copies are skipped.')
+    console.log('Usage: hlpr image resize -path <image> (-size <px> | --all)\nCreate <name>--<px>px.<ext> next to the image, with its longest side set to <px>.\n--all creates a copy for each popular width smaller than the image; existing copies are skipped.')
     process.exit(0)
   }
   try {

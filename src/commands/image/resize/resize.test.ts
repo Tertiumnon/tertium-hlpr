@@ -8,24 +8,28 @@ import { parseResizeArgs, resizedPath, resizeAll, resizeImage } from './resize.j
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64')
 
 describe('parseResizeArgs', () => {
-  test('reads the image and size in any order', () => {
-    expect(parseResizeArgs(['-size', '256', 'photo.png'])).toEqual({ image: 'photo.png', all: false, size: 256 })
+  test('reads the image from -path and the size in any order', () => {
+    expect(parseResizeArgs(['-size', '256', '-path', 'photo.png'])).toEqual({ image: 'photo.png', all: false, size: 256 })
   })
 
   test('reads --all in any position', () => {
-    expect(parseResizeArgs(['--all', 'photo.png'])).toEqual({ image: 'photo.png', all: true })
-    expect(parseResizeArgs(['photo.png', '--all'])).toEqual({ image: 'photo.png', all: true })
+    expect(parseResizeArgs(['--all', '-path', 'photo.png'])).toEqual({ image: 'photo.png', all: true })
+    expect(parseResizeArgs(['-path', 'photo.png', '--all'])).toEqual({ image: 'photo.png', all: true })
   })
 
   test('rejects a missing image, a missing size, or a size that is not a positive whole number', () => {
     expect(() => parseResizeArgs(['-size', '256'])).toThrow('Required')
-    expect(() => parseResizeArgs(['photo.png'])).toThrow('Required')
-    expect(() => parseResizeArgs(['photo.png', '-size', '0'])).toThrow('Required')
-    expect(() => parseResizeArgs(['photo.png', '-size', '12.5'])).toThrow('Required')
+    expect(() => parseResizeArgs(['-path', 'photo.png'])).toThrow('Required')
+    expect(() => parseResizeArgs(['-path', 'photo.png', '-size', '0'])).toThrow('Required')
+    expect(() => parseResizeArgs(['-path', 'photo.png', '-size', '12.5'])).toThrow('Required')
+  })
+
+  test('rejects a bare positional image', () => {
+    expect(() => parseResizeArgs(['photo.png', '-size', '256'])).toThrow('Unknown option: photo.png')
   })
 
   test('rejects -size combined with --all', () => {
-    expect(() => parseResizeArgs(['photo.png', '-size', '256', '--all'])).toThrow('not both')
+    expect(() => parseResizeArgs(['-path', 'photo.png', '-size', '256', '--all'])).toThrow('not both')
   })
 })
 

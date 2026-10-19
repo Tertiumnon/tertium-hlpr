@@ -5,13 +5,13 @@ Create resized copies of an image. Each copy is written next to the original as 
 ## Usage
 
 ```bash
-hlpr image resize <image> -size <px>
-hlpr image resize <image> --all
+hlpr image resize -path <image> -size <px>
+hlpr image resize -path <image> --all
 ```
 
 ### Arguments
 
-- `<image>` - Path to the image file
+- `-path <image>` - Path to the image file
 - `-size <px>` - Length of the longest side in pixels (positive whole number)
 - `--all` - Create one copy for each popular width that is smaller than the image
 
@@ -19,13 +19,13 @@ hlpr image resize <image> --all
 
 ```bash
 # photo.jpg -> photo--256px.jpg
-hlpr image resize photo.jpg -size 256
+hlpr image resize -path photo.jpg -size 256
 
 # icons/logo.png -> icons/logo--64px.png
-hlpr image resize icons/logo.png -size 64
+hlpr image resize -path icons/logo.png -size 64
 
 # photo.jpg -> photo--16px.jpg, photo--32px.jpg, ... for every popular width below the image size
-hlpr image resize photo.jpg --all
+hlpr image resize -path photo.jpg --all
 ```
 
 ## Popular widths
