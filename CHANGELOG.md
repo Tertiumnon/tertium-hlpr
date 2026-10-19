@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.25.2 - 2026-10-19
+
+- feat: add image resize favicon
+
 ## 0.25.1 - 2026-10-19
 
 - fix: image resize command syntax
