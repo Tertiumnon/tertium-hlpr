@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.25.4 - 2026-10-20
+
+- feat(tui): rename browse to explorer as a two-panel file manager
+
 ## 0.25.3 - 2026-10-19
 
 - fix: image favicon commands
