@@ -23,14 +23,6 @@ hlpr aims to make everyday command-line tasks simpler across Windows, macOS, and
 
 > **Note:** This app is in development. Commands, behavior, and documentation are still evolving and may change without notice.
 
-## Install
-
-```sh
-npm install -g @tertium/hlpr
-```
-
-Requires Node.js. Shell commands require Bash (Git Bash on Windows). Other requirements are listed in each command's documentation.
-
 ## Usage
 
 ```sh
@@ -107,3 +99,7 @@ hlpr file rename -dir ./src -style kebab -r -d -f --dry
 [Support the project](https://ko-fi.com/tertiumnon)
 
 License: MIT.
+
+## Documentation
+
+- [Install](docs/INSTALL.md)
