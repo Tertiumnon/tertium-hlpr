@@ -99,7 +99,3 @@ hlpr file rename -dir ./src -style kebab -r -d -f --dry
 [Support the project](https://ko-fi.com/tertiumnon)
 
 License: MIT.
-
-## Documentation
-
-- [Install](docs/INSTALL.md)
