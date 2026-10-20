@@ -1,3 +1,35 @@
 type: cli
 publish_on:
   - https://tertiumnon.github.io
+display_name:
+  en: hlpr
+short_name: hlpr
+summary:
+  en: "Useful CLI commands with natural, consistent names for everyday tasks across Windows, macOS, and Linux"
+keywords:
+  - cli
+  - tasks
+  - windows
+  - macos
+  - linux
+categories:
+  - developer-tools
+  - utilities
+status: stable
+languages:
+  - en
+default_language: en
+code_languages:
+  - TypeScript
+team:
+  - name: Vitalii Balabanov
+    roles:
+      - owner
+      - developer
+platforms:
+  npm:
+    settings:
+      name: "@tertium/hlpr"
+distribution:
+  - npm
+data_collected: none
