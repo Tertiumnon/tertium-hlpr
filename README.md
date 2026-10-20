@@ -99,7 +99,7 @@ hlpr file rename -dir ./src -style kebab -r -d -f --dry
 | [hello](src/commands/hello/hello.md) | Run a Matrix rain animation until q or Esc |
 | [hello world](src/commands/hello/world/world.md) | Display animated Hello World art |
 | [animation play](src/commands/animation/play/play.md) | Play a wave, starfield, fire, pipes, or matrix animation until q or Esc |
-| [tui run](src/commands/tui/run/run.md) | Run a small full-screen terminal app, such as browse (a simple file list) |
+| [tui run](src/commands/tui/run/run.md) | Run a small full-screen terminal app, such as explorer (a two-panel file manager) |
 | [self update](src/commands/self/update/update.md) (`self upgrade`) | Update hlpr and repair broken command files |
 | [self fix](src/commands/self/fix/fix.md) | Reinstall hlpr when command files are missing |
 | [help](src/commands/help/help.md)                 | Show available commands                 |
