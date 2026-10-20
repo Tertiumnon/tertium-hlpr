@@ -6,15 +6,32 @@ display_name:
   en: "@tertium/hlpr"
 summary:
   en: "Command-line helper for everyday tasks on Windows, macOS, and Linux, run as hlpr <domain> <command>."
+keywords:
+  - cli
+  - tasks
+  - windows
+  - macos
+  - linux
+categories:
+  - developer-tools
+  - utilities
+status: stable
 languages:
   - en
 default_language: en
 short_name: hlpr
-distribution:
-  - npm
+code_languages:
+  - TypeScript
 team:
   - name: Vitalii Balabanov
     roles:
       - owner
       - developer
     github: Tertiumnon
+platforms:
+  npm:
+    settings:
+      name: "@tertium/hlpr"
+distribution:
+  - npm
+data_collected: none
