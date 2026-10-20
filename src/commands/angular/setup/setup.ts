@@ -2,6 +2,7 @@
 import { execFileSync, spawnSync } from 'node:child_process'
 import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
+import { envForCwd } from '../../../core/git/env.js'
 import { setupGitHooks } from '../../../core/git/hooks.js'
 import { ensureScripts } from '../../../core/npm/scripts.js'
 
@@ -14,11 +15,11 @@ interface PackageJson {
 }
 
 function query(cwd: string, command: string, args: string[]): string {
-  return execFileSync(command, args, { cwd, encoding: 'utf8' }).trim()
+  return execFileSync(command, args, { cwd, encoding: 'utf8', env: envForCwd() }).trim()
 }
 
 function run(cwd: string, command: string, args: string[]): void {
-  const result = spawnSync(command, args, { cwd, stdio: 'inherit' })
+  const result = spawnSync(command, args, { cwd, stdio: 'inherit', env: envForCwd() })
   if (result.error) throw result.error
   if (result.status !== 0) throw new Error(`${command} ${args.join(' ')} failed with exit code ${result.status}`)
 }

@@ -2,6 +2,7 @@ import { execFileSync } from 'node:child_process'
 import { chmodSync, existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { type PackageJson, type PackageManager, RUN_PREFIX, detectPackageManager, isTypeScriptProject, readPackageJson } from '../npm/project.js'
+import { envForCwd } from './env.js'
 
 export const HOOKS_DIR = '.githooks'
 export const HOOKS_PATH_COMMAND = `git config core.hooksPath ${HOOKS_DIR}`
@@ -45,7 +46,7 @@ export function setupGitHooks(projectPath: string, options: { force?: boolean } 
     // Windows has no POSIX mode bits; Git for Windows still runs the hook through its shebang.
   }
 
-  execFileSync('git', ['config', 'core.hooksPath', HOOKS_DIR], { cwd: projectPath, stdio: 'inherit' })
+  execFileSync('git', ['config', 'core.hooksPath', HOOKS_DIR], { cwd: projectPath, stdio: 'inherit', env: envForCwd() })
 
   if (pkg.scripts?.prepare !== HOOKS_PATH_COMMAND) {
     pkg.scripts = { ...pkg.scripts, prepare: HOOKS_PATH_COMMAND }

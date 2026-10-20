@@ -30,4 +30,29 @@ describe('pre-commit hook', () => {
       fs.rmSync(dir, { recursive: true, force: true })
     }
   })
+
+  test('configures the target folder, not the repository a git hook pins through GIT_DIR', () => {
+    const pinned = fs.mkdtempSync(path.join(os.tmpdir(), 'hlpr-git-pinned-'))
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'hlpr-git-hooks-'))
+    try {
+      spawnSync('git', ['init', '-b', 'main'], { cwd: pinned })
+      spawnSync('git', ['init', '-b', 'main'], { cwd: dir })
+      fs.writeFileSync(path.join(dir, 'package.json'), JSON.stringify({ scripts: {} }))
+      fs.writeFileSync(path.join(dir, 'bun.lock'), '')
+
+      process.env['GIT_DIR'] = path.join(pinned, '.git')
+      try {
+        setupGitHooks(dir)
+      } finally {
+        delete process.env['GIT_DIR']
+      }
+
+      const hooksPath = (cwd: string) => spawnSync('git', ['config', 'core.hooksPath'], { cwd, encoding: 'utf8' }).stdout.trim()
+      expect(hooksPath(dir)).toBe('.githooks')
+      expect(hooksPath(pinned)).toBe('')
+    } finally {
+      fs.rmSync(pinned, { recursive: true, force: true })
+      fs.rmSync(dir, { recursive: true, force: true })
+    }
+  })
 })
