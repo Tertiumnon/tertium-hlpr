@@ -1,5 +1,7 @@
 # @tertium/hlpr
 
+Command-line helper for everyday tasks on Windows, macOS, and Linux, run as hlpr <domain> <command>.
+
 ```text
     |==|   |==|
     |  |   |  |
