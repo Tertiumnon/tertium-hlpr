@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { parseResizeArgs, resizedPath, resizeAll, resizeFavicon, resizeImage } from './resize.js'
+import { fitImage, parseResizeArgs, resizedPath, resizeAll, resizeFavicon, resizeImage } from './resize.js'
 
 // 1x1 transparent PNG
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64')
@@ -26,6 +26,19 @@ describe('parseResizeArgs', () => {
 
   test('rejects a bare positional image', () => {
     expect(() => parseResizeArgs(['photo.png', '-size', '256'])).toThrow('Unknown option: photo.png')
+  })
+
+  test('reads -size <width>x<height> as a box, centered unless -align is given', () => {
+    expect(parseResizeArgs(['-path', 'photo.png', '-size', '1280x800'])).toEqual({ image: 'photo.png', all: false, favicon: false, box: { width: 1280, height: 800, align: 'center' } })
+    expect(parseResizeArgs(['-align', 'left', '-path', 'photo.png', '-size', '1280x800'])).toEqual({ image: 'photo.png', all: false, favicon: false, box: { width: 1280, height: 800, align: 'left' } })
+  })
+
+  test('rejects a bad box size, a bad -align, or -align without a box size', () => {
+    expect(() => parseResizeArgs(['-path', 'photo.png', '-size', '1280x0'])).toThrow('Required')
+    expect(() => parseResizeArgs(['-path', 'photo.png', '-size', '1280x'])).toThrow('Required')
+    expect(() => parseResizeArgs(['-path', 'photo.png', '-size', '1280x800', '-align', 'top'])).toThrow('Invalid -align')
+    expect(() => parseResizeArgs(['-path', 'photo.png', '-size', '256', '-align', 'left'])).toThrow('-align needs')
+    expect(() => parseResizeArgs(['-path', 'photo.png', '--all', '-align', 'left'])).toThrow('-align needs')
   })
 
   test('rejects combining -size, --all, and --favicon', () => {
@@ -95,6 +108,25 @@ describe('resizeFavicon', () => {
       fs.rmSync(tmp, { recursive: true, force: true })
     }
   })
+})
+
+describe('fitImage', () => {
+  test('writes a copy named <name>--<width>x<height>px.<ext> at exactly that size with black bars', () => {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'hlpr-resize-'))
+    try {
+      const src = path.join(tmp, 'icon.png')
+      fs.writeFileSync(src, png)
+      const wide = fitImage(src, { width: 300, height: 100, align: 'center' })
+      expect(wide).toBe(path.join(tmp, 'icon--300x100px.png'))
+      const dst = fitImage(wide, { width: 100, height: 80, align: 'right' })
+      const output = fs.readFileSync(dst)
+      expect(output.readUInt32BE(16)).toBe(100)
+      expect(output.readUInt32BE(20)).toBe(80)
+      expect(() => fitImage(wide, { width: 100, height: 80, align: 'left' })).toThrow('Destination already exists')
+    } finally {
+      fs.rmSync(tmp, { recursive: true, force: true })
+    }
+  }, 30_000)
 })
 
 describe('resizedPath', () => {
