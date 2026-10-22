@@ -1,3 +1,20 @@
 type: cli
-publish_on:
+slug: tertium-hlpr
+listed_on:
   - https://tertiumnon.github.io
+display_name:
+  en: "@tertium/hlpr"
+summary:
+  en: "Command-line helper for everyday tasks on Windows, macOS, and Linux, run as hlpr <domain> <command>."
+languages:
+  - en
+default_language: en
+short_name: hlpr
+distribution:
+  - npm
+team:
+  - name: Vitalii Balabanov
+    roles:
+      - owner
+      - developer
+    github: Tertiumnon
