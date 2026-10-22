@@ -10,4 +10,10 @@ Use quotes for names with spaces, for example `hlpr app install -name "Visual St
 
 Use ↑/↓ to move through the list, Enter to install the selected package, and Esc to cancel. Long lists show twelve entries at a time. The menu needs an interactive terminal.
 
-Installs run with the selected manager and an exact package ID: winget, choco, scoop, brew (formula), brew-cask (cask), apt-get, dnf, pacman, zypper, snap, or flatpak. Each manager must be installed; unavailable managers are skipped. Windows uses winget, choco, and scoop; macOS uses brew; Linux uses apt-cache, dnf, pacman, zypper, snap, flatpak, and brew. Installs through apt-get, dnf, pacman, zypper, and snap run with `sudo` and may ask for your password. flatpak installs from the flathub remote.
+Scoop results include only configured buckets. To make apps such as Sourcetree available through Scoop, first run `scoop bucket add extras`, then repeat the command. Results from other known buckets are excluded because Scoop cannot install them by name until their bucket is configured.
+
+Installs run with the selected manager and an exact package ID: winget, choco, scoop, brew (formula), brew-cask (cask), apt-get, dnf, pacman, zypper, snap, or flatpak. Each manager must be installed; unavailable managers are skipped. Windows uses winget, choco, and scoop; macOS searches Homebrew formulae and casks separately; Linux uses apt-cache, DNF 4/5 `repoquery`, pacman, zypper (packages only), snap, flatpak, and Homebrew formulae. An empty search in one manager does not discard matches from other managers; genuine manager failures are reported.
+
+Installs through apt-get, dnf, pacman, zypper, and snap require `sudo` and may ask for your password. Flatpak 1.2 or newer resolves the exact application ID across configured remotes and may ask you to select a remote, installation, or branch; Flathub is not required. Snap packages that require classic confinement need a manual `snap install <id> --classic`; hlpr does not enable it automatically.
+
+Catalogs and package availability depend on the host's configuration. Tests with captured output and simulated command results do not verify native macOS or Linux installation.

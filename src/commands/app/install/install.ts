@@ -10,6 +10,8 @@ async function main(): Promise<void> {
   if (args.length === 1 && ['-h', '--help'].includes(args[0])) {
     console.log('Usage: hlpr app install -name <app name>')
     console.log('Search package managers for the name, then choose a package from a keyboard menu to install.')
+    console.log('Scoop searches configured buckets only; add extras with: scoop bucket add extras')
+    console.log('Homebrew distinguishes formulae and casks. Flatpak may ask you to choose a configured remote.')
     return
   }
   if (args.length < 2 || args[0] !== '-name' || args.slice(1).some(value => !value.trim())) throw new Error('Usage: hlpr app install -name <app name>')

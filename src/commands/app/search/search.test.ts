@@ -1,5 +1,6 @@
 import { expect, test } from 'bun:test'
-import { parseRemoteSearch } from '../../../core/command/apps.js'
+import type { SpawnSyncReturns } from 'node:child_process'
+import { installedApps, parseRemoteSearch, remoteApps, remoteSearchQueries } from '../../../core/command/apps.js'
 import { matchingAppNames, matchingRemoteApps } from './search.js'
 
 test('searches installed app names by case-insensitive substring and removes duplicates', () => {
@@ -37,15 +38,79 @@ test('parses winget search output into name and id', () => {
   ])
 })
 
-test('parses dnf search output from Name lines', () => {
+test('parses machine-readable DNF repoquery output', () => {
   const output = [
-    'Name    : git',
-    'Summary : The Git source code manager',
-    'Name    : git-core',
+    'git',
+    'git-core',
+    'Last metadata expiration check: 0:00:01 ago',
   ].join('\n')
   expect(parseRemoteSearch('dnf', output)).toEqual([
     { manager: 'dnf', name: 'git', id: 'git' },
     { manager: 'dnf', name: 'git-core', id: 'git-core' },
+  ])
+})
+
+const result = (stdout = '', status = 0, stderr = ''): SpawnSyncReturns<string> => ({
+  pid: 0, output: [], stdout, stderr, status, signal: null,
+})
+const missing = (): SpawnSyncReturns<string> => ({
+  ...result('', 1), error: Object.assign(new Error('Not installed'), { code: 'ENOENT' }),
+})
+
+test('keeps headerless Homebrew casks separate from formulae and allows empty formula results', () => {
+  expect(remoteSearchQueries('darwin', 'sourcetree')).toEqual([
+    { manager: 'brew', command: 'brew', args: ['search', '--formula', 'sourcetree'] },
+    { manager: 'brew-cask', command: 'brew', args: ['search', '--cask', 'sourcetree'] },
+  ])
+  expect(remoteApps('darwin', 'sourcetree', (command, args, options) => {
+    expect(command).toBe('brew')
+    expect(options.env?.LC_ALL).toBe('C')
+    return args.includes('--cask') ? result('sourcetree\n') : result('', 1, 'Error: No formulae or casks found for "sourcetree".')
+  })).toEqual([{ manager: 'brew-cask', name: 'sourcetree', id: 'sourcetree' }])
+})
+
+test('Linux empty searches do not discard results from another manager', () => {
+  expect(remoteApps('linux', 'curl', (command, args, options) => {
+    expect(options.env?.LC_ALL).toBe('C')
+    if (command === 'apt-cache') return result('curl - command line transfer tool\n')
+    if (command === 'pacman') return result('', 1)
+    if (command === 'zypper') {
+      expect(args).toEqual(['search', '--type', 'package', 'curl'])
+      return result('No matching items found.\n', 104)
+    }
+    if (command === 'dnf') {
+      expect(args).toEqual(['-q', 'repoquery', '--available', '--queryformat', '%{name}', '*curl*'])
+      return result('curl\nlibcurl\n')
+    }
+    return missing()
+  })).toEqual([
+    { manager: 'apt', name: 'curl', id: 'curl' },
+    { manager: 'dnf', name: 'curl', id: 'curl' },
+    { manager: 'dnf', name: 'libcurl', id: 'libcurl' },
+  ])
+})
+
+test('reports genuine manager failures instead of treating them as empty searches', () => {
+  expect(() => remoteApps('darwin', 'curl', () => result('', 1, 'Permission denied'))).toThrow('brew search failed: Permission denied')
+  expect(() => remoteApps('linux', 'curl', command => command === 'pacman' ? result('', 1, 'error: database unavailable') : missing())).toThrow('pacman search failed: error: database unavailable')
+  expect(() => remoteApps('linux', 'curl', command => command === 'zypper' ? result('', 4, 'Repository unavailable') : missing())).toThrow('zypper search failed: Repository unavailable')
+  expect(() => remoteApps('darwin', 'curl', missing)).toThrow('No supported package manager found on darwin')
+})
+
+test('installed Linux packages exclude residual dpkg entries and unusable DNF frontends', () => {
+  expect(installedApps('linux', (command, args, options) => {
+    if (command === 'dnf') return result('', 1)
+    if (command === 'rpm') throw new Error('Should not assign RPM packages to an unusable DNF frontend')
+    if (command === 'dpkg-query') {
+      expect(args).toEqual(['-W', `-f=\${db:Status-Status}\t\${binary:Package}\n`])
+      expect(options.env?.LC_ALL).toBe('C')
+      return result('installed\tcurl\nconfig-files\tremoved-app\nnot-installed\tpurged-app\ninstalled\tlibcurl4:amd64\n')
+    }
+    if (command === 'zypper') return result('No matching items found.\n', 104)
+    return missing()
+  })).toEqual([
+    { manager: 'apt', name: 'curl', id: 'curl' },
+    { manager: 'apt', name: 'libcurl4:amd64', id: 'libcurl4:amd64' },
   ])
 })
 

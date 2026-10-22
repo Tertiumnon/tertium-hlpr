@@ -14,3 +14,5 @@ Use ↑/↓ to move through the matching apps, Enter to uninstall the selected o
 Requires an interactive terminal. Checks available package managers: winget, Chocolatey, and Scoop on Windows; Homebrew formulas and casks on macOS; apt/dpkg, RPM/DNF, pacman, zypper, snap, flatpak, and Homebrew on Linux. Only packages listed by these managers can be removed. Linux removal with apt-get, dnf, pacman, zypper, or snap may request administrator credentials. The selected package manager may ask for further confirmation.
 
 Not supported: Mac App Store apps (`mas` cannot uninstall) and Linux packages from managers not listed above.
+
+On Debian/Ubuntu, removed packages with leftover configuration files are excluded from the menu. Homebrew formulae and casks keep their respective uninstall commands. Flatpak may ask which installed branch or installation to remove when more than one matches the selected ID.
