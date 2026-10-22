@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.25.6 - 2026-10-22
+
+- fix(app): correct package selection across package managers
+
 ## 0.25.5 - 2026-10-21
 
 - feat(image): add image crop, fit -size WxH with black bars in resize
