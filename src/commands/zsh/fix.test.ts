@@ -39,8 +39,10 @@ test.skipIf(process.platform === 'win32')('writes one bun PATH block to .zshrc, 
     expect(zshrc).toContain('export BUN_INSTALL="$HOME/.bun"')
     expect(zshrc).toContain('export PATH="$BUN_INSTALL/bin:$PATH"')
     const backups = (await readdir(home)).filter(name => name.startsWith('.zshrc.bak-'))
-    expect(backups.length).toBeGreaterThanOrEqual(1)
-    expect(await readFile(path.join(home, backups[0]), 'utf8')).toBe('alias ll="ls -l"\n')
+    expect(backups).toHaveLength(2)
+    const contents = await Promise.all(backups.map(name => readFile(path.join(home, name), 'utf8')))
+    expect(contents).toContain('alias ll="ls -l"\n')
+    expect(contents).toContain(zshrc)
   } finally { await rm(home, { recursive: true, force: true }) }
 })
 
