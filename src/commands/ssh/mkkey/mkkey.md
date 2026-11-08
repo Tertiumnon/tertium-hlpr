@@ -5,11 +5,14 @@ connecting to the remote host:
 
 ```sh
 hlpr ssh mkkey
+hlpr ssh mkkey --rsa
 ```
 
 The command asks for the SSH user, host or IP address, and a connection name
 (default: the host). It creates a dedicated Ed25519 key pair named
-`~/.ssh/<host>-<user>`, unless that pair already exists. `ssh-keygen` asks for
+`~/.ssh/<host>-<user>`, unless that pair already exists. Use `--rsa` for an RSA
+key instead. An existing pair must match the requested type; neither key is
+overwritten. `ssh-keygen` asks for
 the key passphrase. Before editing the config, the command creates a
 `~/.ssh/config.bak-...` backup; the backup is empty if the file did not exist.
 It refuses to replace an existing connection name.

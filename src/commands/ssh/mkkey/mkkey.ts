@@ -5,10 +5,10 @@ import { ensureKeyPair, keyPathFor } from '../../../core/ssh/key.js'
 
 // @description Create an SSH key pair and save its connection to ~/.ssh/config
 
-async function createKey(): Promise<void> {
+const createKey = async (type: 'ed25519' | 'rsa'): Promise<void> => {
   const { user, host, alias, configPath } = await promptConnection()
   const keyPath = keyPathFor(host, user)
-  const publicKey = await ensureKeyPair(keyPath, `${user}@${host}`)
+  const publicKey = await ensureKeyPair(keyPath, `${user}@${host}`, type)
 
   const backup = await saveConnection(configPath, alias, user, host, keyPath)
   console.log(`Config backup: ${backup}`)
@@ -20,13 +20,13 @@ async function createKey(): Promise<void> {
 if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
   const args = process.argv.slice(2)
   if (args.includes('--help') || args.includes('-h')) {
-    console.log('Usage: hlpr ssh mkkey')
-    console.log('Prompt for a user, host, and connection name; create an Ed25519 key pair and save the connection. Shows the public key at the end.')
-  } else if (args.length !== 0) {
-    console.error('Usage: hlpr ssh mkkey')
+    console.log('Usage: hlpr ssh mkkey [--rsa]')
+    console.log('Create an Ed25519 key pair (or RSA with --rsa) and save the connection. Shows the public key at the end.')
+  } else if (args.length > 1 || (args.length === 1 && args[0] !== '--rsa')) {
+    console.error('Usage: hlpr ssh mkkey [--rsa]')
     process.exitCode = 1
   } else {
-    createKey().catch(error => {
+    createKey(args[0] === '--rsa' ? 'rsa' : 'ed25519').catch(error => {
       console.error(`Error: ${error instanceof Error ? error.message : error}`)
       process.exitCode = 1
     })

@@ -74,7 +74,7 @@ hlpr file rename -dir ./src -style kebab -r -d -f --dry
 | [tool install](src/commands/tool/install/install.md) | Install Docker, htop, fastfetch, Starship, Claude CLI, Codex CLI, Copilot CLI, or another supported tool |
 | [runtime install](src/commands/runtime/install/install.md) | Install Node.js, Python, Bun, Rust, or Go |
 | [ssh mkcon](src/commands/ssh/mkcon/mkcon.md) | Create a key, authorize it on a host, and save the connection |
-| [ssh mkkey](src/commands/ssh/mkkey/mkkey.md) | Create a key pair and save the connection locally |
+| [ssh mkkey](src/commands/ssh/mkkey/mkkey.md) | Create an Ed25519 or RSA key pair and save the connection locally |
 | [zsh fix --bun](src/commands/zsh/zsh.md) | Add bun to PATH in ~/.zshrc |
 | [ssh setup](src/commands/ssh/ssh.md#setup) | Create ~/.ssh with the permissions SSH requires |
 | [ssh fix --permissions](src/commands/ssh/ssh.md#fix) | Fix permissions of ~/.ssh and its files |

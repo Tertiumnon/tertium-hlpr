@@ -10,7 +10,7 @@ and add a backed-up local SSH config entry. See [mkcon](mkcon/mkcon.md).
 ## mkkey
 
 Run `hlpr ssh mkkey` to create a key pair and add a backed-up local SSH config entry
-without connecting to the remote host. It shows the public key at the end. See [mkkey](mkkey/mkkey.md).
+without connecting to the remote host. Add `--rsa` to use RSA. It shows the public key at the end. See [mkkey](mkkey/mkkey.md).
 
 Both commands name keys `~/.ssh/<host>-<user>`.
 

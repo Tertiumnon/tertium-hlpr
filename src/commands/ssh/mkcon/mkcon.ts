@@ -23,7 +23,7 @@ grep -qxF "$key" "$file" || printf '%s\\n' "$key" >> "$file"
 async function addConnection(): Promise<void> {
   const { user, host, alias, configPath } = await promptConnection()
   const keyPath = keyPathFor(host, user)
-  const publicKey = await ensureKeyPair(keyPath, `${user}@${host}`)
+  const publicKey = await ensureKeyPair(keyPath, `${user}@${host}`, 'ed25519')
 
   console.log(`Authorizing key on ${user}@${host}. SSH may ask for a password.`)
   runCommand('ssh', [`${user}@${host}`, remoteAuthorizationCommand], `${publicKey}\n`)

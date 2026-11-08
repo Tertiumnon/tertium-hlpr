@@ -22,8 +22,7 @@ async function fileExists(filePath: string): Promise<boolean> {
   }
 }
 
-// Creates an Ed25519 pair at keyPath unless it already exists. Returns the public key.
-export async function ensureKeyPair(keyPath: string, comment: string): Promise<string> {
+export async function ensureKeyPair(keyPath: string, comment: string, type: 'ed25519' | 'rsa'): Promise<string> {
   const publicPath = `${keyPath}.pub`
   await mkdir(path.dirname(keyPath), { recursive: true, mode: 0o700 })
   const privateExists = await fileExists(keyPath)
@@ -32,9 +31,9 @@ export async function ensureKeyPair(keyPath: string, comment: string): Promise<s
   if (privateExists) console.log(`Using existing SSH key: ${keyPath}`)
   else {
     console.log(`Creating SSH key: ${keyPath}`)
-    runCommand('ssh-keygen', ['-t', 'ed25519', '-f', keyPath, '-C', comment])
+    runCommand('ssh-keygen', ['-t', type, '-f', keyPath, '-C', comment])
   }
   const publicKey = (await readFile(publicPath, 'utf8')).trim()
-  if (!publicKey.startsWith('ssh-ed25519 ') || publicKey.includes('\n')) throw new Error(`Invalid public key: ${publicPath}`)
+  if (!publicKey.startsWith(`ssh-${type} `) || publicKey.includes('\n')) throw new Error(`Invalid or non-${type} public key: ${publicPath}; use a matching key or choose another host or user`)
   return publicKey
 }
