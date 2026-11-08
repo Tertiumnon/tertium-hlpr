@@ -13,6 +13,7 @@ describe('command aliases', () => {
 
   test('file search resolves to find', () => {
     expect(resolveSubcommandAlias('file', 'search')).toBe('find')
+    expect(resolveSubcommandAlias('process', 'search')).toBe('find')
   })
 
   test('lists the same aliases for help', () => {

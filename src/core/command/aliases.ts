@@ -5,6 +5,7 @@ const aliases: Record<string, Record<string, string>> = {
   file: { mv: 'move', search: 'find' },
   memory: { status: 'info' },
   net: { info: 'status' },
+  process: { info: 'status', search: 'find' },
   system: { status: 'info' },
 }
 

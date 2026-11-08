@@ -86,6 +86,10 @@ test('help lists current commands, excludes helpers, and shows the package versi
       expect(result.stdout).toContain(`hlpr ${command}`)
     }
     expect(result.stdout).toContain('hlpr ssh mkkey [--rsa]')
+    expect(result.stdout).toContain('hlpr process status -name <name>')
+    expect(result.stdout).toContain('hlpr process info -name <name>')
+    expect(result.stdout).toContain('hlpr process find (-name <name> | -id <id>)')
+    expect(result.stdout).toContain('hlpr process search (-name <name> | -id <id>)')
     expect(result.stdout).toContain('also: hlpr net list -d')
     expect(result.stdout).not.toMatch(/also: (?!hlpr )/)
     for (const obsolete of ['.types', 'hlpr demo ', 'hlpr rename ', 'hlpr mv ', 'hlpr list process', 'hlpr list app', 'hlpr kill process', 'hlpr ssh add connection', 'git precommit', 'git fodd', 'hlpr nvm', 'hlpr net devices', 'hlpr ssh read', 'hlpr mariadb backup -ssh-config', 'hlpr mariadb sync -from-ssh-config', 'hlpr mariadb set-user-password --remote', 'hlpr file read -ssh-config']) {
@@ -114,6 +118,19 @@ test('help lists current commands, excludes helpers, and shows the package versi
   const hello = spawnSync('node', ['bin/index.js', 'hello', '--help'], { encoding: 'utf8' })
   expect(hello.status).toBe(0)
   expect(hello.stdout).toContain('Usage: hlpr hello')
+  for (const action of ['status', 'info']) {
+    const result = spawnSync('node', ['bin/index.js', 'process', action, '-name', 'hlpr-process-name-that-cannot-exist-000000'], { encoding: 'utf8' })
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain('No processes match')
+  }
+  for (const action of ['find', 'search']) {
+    const result = spawnSync('node', ['bin/index.js', 'process', action, '-id', String(process.pid)], { encoding: 'utf8' })
+    expect(result.status).toBe(0)
+    expect(result.stdout.split('\n').filter(line => /^\s*\d+\s/.test(line))).toHaveLength(1)
+    expect(result.stdout).toContain(String(process.pid))
+    const help = spawnSync('node', ['bin/index.js', 'process', action, '--help'], { encoding: 'utf8' })
+    expect(help.stdout).toContain('Usage: hlpr process find (-name <name> | -id <id>)')
+  }
   const fileFind = spawnSync('node', ['bin/index.js', 'file', 'find', '-name', 'AGENTS.md'], { encoding: 'utf8' })
   expect(fileFind.status).toBe(0)
   expect(fileFind.stdout).toContain('AGENTS.md')

@@ -66,6 +66,8 @@ hlpr file rename -dir ./src -style kebab -r -d -f --dry
 | [memory info](src/commands/memory/info/info.md) (`status`) | Show total, used, and free memory |
 | [disk info](src/commands/disk/info/info.md) (`status`) | Show disk usage and available space |
 | [process list](src/commands/process/list/list.md) | List running processes |
+| [process find](src/commands/process/find/find.md) | Find running processes by name or ID |
+| [process status](src/commands/process/status/status.md) | Summarize CPU and memory for a process tree |
 | [process kill](src/commands/process/kill/kill.md) | Kill a process by ID, port, folder, or file |
 | [app list](src/commands/app/list/list.md) | List installed apps |
 | [app search](src/commands/app/search/search.md) (`find`) | Find installed apps or remote packages by name |

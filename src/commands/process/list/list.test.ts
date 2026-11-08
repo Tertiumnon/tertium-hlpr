@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { parseUnixProcesses, parseWindowsProcesses } from './list.js'
+import { parseUnixProcesses, parseWindowsProcesses } from './list.utils.js'
 
 describe('process list', () => {
   test('parses Windows tasklist output', () => {
