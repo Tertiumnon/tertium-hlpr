@@ -95,6 +95,7 @@ test('help lists current commands, excludes helpers, and shows the package versi
     expect(result.stdout).toContain('hlpr process status --name=<name>')
     expect(result.stdout).toContain('hlpr process info --name=<name>')
     expect(result.stdout).toContain('hlpr process find (--name=<name> | --id=<id>)')
+    expect(result.stdout).toContain('needs the name typed again as --confirm')
     expect(result.stdout).toContain('hlpr process search (--name=<name> | --id=<id>)')
     expect(result.stdout).not.toMatch(/also: (?!hlpr )/)
     for (const obsolete of ['.types', 'hlpr demo ', 'hlpr rename ', 'hlpr mv ', 'hlpr list process', 'hlpr list app', 'hlpr kill process', 'hlpr ssh add connection', 'git precommit', 'git fodd', 'hlpr nvm', 'hlpr net devices', 'hlpr ssh read', 'hlpr mariadb backup -ssh-config', 'hlpr mariadb sync -from-ssh-config', 'hlpr mariadb set-user-password --remote', 'hlpr file read -ssh-config']) {

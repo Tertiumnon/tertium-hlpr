@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { type AwsRunner, deleteParameter, runAws, validateParamName } from '../../../core/aws/param-store.js'
 
-// @description Remove an AWS Systems Manager Parameter Store value; needs the name typed again as -confirm
+// @description Remove an AWS Systems Manager Parameter Store value; needs the name typed again as --confirm
 
 // Literal on purpose: `hlpr help` scrapes "Usage:" lines from this source file.
 const USAGE = 'Usage: hlpr aws-param-store remove --name=<param name> --confirm=<param name>'
