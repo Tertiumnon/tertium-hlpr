@@ -9,16 +9,16 @@ const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR
 
 describe('parseCropArgs', () => {
   test('reads the image, the size, and the alignment in any order, centered by default', () => {
-    expect(parseCropArgs(['-size', '1280x800', '-path', 'photo.png'])).toEqual({ image: 'photo.png', box: { width: 1280, height: 800, align: 'center' } })
-    expect(parseCropArgs(['-align', 'right', '-path', 'photo.png', '-size', '1280x800'])).toEqual({ image: 'photo.png', box: { width: 1280, height: 800, align: 'right' } })
+    expect(parseCropArgs(['--size=1280x800', '--path=photo.png'])).toEqual({ image: 'photo.png', box: { width: 1280, height: 800, align: 'center' } })
+    expect(parseCropArgs(['--align=right', '--path=photo.png', '--size=1280x800'])).toEqual({ image: 'photo.png', box: { width: 1280, height: 800, align: 'right' } })
   })
 
   test('rejects a missing image, a missing or single-number size, or a bad -align', () => {
-    expect(() => parseCropArgs(['-size', '1280x800'])).toThrow('Required')
-    expect(() => parseCropArgs(['-path', 'photo.png'])).toThrow('Required')
-    expect(() => parseCropArgs(['-path', 'photo.png', '-size', '256'])).toThrow('Required')
-    expect(() => parseCropArgs(['-path', 'photo.png', '-size', '1280x0'])).toThrow('Required')
-    expect(() => parseCropArgs(['-path', 'photo.png', '-size', '1280x800', '-align', 'top'])).toThrow('Invalid -align')
+    expect(() => parseCropArgs(['--size=1280x800'])).toThrow('Required')
+    expect(() => parseCropArgs(['--path=photo.png'])).toThrow('Required')
+    expect(() => parseCropArgs(['--path=photo.png', '--size=256'])).toThrow('Required')
+    expect(() => parseCropArgs(['--path=photo.png', '--size=1280x0'])).toThrow('Required')
+    expect(() => parseCropArgs(['--path=photo.png', '--size=1280x800', '--align=top'])).toThrow('Invalid -align')
   })
 })
 

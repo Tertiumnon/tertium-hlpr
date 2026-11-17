@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 import { execFileSync } from 'node:child_process'
 import path from 'node:path'
+import { parseFlags } from '../../../core/args.js'
 import { type Box, checkFreeDestination, checkImage, imageMagickGravity, imageSize, linuxMissing, parseBox, sizedPath, windowsSave } from '../../../core/image/image.js'
 
 // @description Create a copy of an image cropped to an exact size
@@ -10,17 +11,12 @@ const windowsCrop = `$ErrorActionPreference = 'Stop'; Add-Type -AssemblyName Sys
 export type CropArgs = { image: string; box: Box }
 
 export const parseCropArgs = (args: string[]): CropArgs => {
-  let image: string | undefined
-  let size: string | undefined
-  let align: string | undefined
-  for (let i = 0; i < args.length; i++) {
-    if (args[i] === '-path') image = args[++i]
-    else if (args[i] === '-size') size = args[++i]
-    else if (args[i] === '-align') align = args[++i]
-    else throw new Error(`Unknown option: ${args[i]}`)
-  }
+  const values = parseFlags(args, ['-path', '-size', '-align'])
+  const image = values['-path'] as string | undefined
+  const size = values['-size'] as string | undefined
+  const align = values['-align'] as string | undefined
   const box = image && size ? parseBox(size, align) : undefined
-  if (!image || !box) throw new Error('Required: -path <image> -size <width>x<height> (positive whole numbers), e.g. -size 1280x800')
+  if (!image || !box) throw new Error('Required: --path=<image> --size=<width>x<height> (positive whole numbers), e.g. --size=1280x800')
   return { image, box }
 }
 
@@ -65,7 +61,7 @@ export const cropImage = (image: string, box: Box): string => {
 if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
   const args = process.argv.slice(2)
   if (args.includes('--help') || args.includes('-h')) {
-    console.log('Usage: hlpr image crop -path <image> -size <width>x<height> [-align left|center|right]\nCreate <name>--<width>x<height>px-crop.<ext> next to the image: it is scaled to cover that size and the rest is cropped.\n-align keeps the left, center (default), or right part; vertical overflow is cropped from the center.')
+    console.log('Usage: hlpr image crop --path=<image> --size=<width>x<height> [--align=left|center|right]\nCreate <name>--<width>x<height>px-crop.<ext> next to the image: it is scaled to cover that size and the rest is cropped.\n--align keeps the left, center (default), or right part; vertical overflow is cropped from the center.')
     process.exit(0)
   }
   try {
