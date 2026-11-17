@@ -44,15 +44,15 @@ describe('destinationFor', () => {
   })
 
   test('needs a host from a flag or the parameter', () => {
-    expect(() => destinationFor({}, { resolve, readParameter: () => 'PORT=1\n' })).toThrow('Give -ssh-host')
-    expect(() => destinationFor({ ssmParam: '/env/x/env.dev' }, { resolve, readParameter: () => 'PORT=1\n' })).toThrow('Give -ssh-host')
+    expect(() => destinationFor({}, { resolve, readParameter: () => 'PORT=1\n' })).toThrow('Give --ssh-host')
+    expect(() => destinationFor({ ssmParam: '/env/x/env.dev' }, { resolve, readParameter: () => 'PORT=1\n' })).toThrow('Give --ssh-host')
   })
 
   test('validates the flags', () => {
-    expect(() => destinationFor({ sshHost: 'deploy@tertium' }, { resolve })).toThrow('Invalid -ssh-host')
-    expect(() => destinationFor({ sshHost: 'bad host' }, { resolve })).toThrow('Invalid -ssh-host')
-    expect(() => destinationFor({ sshHost: 'tertium', sshUser: 'de ploy' }, { resolve })).toThrow('Invalid -ssh-user')
-    expect(() => destinationFor({ ssmParam: 'env/x' }, { resolve })).toThrow('Invalid -ssm-param')
+    expect(() => destinationFor({ sshHost: 'deploy@tertium' }, { resolve })).toThrow('Invalid --ssh-host')
+    expect(() => destinationFor({ sshHost: 'bad host' }, { resolve })).toThrow('Invalid --ssh-host')
+    expect(() => destinationFor({ sshHost: 'tertium', sshUser: 'de ploy' }, { resolve })).toThrow('Invalid --ssh-user')
+    expect(() => destinationFor({ ssmParam: 'env/x' }, { resolve })).toThrow('Invalid --ssm-param')
   })
 
   test('validateSshDestination accepts user@host and host', () => {

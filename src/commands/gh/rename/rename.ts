@@ -14,8 +14,8 @@ export function parseRenameArgs(args: string[]): { repo: string; to: string } {
   const repo = values['-repo']
   const to = values['-to']
   if (typeof repo !== 'string' || typeof to !== 'string') throw new Error(USAGE)
-  if (repo.startsWith('-') || !/^[^/\s]+\/[^/\s]+$/.test(repo)) throw new Error(`-repo must be OWNER/REPO, got "${repo}". ${USAGE}`)
-  if (to.startsWith('-') || /[/\s]/.test(to)) throw new Error(`-to must be the new name without an owner, got "${to}". ${USAGE}`)
+  if (repo.startsWith('-') || !/^[^/\s]+\/[^/\s]+$/.test(repo)) throw new Error(`--repo must be OWNER/REPO, got "${repo}". ${USAGE}`)
+  if (to.startsWith('-') || /[/\s]/.test(to)) throw new Error(`--to must be the new name without an owner, got "${to}". ${USAGE}`)
   return { repo, to }
 }
 

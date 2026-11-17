@@ -42,7 +42,7 @@ function parseSide(values: Record<string, string | true>, name: 'from' | 'to', d
   const ssm = typeof values[`-${name}-ssm-param`] === 'string' ? values[`-${name}-ssm-param`] as string : undefined
   if (url === undefined && ssm === undefined) throw new Error(USAGE)
   if ((url === undefined) === (ssm === undefined)) throw new Error(`${USAGE}\nGive exactly one of --${name}-db-url or --${name}-ssm-param`)
-  const source = typeof url === 'string' ? url : `ssm:${validateParamName(String(ssm), `-${name}-ssm-param`)}`
+  const source = typeof url === 'string' ? url : `ssm:${validateParamName(String(ssm), `--${name}-ssm-param`)}`
   return { ssh: destinationFor({ sshHost, sshUser, ssmParam: ssm }, deps), source }
 }
 

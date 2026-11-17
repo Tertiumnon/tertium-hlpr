@@ -26,7 +26,7 @@ describe('aws-param-store set', () => {
     expect(parseSetArgs(['--name=/env/app/env.prod', '--key=DB_PASSWORD', '--value=-x-1'])).toEqual({ name: '/env/app/env.prod', key: 'DB_PASSWORD', value: '-x-1' })
     expect(() => parseSetArgs(['--name=/env/app/env.prod', '-key'])).toThrow('Usage: hlpr aws-param-store set')
     expect(() => parseSetArgs(['--name=/env/app/env.prod', '--key=DB_PASSWORD', '--key=X'])).toThrow('Usage: hlpr aws-param-store set')
-    expect(() => parseSetArgs(['--name=/env/app/env.prod', '--key=DB-PASSWORD'])).toThrow('Invalid -key')
+    expect(() => parseSetArgs(['--name=/env/app/env.prod', '--key=DB-PASSWORD'])).toThrow('Invalid --key')
   })
 
   test('replaces only the named line and keeps the parameter type', () => {

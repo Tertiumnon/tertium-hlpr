@@ -15,7 +15,7 @@ export function parseRotateArgs(args: string[], deps: DestinationDeps = {}): Rot
   if (typeof ssm !== 'string') throw new Error(USAGE)
   return {
     sshConfig: destinationFor(sshTargetFromFlags(values), deps),
-    paramName: validateParamName(ssm, '-ssm-param'),
+    paramName: validateParamName(ssm, '--ssm-param'),
     dryRun: values['-dry-run'] === true,
   }
 }

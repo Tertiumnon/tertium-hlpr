@@ -41,7 +41,7 @@ describe('parseResizeArgs', () => {
   test('rejects a bad box size, a bad -align, or -align without a box size', () => {
     expect(() => parseResizeArgs(['--path=photo.png', '--size=1280x0'])).toThrow('Required')
     expect(() => parseResizeArgs(['--path=photo.png', '--size=1280x'])).toThrow('Required')
-    expect(() => parseResizeArgs(['--path=photo.png', '--size=1280x800', '--align=top'])).toThrow('Invalid -align')
+    expect(() => parseResizeArgs(['--path=photo.png', '--size=1280x800', '--align=top'])).toThrow('Invalid --align')
     expect(() => parseResizeArgs(['--path=photo.png', '--size=256', '--align=left'])).toThrow('-align needs')
     expect(() => parseResizeArgs(['--path=photo.png', '-all', '--align=left'])).toThrow('-align needs')
   })

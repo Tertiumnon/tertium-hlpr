@@ -18,7 +18,7 @@ describe('parseCropArgs', () => {
     expect(() => parseCropArgs(['--path=photo.png'])).toThrow('Required')
     expect(() => parseCropArgs(['--path=photo.png', '--size=256'])).toThrow('Required')
     expect(() => parseCropArgs(['--path=photo.png', '--size=1280x0'])).toThrow('Required')
-    expect(() => parseCropArgs(['--path=photo.png', '--size=1280x800', '--align=top'])).toThrow('Invalid -align')
+    expect(() => parseCropArgs(['--path=photo.png', '--size=1280x800', '--align=top'])).toThrow('Invalid --align')
   })
 })
 

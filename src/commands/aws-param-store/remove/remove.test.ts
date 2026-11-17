@@ -14,6 +14,6 @@ describe('aws-param-store remove args', () => {
   })
 
   test('validates the name', () => {
-    expect(() => parseRemoveArgs(['--name=env/app', '--confirm=env/app'])).toThrow('Invalid -name')
+    expect(() => parseRemoveArgs(['--name=env/app', '--confirm=env/app'])).toThrow('Invalid --name')
   })
 })

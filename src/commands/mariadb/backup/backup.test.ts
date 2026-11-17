@@ -20,10 +20,10 @@ describe('mariadb backup args', () => {
     expect(parse(['--ssm-param=/env/app/env.prod']).ssh).toBe('deploy@tertium')
   })
 
-  test('needs a source: -db-url or -ssm-param, and not both', () => {
+  test('needs a source: -db-url or --ssm-param, and not both', () => {
     expect(() => parse(['--ssh-host=a'])).toThrow('Usage: hlpr mariadb backup')
     expect(() => parse(['--ssh-host=a', '--db-url=mysql://u:p@h/db', '--ssm-param=/env/x'])).toThrow('Give exactly one of --db-url or --ssm-param')
-    expect(() => parse(['--db-url=mysql://u:p@h/db'])).toThrow('Give -ssh-host')
+    expect(() => parse(['--db-url=mysql://u:p@h/db'])).toThrow('Give --ssh-host')
   })
 
   test('rejects a prefix that is a path', () => {

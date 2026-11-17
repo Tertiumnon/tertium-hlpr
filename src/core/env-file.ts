@@ -3,7 +3,7 @@
 
 const SAFE_VALUE = /^[A-Za-z0-9_./+=@%:,-]+$/
 
-export function validateEnvKey(key: string, flag = '-key'): string {
+export function validateEnvKey(key: string, flag = '--key'): string {
   if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key)) throw new Error(`Invalid ${flag}: use a variable name such as DB_PASSWORD`)
   return key
 }

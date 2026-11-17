@@ -23,7 +23,7 @@ describe('mariadb rotate-password args', () => {
   })
 
   test('validates the parameter name', () => {
-    expect(() => parse(['--ssh-host=a', '--ssm-param=env/app'])).toThrow('Invalid -ssm-param')
+    expect(() => parse(['--ssh-host=a', '--ssm-param=env/app'])).toThrow('Invalid --ssm-param')
   })
 
   test('uses the SSH alias the host resolves to', () => {

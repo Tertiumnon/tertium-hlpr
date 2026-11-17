@@ -16,7 +16,7 @@ export function parseChangeArgs(args: string[]): { defaultBranch: string; to: st
   if (typeof defaultBranch !== 'string' || typeof to !== 'string') throw new Error(USAGE)
   if (/\s/.test(defaultBranch) || /\s/.test(to)) throw new Error(`Branch names cannot contain spaces. ${USAGE}`)
   if (defaultBranch.startsWith('-') || to.startsWith('-')) throw new Error(`Branch names cannot start with a dash. ${USAGE}`)
-  if (defaultBranch === to) throw new Error(`-to must differ from -default-branch. ${USAGE}`)
+  if (defaultBranch === to) throw new Error(`--to must differ from --default-branch. ${USAGE}`)
   return { defaultBranch, to }
 }
 

@@ -13,9 +13,9 @@ describe('aws-param-store add args', () => {
 
   test('rejects a missing name, an unknown type, and an empty value', () => {
     expect(() => parseAddArgs(['--value=v'])).toThrow('Usage: hlpr aws-param-store add')
-    expect(() => parseAddArgs(['--name=/env/app/x', '--type=StringList'])).toThrow('Invalid -type')
-    expect(() => parseAddArgs(['--name=/env/app/x', '--value='])).toThrow('Invalid -value')
-    expect(() => parseAddArgs(['--name=env/app'])).toThrow('Invalid -name')
+    expect(() => parseAddArgs(['--name=/env/app/x', '--type=StringList'])).toThrow('Invalid --type')
+    expect(() => parseAddArgs(['--name=/env/app/x', '--value='])).toThrow('Invalid --value')
+    expect(() => parseAddArgs(['--name=env/app'])).toThrow('Invalid --name')
   })
 
   test('refuses an empty value from stdin before calling AWS', () => {

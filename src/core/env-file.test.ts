@@ -15,8 +15,8 @@ const env = [
 describe('env file key', () => {
   test('validates the variable name', () => {
     expect(validateEnvKey('DB_PASSWORD')).toBe('DB_PASSWORD')
-    expect(() => validateEnvKey('DB-PASSWORD')).toThrow('Invalid -key')
-    expect(() => validateEnvKey('1X')).toThrow('Invalid -key')
+    expect(() => validateEnvKey('DB-PASSWORD')).toThrow('Invalid --key')
+    expect(() => validateEnvKey('1X')).toThrow('Invalid --key')
   })
 
   test('reads a value without quotes or a trailing comment', () => {

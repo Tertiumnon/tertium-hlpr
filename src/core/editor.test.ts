@@ -10,8 +10,8 @@ describe('editor choice', () => {
   })
 
   test('rejects anything else, including object property names', () => {
-    expect(() => editorFlagCommand('notepad')).toThrow('Invalid -editor: use code, edit, nano or vi')
-    expect(() => editorFlagCommand('constructor')).toThrow('Invalid -editor')
+    expect(() => editorFlagCommand('notepad')).toThrow('Invalid --editor: use code, edit, nano or vi')
+    expect(() => editorFlagCommand('constructor')).toThrow('Invalid --editor')
   })
 
   test('-editor wins over the environment', () => {

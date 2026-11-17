@@ -42,7 +42,7 @@ describe('aws param store core', () => {
 
   test('validates parameter names', () => {
     expect(validateParamName('/env/app/env.dev')).toBe('/env/app/env.dev')
-    expect(() => validateParamName('env/app')).toThrow('Invalid -name')
-    expect(() => validateParamName('/env/app;rm')).toThrow('Invalid -name')
+    expect(() => validateParamName('env/app')).toThrow('Invalid --name')
+    expect(() => validateParamName('/env/app;rm')).toThrow('Invalid --name')
   })
 })

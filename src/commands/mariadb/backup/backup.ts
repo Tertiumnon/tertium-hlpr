@@ -17,7 +17,7 @@ export function parseBackupArgs(args: string[], deps: DestinationDeps = {}): Bac
   if ((values['-db-url'] === undefined) === (ssmParam === undefined)) throw new Error(`${USAGE}\nGive exactly one of --db-url or --ssm-param`)
   const prefix = typeof values['-prefix'] === 'string' ? values['-prefix'] : 'backup'
   if (prefix !== path.basename(prefix) || prefix === '.' || prefix === '..') throw new Error('--prefix must be a file name, not a path')
-  const source = typeof values['-db-url'] === 'string' ? values['-db-url'] : `ssm:${validateParamName(String(ssmParam), '-ssm-param')}`
+  const source = typeof values['-db-url'] === 'string' ? values['-db-url'] : `ssm:${validateParamName(String(ssmParam), '--ssm-param')}`
   return {
     ssh: destinationFor(sshTargetFromFlags(values), deps),
     source,

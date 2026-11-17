@@ -24,11 +24,11 @@ describe('pm2 args', () => {
   })
 
   test('validates the name, the directory and the config file', () => {
-    expect(() => parsePm2Args('restart', ['--ssh-host=a', '--name=x y'], 'u', { resolve })).toThrow('Invalid -name')
-    expect(() => parsePm2Args('start', ['--ssh-host=a', '--dir=var/x', '--config=pm2.config.cjs'], 'u', { resolve })).toThrow('Invalid -dir')
-    expect(() => parsePm2Args('start', ['--ssh-host=a', '--dir=/var/x', '--config=--x'], 'u', { resolve })).toThrow('Invalid -config')
-    expect(() => parsePm2Args('start', ['--ssh-host=a', '--dir=/var/x', '--config=a b'], 'u', { resolve })).toThrow('Invalid -config')
-    expect(() => parsePm2Args('restart', ['--ssh-host=bad host', '--name=x'], 'u', { resolve })).toThrow('Invalid -ssh-host')
+    expect(() => parsePm2Args('restart', ['--ssh-host=a', '--name=x y'], 'u', { resolve })).toThrow('Invalid --name')
+    expect(() => parsePm2Args('start', ['--ssh-host=a', '--dir=var/x', '--config=pm2.config.cjs'], 'u', { resolve })).toThrow('Invalid --dir')
+    expect(() => parsePm2Args('start', ['--ssh-host=a', '--dir=/var/x', '--config=--x'], 'u', { resolve })).toThrow('Invalid --config')
+    expect(() => parsePm2Args('start', ['--ssh-host=a', '--dir=/var/x', '--config=a b'], 'u', { resolve })).toThrow('Invalid --config')
+    expect(() => parsePm2Args('restart', ['--ssh-host=bad host', '--name=x'], 'u', { resolve })).toThrow('Invalid --ssh-host')
   })
 
   test('the validators accept what pm2 and paths normally use', () => {

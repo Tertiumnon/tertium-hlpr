@@ -22,7 +22,7 @@ describe('mariadb set-user-password', () => {
 
   test('requires every flag once and rejects unknown flags', () => {
     expect(() => parse(valid.slice(1))).toThrow('Usage: hlpr mariadb set-user-password')
-    expect(() => parse(['--db-name=dungeons'])).toThrow('Give -ssh-host')
+    expect(() => parse(['--db-name=dungeons'])).toThrow('Give --ssh-host')
     expect(parse(['--db-name=dungeons', '--ssh-host=tertium'])).toEqual({ dbName: 'dungeons', dbPassword: undefined, sshConfig: 'tertium' })
     expect(() => parse([...valid, '--db-name=other'])).toThrow('Usage: hlpr mariadb set-user-password')
     expect(() => parse([...valid, '-extra', 'x'])).toThrow('Usage: hlpr mariadb set-user-password')
@@ -32,7 +32,7 @@ describe('mariadb set-user-password', () => {
     expect(() => parse(['--db-name=dungeons; drop', '--db-password=x', '--ssh-host=tertium'])).toThrow('Invalid --db-name')
     expect(() => parse(['--db-name=dungeons', '--db-password=', '--ssh-host=tertium'])).toThrow('Invalid --db-password')
     expect(() => parse(['--db-name=dungeons', '--db-password=a\nb', '--ssh-host=tertium'])).toThrow('Invalid --db-password')
-    expect(() => parse(['--db-name=dungeons', '--db-password=x', '--ssh-host=a b'])).toThrow('Invalid -ssh-host')
+    expect(() => parse(['--db-name=dungeons', '--db-password=x', '--ssh-host=a b'])).toThrow('Invalid --ssh-host')
   })
 
   test('quotes SQL strings, escaping quotes and backslashes', () => {

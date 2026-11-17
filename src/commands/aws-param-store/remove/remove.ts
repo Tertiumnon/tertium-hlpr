@@ -20,7 +20,7 @@ export function parseRemoveArgs(args: string[]): { name: string } {
   if (!name || values['-confirm'] === undefined) throw new Error(USAGE)
   validateParamName(name)
   // The name typed twice: a parameter is not removed by one stray flag.
-  if (values['-confirm'] !== name) throw new Error(`-confirm must repeat the name exactly (${name}); nothing was removed`)
+  if (values['-confirm'] !== name) throw new Error(`--confirm must repeat the name exactly (${name}); nothing was removed`)
   return { name }
 }
 

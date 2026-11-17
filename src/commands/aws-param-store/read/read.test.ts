@@ -11,8 +11,8 @@ describe('aws-param-store read', () => {
     expect(() => parseReadArgs(['/env/app/env.dev'])).toThrow('Usage: hlpr aws-param-store read')
     expect(() => parseReadArgs(['-name'])).toThrow('Usage: hlpr aws-param-store read')
     expect(() => parseReadArgs(['--name=/env/app/env.dev', 'extra'])).toThrow('Usage: hlpr aws-param-store read')
-    expect(() => parseReadArgs(['--name=env/app'])).toThrow('Invalid -name')
-    expect(() => parseReadArgs(['--name=/env/app/env.dev', '--key=DB-PASSWORD'])).toThrow('Invalid -key')
+    expect(() => parseReadArgs(['--name=env/app'])).toThrow('Invalid --name')
+    expect(() => parseReadArgs(['--name=/env/app/env.dev', '--key=DB-PASSWORD'])).toThrow('Invalid --key')
   })
 
   test('returns the value exactly as stored', () => {

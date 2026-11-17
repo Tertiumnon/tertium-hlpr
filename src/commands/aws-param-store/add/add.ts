@@ -26,8 +26,8 @@ export function parseAddArgs(args: string[]): AddOptions {
   }
   if (!values['-name']) throw new Error(USAGE)
   const type = values['-type'] ?? 'SecureString'
-  if (type !== 'SecureString' && type !== 'String') throw new Error('Invalid -type: use SecureString or String')
-  if (values['-value'] === '') throw new Error('Invalid -value: a parameter cannot be empty')
+  if (type !== 'SecureString' && type !== 'String') throw new Error('Invalid --type: use SecureString or String')
+  if (values['-value'] === '') throw new Error('Invalid --value: a parameter cannot be empty')
   return { name: validateParamName(values['-name']), type, value: values['-value'] }
 }
 

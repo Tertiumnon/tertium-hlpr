@@ -45,17 +45,17 @@ export function quote(value: string): string {
 }
 
 export function validatePm2Name(name: string): string {
-  if (!NAME.test(name)) throw new Error('Invalid -name: use the PM2 process name (letters, digits, . _ -)')
+  if (!NAME.test(name)) throw new Error('Invalid --name: use the PM2 process name (letters, digits, . _ -)')
   return name
 }
 
 export function validateRemoteDir(dir: string): string {
-  if (!/^\/[A-Za-z0-9_./-]+$/.test(dir)) throw new Error('Invalid -dir: use an absolute path such as /var/www/app')
+  if (!/^\/[A-Za-z0-9_./-]+$/.test(dir)) throw new Error('Invalid --dir: use an absolute path such as /var/www/app')
   return dir
 }
 
 export function validateConfigFile(file: string): string {
-  if (!/^[A-Za-z0-9_./-]+$/.test(file) || file.startsWith('-')) throw new Error('Invalid -config: use a file name such as pm2.config.cjs')
+  if (!/^[A-Za-z0-9_./-]+$/.test(file) || file.startsWith('-')) throw new Error('Invalid --config: use a file name such as pm2.config.cjs')
   return file
 }
 
