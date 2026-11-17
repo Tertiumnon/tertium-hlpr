@@ -9,16 +9,16 @@ binary files are skipped automatically.
 ## Usage
 
 ```bash
-hlpr file move <oldPath> <newPath> [-root <dir>] [-dry] [-force] [-no-update-content]
+hlpr file move --from=<oldPath> --to=<newPath> [--root=<dir>] [-dry] [-force] [-no-update-content]
 ```
 
 ### Arguments
 
-- `<oldPath>` - Path to the existing file
-- `<newPath>` - New path or filename. If it has no directory separators, the file is renamed
+- `--from=<oldPath>` - Path to the existing file
+- `--to=<newPath>` - New path or filename. If it has no directory separators, the file is renamed
   in place (kept in the same directory as `<oldPath>`); otherwise it's treated as a full path
   and the file is moved there (missing directories are created).
-- `-root <dir>` - Directory to scan for references. If omitted, defaults to the nearest
+- `--root=<dir>` - Directory to scan for references. If omitted, defaults to the nearest
   ancestor of `<oldPath>` containing a `.git` folder (i.e. its git repo root), or `<oldPath>`'s
   own directory if no repo is found. **Not** your shell's current working directory — this
   matters for the globally-installed `hlpr` binary, since your terminal's cwd may have nothing
@@ -31,24 +31,24 @@ hlpr file move <oldPath> <newPath> [-root <dir>] [-dry] [-force] [-no-update-con
 
 ```bash
 # Rename a markdown file in place and fix every link to it
-hlpr file move docs/old-name.md new-name.md
+hlpr file move --from=docs/old-name.md --to=new-name.md
 
 # Preview what would change first
-hlpr file move docs/old-name.md new-name.md -dry
+hlpr file move --from=docs/old-name.md --to=new-name.md -dry
 
 # Move a file into another folder
-hlpr file move docs/old-name.md docs/archive/old-name.md
+hlpr file move --from=docs/old-name.md --to=docs/archive/old-name.md
 
 # Only scan a specific subtree for references
-hlpr file move docs/old-name.md new-name.md -root docs
+hlpr file move --from=docs/old-name.md --to=new-name.md --root=docs
 
 # Overwrite an existing destination file
-hlpr file move docs/old-name.md docs/existing.md -force
+hlpr file move --from=docs/old-name.md --to=docs/existing.md -force
 ```
 
 ## What Gets Updated
 
-For every text file under `-root` (see default above), the command rewrites:
+For every text file under `--root` (see default above), the command rewrites:
 
 - **Markdown links & images**: `[text](./old-name.md)`, `![alt](../old-name.md)`, including
   `<path with spaces>` wrapping, `#heading` fragments, and `"title"` suffixes.
@@ -60,7 +60,7 @@ For every text file under `-root` (see default above), the command rewrites:
 - **Quoted paths**: `'./old-name'`, `"../old-name.md"`, `` `./old-name` `` — covers JS/TS
   imports and requires, and HTML `href`/`src` attributes.
 
-Each reference is resolved relative to the *referencing file's own directory* (or to `-root`
+Each reference is resolved relative to the *referencing file's own directory* (or to `--root`
 for root-relative/leading-`/` links) before being matched, so files in different folders each
 get the correct relative path to the new location — not just a blind text substitution.
 
@@ -75,7 +75,7 @@ touched.
   references in each), without touching disk.
 - Skips `.git` and `node_modules` when scanning for references.
 - Always prints which directory it scanned (`Scanned for references under: ...`), so a
-  surprising "No references found" is easy to diagnose — pass `-root` explicitly if the
+  surprising "No references found" is easy to diagnose — pass `--root` explicitly if the
   auto-detected repo root isn't what you expect.
 
 ## TypeScript API

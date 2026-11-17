@@ -11,10 +11,13 @@ test('rejects a missing root value and the old root flag without moving files', 
     const source = path.join(dir, 'old.txt')
     fs.writeFileSync(source, 'content')
     for (const args of [['-root'], ['--root', dir]]) {
-      const result = spawnSync(process.execPath, [path.join(import.meta.dir, 'move.ts'), source, path.join(dir, 'new.txt'), ...args], { encoding: 'utf8' })
+      const result = spawnSync(process.execPath, [path.join(import.meta.dir, 'move.ts'), `--from=${source}`, `--to=${path.join(dir, 'new.txt')}`, ...args], { encoding: 'utf8' })
       expect(result.status).toBe(1)
       expect(fs.readFileSync(source, 'utf8')).toBe('content')
     }
+    const preview = spawnSync(process.execPath, [path.join(import.meta.dir, 'move.ts'), `--from=${source}`, `--to=${path.join(dir, 'new.txt')}`, `--root=${dir}`, '-dry'], { encoding: 'utf8' })
+    expect(preview.status).toBe(0)
+    expect(fs.readFileSync(source, 'utf8')).toBe('content')
   } finally { fs.rmSync(dir, { recursive: true, force: true }) }
 })
 
