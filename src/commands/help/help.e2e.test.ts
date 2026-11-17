@@ -82,7 +82,7 @@ test('help lists current commands, excludes helpers, and shows the package versi
     expect(result.stdout).not.toContain('(TS)')
     expect(result.stdout).not.toContain('EXAMPLES:')
     expect(result.stdout).not.toContain('\u001b[')
-    for (const command of ['file rename', 'file move', 'file find -name <name>', 'file read --host=<hostname> --path=<path>', 'file edit --host=<hostname> --path=<path>', 'file search -name <name>', 'net scan', 'net list -device', 'net status', 'system info', 'battery status', 'disk info', 'memory info', 'process list', 'process kill', 'app list', 'app search -name <name>', 'app find -name <name>', 'app remove -name <app name>', 'app install -name <app name>', 'ssh mkcon', 'ssh mkkey', 'mariadb backup [--ssh-host=<host>] [--ssh-user=<user>] [--ssm-param=<name>] (--db-url=<url> | --ssm-param=<name>)', 'mariadb sync [--from-ssh-host=<host>] [--from-ssh-user=<user>] [--from-ssm-param=<name>] (--from-db-url=<url> | --from-ssm-param=<name>)', 'mariadb set-user-password -db-name <name> [-db-password <password>] [-ssh-host <host>] [-ssh-user <user>] [-ssm-param <name>]','aws-param-store read --name=<param name>', 'aws-param-store set --name=<param name> --key=<variable> [--value=<value>]', 'aws-param-store edit --name=<param name> [--editor=code|edit|nano|vi]', 'tool install', 'runtime install', 'self update', 'self fix', 'self upgrade', 'hello', 'hello world']) {
+    for (const command of ['file rename', 'file move', 'file find --name=<name>', 'file read --host=<hostname> --path=<path>', 'file edit --host=<hostname> --path=<path>', 'file search --name=<name>', 'net scan', 'net list -device', 'net status', 'system info', 'battery status', 'disk info', 'memory info', 'process list', 'process kill', 'app list', 'app search --name=<name>', 'app find --name=<name>', 'app remove --name=<app name>', 'app install --name=<app name>', 'ssh mkcon', 'ssh mkkey', 'mariadb backup [--ssh-host=<host>] [--ssh-user=<user>] [--ssm-param=<name>] (--db-url=<url> | --ssm-param=<name>)', 'mariadb sync [--from-ssh-host=<host>] [--from-ssh-user=<user>] [--from-ssm-param=<name>] (--from-db-url=<url> | --from-ssm-param=<name>)', 'mariadb set-user-password -db-name <name> [-db-password <password>] [-ssh-host <host>] [-ssh-user <user>] [-ssm-param <name>]','aws-param-store read --name=<param name>', 'aws-param-store set --name=<param name> --key=<variable> [--value=<value>]', 'aws-param-store edit --name=<param name> [--editor=code|edit|nano|vi]', 'tool install', 'runtime install', 'self update', 'self fix', 'self upgrade', 'hello', 'hello world']) {
       expect(result.stdout).toContain(`hlpr ${command}`)
     }
     expect(result.stdout).toContain('hlpr ssh mkkey [-rsa]')
@@ -97,7 +97,7 @@ test('help lists current commands, excludes helpers, and shows the package versi
     expect(result.stdout).toContain('hlpr [options] <domain> <command> [params...]')
     expect(result.stdout).toContain('hlpr process kill (--id=<id> | --port=<port> | --folder=<path> | --file=<path> | --path=<path>) [options]')
     expect(result.stdout).toContain('hlpr file rename --dir=<dir> --style=<style> [-recursive] [-directories] [-files]')
-    for (const alias of ['battery info', 'net info', 'disk status', 'memory status', 'system status', 'app delete -name <app name>', 'app uninstall -name <app name>', 'file mv']) expect(result.stdout).toContain(`hlpr ${alias}`)
+    for (const alias of ['battery info', 'net info', 'disk status', 'memory status', 'system status', 'app delete --name=<app name>', 'app uninstall --name=<app name>', 'file mv']) expect(result.stdout).toContain(`hlpr ${alias}`)
   }
   for (const [category, alias, original] of [['battery', 'info', 'status'], ['net', 'info', 'status'], ['disk', 'status', 'info'], ['memory', 'status', 'info'], ['system', 'status', 'info']]) {
     const result = spawnSync('node', ['bin/index.js', category, alias, '--help'], { encoding: 'utf8' })
@@ -130,7 +130,7 @@ test('help lists current commands, excludes helpers, and shows the package versi
     const help = spawnSync('node', ['bin/index.js', 'help', 'process', action], { encoding: 'utf8' })
     expect(help.stdout).toContain('Usage: hlpr process find (--name=<name> | --id=<id>)')
   }
-  const fileFind = spawnSync('node', ['bin/index.js', 'file', 'find', '-name', 'AGENTS.md'], { encoding: 'utf8' })
+  const fileFind = spawnSync('node', ['bin/index.js', 'file', 'find', '--name=AGENTS.md'], { encoding: 'utf8' })
   expect(fileFind.status).toBe(0)
   expect(fileFind.stdout).toContain('AGENTS.md')
   expect(fileFind.stdout).not.toContain('--- finished by')

@@ -23,11 +23,11 @@ export function findFiles(root: string, name: string): string[] {
 function main(): void {
   const args = process.argv.slice(2)
   if (args.length === 1 && (args[0] === '-h' || args[0] === '--help')) {
-    console.log('Usage: hlpr file find -name <name>\nAlias: hlpr file search -name <name>')
+    console.log('Usage: hlpr file find --name=<name>\nAlias: hlpr file search --name=<name>')
     return
   }
-  if (args.length < 2 || args[0] !== '-name' || args.slice(1).some(value => !value.trim())) throw new Error('Usage: hlpr file find -name <name>')
-  const name = args.slice(1).join(' ')
+  if (args.length !== 1 || !args[0].startsWith('--name=') || !args[0].slice(7).trim()) throw new Error('Usage: hlpr file find --name=<name>')
+  const name = args[0].slice(7)
   const matches = findFiles(process.cwd(), name)
   console.log(matches.length ? matches.join('\n') : `No files found matching "${name}".`)
 }
