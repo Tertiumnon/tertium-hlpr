@@ -20,13 +20,13 @@ const createKey = async (type: 'ed25519' | 'rsa'): Promise<void> => {
 if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
   const args = process.argv.slice(2)
   if (args.includes('--help') || args.includes('-h')) {
-    console.log('Usage: hlpr ssh mkkey [--rsa]')
-    console.log('Create an Ed25519 key pair (or RSA with --rsa) and save the connection. Shows the public key at the end.')
-  } else if (args.length > 1 || (args.length === 1 && args[0] !== '--rsa')) {
-    console.error('Usage: hlpr ssh mkkey [--rsa]')
+    console.log('Usage: hlpr ssh mkkey [-rsa]')
+    console.log('Create an Ed25519 key pair (or RSA with -rsa) and save the connection. Shows the public key at the end.')
+  } else if (args.length > 1 || (args.length === 1 && args[0] !== '-rsa')) {
+    console.error('Usage: hlpr ssh mkkey [-rsa]')
     process.exitCode = 1
   } else {
-    createKey(args[0] === '--rsa' ? 'rsa' : 'ed25519').catch(error => {
+    createKey(args[0] === '-rsa' ? 'rsa' : 'ed25519').catch(error => {
       console.error(`Error: ${error instanceof Error ? error.message : error}`)
       process.exitCode = 1
     })

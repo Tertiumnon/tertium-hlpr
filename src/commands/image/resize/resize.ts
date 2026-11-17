@@ -26,17 +26,17 @@ export const parseResizeArgs = (args: string[]): ResizeArgs => {
     if (args[i] === '-path') image = args[++i]
     else if (args[i] === '-size') size = args[++i]
     else if (args[i] === '-align') align = args[++i]
-    else if (args[i] === '--all') all = true
-    else if (args[i] === '--favicon') favicon = true
+    else if (args[i] === '-all') all = true
+    else if (args[i] === '-favicon') favicon = true
     else throw new Error(`Unknown option: ${args[i]}`)
   }
-  if (!image) throw new Error('Required: -path <image> and one of -size <px>, --all, or --favicon')
-  if ([size !== undefined, all, favicon].filter(Boolean).length > 1) throw new Error('Use only one of -size <px>, --all, or --favicon')
+  if (!image) throw new Error('Required: -path <image> and one of -size <px>, -all, or -favicon')
+  if ([size !== undefined, all, favicon].filter(Boolean).length > 1) throw new Error('Use only one of -size <px>, -all, or -favicon')
   const box = size === undefined ? undefined : parseBox(size, align)
   if (align !== undefined && !box) throw new Error('-align needs -size <width>x<height>, e.g. -size 1280x800 -align left')
   if (all || favicon) return { image, all, favicon }
   if (box) return { image, all, favicon, box }
-  if (size === undefined || !/^[1-9]\d*$/.test(size)) throw new Error('Required: -path <image> -size <px> or <width>x<height> (positive whole numbers), --all, or --favicon')
+  if (size === undefined || !/^[1-9]\d*$/.test(size)) throw new Error('Required: -path <image> -size <px> or <width>x<height> (positive whole numbers), -all, or -favicon')
   return { image, all, favicon, size: Number(size) }
 }
 
@@ -179,7 +179,7 @@ export const resizeFavicon = (image: string): string => {
 if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
   const args = process.argv.slice(2)
   if (args.includes('--help') || args.includes('-h')) {
-    console.log('Usage: hlpr image resize -path <image> (-size <px> | -size <width>x<height> [-align left|center|right] | --all | --favicon)\nCreate <name>--<px>px.<ext> next to the image, with its longest side set to <px>.\n-size <width>x<height> creates <name>--<width>x<height>px.<ext>: the image is scaled to fit inside and the empty space is filled with black; -align places it left, center (default), or right. To crop instead, use hlpr image crop.\n--all creates a copy for each popular width smaller than the image; existing copies are skipped.\n--favicon creates one favicon.ico with 16, 32, 48, 64, 128, and 256 px icons.')
+    console.log('Usage: hlpr image resize -path <image> (-size <px> | -size <width>x<height> [-align left|center|right] | -all | -favicon)\nCreate <name>--<px>px.<ext> next to the image, with its longest side set to <px>.\n-size <width>x<height> creates <name>--<width>x<height>px.<ext>: the image is scaled to fit inside and the empty space is filled with black; -align places it left, center (default), or right. To crop instead, use hlpr image crop.\n-all creates a copy for each popular width smaller than the image; existing copies are skipped.\n-favicon creates one favicon.ico with 16, 32, 48, 64, 128, and 256 px icons.')
     process.exit(0)
   }
   try {

@@ -14,5 +14,5 @@ test('rejects missing counters, invalid output, and invalid CLI arguments', () =
   expect(() => parseUnix('invalid')).toThrow('Cannot parse')
   const result = spawnSync(process.execPath, [path.join(import.meta.dir, 'status.ts'), '-name'], { encoding: 'utf8' })
   expect(result.status).toBe(1)
-  expect(result.stderr).toContain('Usage: hlpr process status -name <name>')
+  expect(result.stderr).toContain('Usage: hlpr process status --name=<name>')
 })

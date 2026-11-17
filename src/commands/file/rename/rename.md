@@ -5,18 +5,18 @@ Rename selected files and directories according to a specific case style.
 ## Usage
 
 ```bash
-hlpr file rename -dir <dir> -style <style> [-r] [-d] [-f]
+hlpr file rename -dir <dir> -style <style> [-recursive] [-directories] [-files]
 ```
 
 ### Arguments
 
 - `-dir <dir>` - The root directory to process
 - `-style <style>` - The target case style (see Supported Styles below)
-- `-r` - Process subdirectories recursively
-- `-d` - Rename directories
-- `-f` - Rename files
-- `--dry` or `-n` - Optional dry-run mode (preview changes without applying)
-- `--no-update-content` - Skip updating import/require statements in files (content updates are enabled by default)
+- `-recursive` - Process subdirectories recursively
+- `-directories` - Rename directories
+- `-files` - Rename files
+- `-dry` - Optional dry-run mode (preview changes without applying)
+- `-no-update-content` - Skip updating import/require statements in files (content updates are enabled by default)
 
 ## Supported Styles
 
@@ -37,23 +37,23 @@ hlpr file rename -dir <dir> -style <style> [-r] [-d] [-f]
 
 ```bash
 # Preview renaming all files/folders to kebab-case
-hlpr file rename -dir ./my-project -style kebab -r -d -f --dry
+hlpr file rename -dir ./my-project -style kebab -recursive -directories -files -dry
 
 # Preview renaming with short flag
-hlpr file rename -dir ./src -style snake -r -f -n
+hlpr file rename -dir ./src -style snake -recursive -files -dry
 ```
 
 ### Apply Changes
 
 ```bash
 # Rename all files/folders to kebab-case
-hlpr file rename -dir ./my-project -style kebab -r -d -f
+hlpr file rename -dir ./my-project -style kebab -recursive -directories -files
 
 # Rename to PascalCase
-hlpr file rename -dir ./docs -style pascal -r -d -f
+hlpr file rename -dir ./docs -style pascal -recursive -directories -files
 
 # Rename current directory
-hlpr file rename -dir . -style snake -r -d -f
+hlpr file rename -dir . -style snake -recursive -directories -files
 ```
 
 ## Features
@@ -79,7 +79,7 @@ Example:
 import { helper } from './my-utils'
 const x = require('./my-utils')
 
-// After running: hlpr file rename -dir . -style snake -r -f
+// After running: hlpr file rename -dir . -style snake -recursive -files
 import { helper } from './my_utils'
 const x = require('./my_utils')
 ```
@@ -91,7 +91,7 @@ The feature supports:
 - Files with and without extensions in import statements
 - Both ES6 imports and CommonJS require statements
 
-To disable this feature, use the `--no-update-content` flag.
+To disable this feature, use the `-no-update-content` flag.
 
 ### ✅ Recursive Processing
 
@@ -129,10 +129,10 @@ If a renamed file would conflict with an existing file, the command automaticall
 
 ### ✅ Dry-Run Mode
 
-Use `--dry` or `-n` to preview all changes before applying them:
+Use `-dry` to preview all changes before applying them:
 
 ```bash
-hlpr file rename -dir ./src -style kebab -r -d -f --dry
+hlpr file rename -dir ./src -style kebab -recursive -directories -files -dry
 ```
 
 Output:

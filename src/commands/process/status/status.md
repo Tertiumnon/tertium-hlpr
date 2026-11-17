@@ -1,8 +1,8 @@
 # process status
 
 ```sh
-hlpr process status -name <name>
-hlpr process info -name <name>
+hlpr process status --name=<name>
+hlpr process info --name=<name>
 ```
 
 Matches executable names case-insensitively by substring and summarizes every

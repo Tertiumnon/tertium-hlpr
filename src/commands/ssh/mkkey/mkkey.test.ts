@@ -13,7 +13,7 @@ test('prints usage and rejects arguments', () => {
   const help = spawnSync(process.execPath, [path.join(import.meta.dir, 'mkkey.ts'), '--help'], { encoding: 'utf8' })
   expect(help.status).toBe(0)
   expect(help.stdout).toContain('Usage: hlpr ssh mkkey')
-  expect(help.stdout).toContain('[--rsa]')
+  expect(help.stdout).toContain('[-rsa]')
   const extra = spawnSync(process.execPath, [path.join(import.meta.dir, 'mkkey.ts'), 'extra'], { encoding: 'utf8' })
   expect(extra.status).toBe(1)
   expect(extra.stderr).toContain('Usage: hlpr ssh mkkey')
@@ -26,7 +26,7 @@ test('RSA flag reuses a matching key and saves its connection', () => {
     mkdirSync(ssh)
     writeFileSync(path.join(ssh, 'example.com-alice'), 'private fixture')
     writeFileSync(path.join(ssh, 'example.com-alice.pub'), 'ssh-rsa fixture alice@example.com\n')
-    const result = spawnSync(process.execPath, [path.join(import.meta.dir, 'mkkey.ts'), '--rsa'], {
+    const result = spawnSync(process.execPath, [path.join(import.meta.dir, 'mkkey.ts'), '-rsa'], {
       encoding: 'utf8', input: 'alice\nexample.com\nexample\n', env: { ...process.env, HOME: home, USERPROFILE: home },
     })
     expect(result.status).toBe(0)
@@ -45,7 +45,7 @@ test('RSA flag rejects an existing Ed25519 key without overwriting it', () => {
     mkdirSync(ssh)
     writeFileSync(path.join(ssh, 'example.com-alice'), 'private fixture')
     writeFileSync(path.join(ssh, 'example.com-alice.pub'), 'ssh-ed25519 fixture\n')
-    const result = spawnSync(process.execPath, [path.join(import.meta.dir, 'mkkey.ts'), '--rsa'], {
+    const result = spawnSync(process.execPath, [path.join(import.meta.dir, 'mkkey.ts'), '-rsa'], {
       encoding: 'utf8', input: 'alice\nexample.com\nexample\n', env: { ...process.env, HOME: home, USERPROFILE: home },
     })
     expect(result.status).toBe(1)

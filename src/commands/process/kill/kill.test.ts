@@ -14,11 +14,13 @@ describe('process kill', () => {
   })
 
   test('parses folder, file and path targets as the same path', () => {
-    for (const flag of ['-folder', '-file', '-path', '--path']) {
+    for (const flag of ['-folder', '-file', '-path']) {
       expect(parseKillTarget([flag, 'some-dir'])).toEqual({ path: resolve('some-dir') })
     }
-    expect(() => parseKillTarget(['-file'])).toThrow('Missing file path')
+    expect(() => parseKillTarget(['-file'])).toThrow('missing value')
     expect(() => parseKillTarget(['-id', '1', '-path', 'x'])).toThrow()
+    expect(() => parseKillTarget(['-id', '1', '-f'])).toThrow('Invalid option')
+    expect(() => parseKillTarget(['--id', '1'])).toThrow('Invalid option')
   })
 
   test('finds a process started inside a temporary folder', async () => {

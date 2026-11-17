@@ -37,7 +37,7 @@ hlpr system info
 hlpr battery status
 hlpr ssh mkcon
 hlpr ssh mkkey
-hlpr file rename -dir ./src -style kebab -r -d -f --dry
+hlpr file rename -dir ./src -style kebab -recursive -directories -files -dry
 ```
 
 ## Commands
@@ -77,9 +77,9 @@ hlpr file rename -dir ./src -style kebab -r -d -f --dry
 | [runtime install](src/commands/runtime/install/install.md) | Install Node.js, Python, Bun, Rust, or Go |
 | [ssh mkcon](src/commands/ssh/mkcon/mkcon.md) | Create a key, authorize it on a host, and save the connection |
 | [ssh mkkey](src/commands/ssh/mkkey/mkkey.md) | Create an Ed25519 or RSA key pair and save the connection locally |
-| [zsh fix --bun](src/commands/zsh/zsh.md) | Add bun to PATH in ~/.zshrc |
+| [zsh fix -bun](src/commands/zsh/zsh.md) | Add bun to PATH in ~/.zshrc |
 | [ssh setup](src/commands/ssh/ssh.md#setup) | Create ~/.ssh with the permissions SSH requires |
-| [ssh fix --permissions](src/commands/ssh/ssh.md#fix) | Fix permissions of ~/.ssh and its files |
+| [ssh fix -permissions](src/commands/ssh/ssh.md#fix) | Fix permissions of ~/.ssh and its files |
 | [mariadb backup](src/commands/mariadb/backup/backup.md) | Dump a MariaDB database over SSH into a local .sql file |
 | [mariadb sync](src/commands/mariadb/sync/sync.md) | Copy one MariaDB database over another, backing up the target first |
 | [mariadb set-user-password](src/commands/mariadb/set-user-password/set-user-password.md) | Set a MariaDB user's password on a remote host over SSH |

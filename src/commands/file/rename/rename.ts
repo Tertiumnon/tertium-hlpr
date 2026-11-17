@@ -33,16 +33,16 @@ export function parseRenameArgs(args: string[]): RenameCliOptions {
     const arg = args[i]
     if (arg === '-dir') root = args[++i]
     else if (arg === '-style') style = args[++i] as Style
-    else if (arg === '-r') recursive = true
-    else if (arg === '-d') directories = true
-    else if (arg === '-f') files = true
-    else if (arg === '--dry' || arg === '-n') dryRun = true
-    else if (arg === '--no-update-content') updateContent = false
+    else if (arg === '-recursive') recursive = true
+    else if (arg === '-directories') directories = true
+    else if (arg === '-files') files = true
+    else if (arg === '-dry') dryRun = true
+    else if (arg === '-no-update-content') updateContent = false
     else throw new Error(`Unknown option: ${arg}`)
   }
 
   if (!root || !style || !styles.includes(style)) throw new Error('Required: -dir <dir> -style <style>')
-  if (!directories && !files) throw new Error('Select files with -f, directories with -d, or both')
+  if (!directories && !files) throw new Error('Select files with -files, directories with -directories, or both')
   return { root, style, recursive, directories, files, dryRun, updateContent }
 }
 
@@ -376,14 +376,14 @@ if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
 
   // If user asked for help, print usage and exit with success
   if (args.includes('--help') || args.includes('-h') || args.includes('/help') || args.includes('/h') || args.includes('/?')) {
-    console.log('Usage: hlpr file rename -dir <dir> -style <style> [-r] [-d] [-f]')
+    console.log('Usage: hlpr file rename -dir <dir> -style <style> [-recursive] [-directories] [-files]')
     console.log('Styles: title_underscore, pascal_underscore, snake, kebab, camel, pascal, upper, lower')
     console.log('Options:')
-    console.log('  -r                     Process subdirectories recursively')
-    console.log('  -d                     Rename directories')
-    console.log('  -f                     Rename files')
-    console.log('  --dry, -n              Preview changes without applying them')
-    console.log('  --no-update-content    Skip updating import/require statements in files')
+    console.log('  -recursive                     Process subdirectories recursively')
+    console.log('  -directories                     Rename directories')
+    console.log('  -files                     Rename files')
+    console.log('  -dry              Preview changes without applying them')
+    console.log('  -no-update-content    Skip updating import/require statements in files')
     process.exit(0)
   }
 
@@ -392,7 +392,7 @@ if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
     options = parseRenameArgs(args)
   } catch (error) {
     console.error(`Error: ${error instanceof Error ? error.message : error}`)
-    console.error('Usage: hlpr file rename -dir <dir> -style <style> [-r] [-d] [-f]')
+    console.error('Usage: hlpr file rename -dir <dir> -style <style> [-recursive] [-directories] [-files]')
     process.exit(1)
   }
 

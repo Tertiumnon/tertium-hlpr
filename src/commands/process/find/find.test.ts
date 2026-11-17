@@ -8,13 +8,13 @@ const processes = [
 ]
 
 test('finds names case-insensitively and IDs exactly', () => {
-  expect(findProcesses(processes, parseTarget(['-name', 'NODE']))).toEqual(processes.slice(0, 2))
-  expect(findProcesses(processes, parseTarget(['-id', '12']))).toEqual([processes[0]])
-  expect(() => findProcesses(processes, parseTarget(['-id', '13']))).toThrow('No processes match')
+  expect(findProcesses(processes, parseTarget(['--name=NODE']))).toEqual(processes.slice(0, 2))
+  expect(findProcesses(processes, parseTarget(['--id=12']))).toEqual([processes[0]])
+  expect(() => findProcesses(processes, parseTarget(['--id=13']))).toThrow('No processes match')
 })
 
 test('rejects invalid or conflicting arguments', () => {
-  for (const args of [[], ['-name'], ['-name', 'node', '-id', '12'], ['-id', '0'], ['-id', '12x']]) {
+  for (const args of [[], ['--name'], ['--name='], ['-name', 'node'], ['--name=node', '--id=12'], ['--id=0'], ['--id=12x']]) {
     expect(() => parseTarget(args)).toThrow()
   }
 })

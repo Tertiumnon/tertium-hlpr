@@ -115,7 +115,7 @@ async function performRename(oldAbs: string, newAbs: string, force: boolean): Pr
 
   if (destExists && !caseOnlyChange) {
     if (!force) {
-      throw new Error(`Destination already exists: ${newAbs} (use --force to overwrite)`)
+      throw new Error(`Destination already exists: ${newAbs} (use -force to overwrite)`)
     }
     await fs.rm(newAbs)
   }
@@ -384,15 +384,15 @@ if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
     rawArgs.includes('/h') ||
     rawArgs.includes('/?')
   ) {
-    console.log('Usage: hlpr file move <oldPath> <newPath> [--root <dir>] [--dry|-n] [--force] [--no-update-content]')
+    console.log('Usage: hlpr file move <oldPath> <newPath> [-root <dir>] [-dry] [-force] [-no-update-content]')
     console.log('Renames/moves a single file and updates references to it (markdown links, wikilinks,')
     console.log('imports, href/src) in every text file under <dir>, recursively.')
     console.log('Options:')
-    console.log('  --root <dir>           Directory to scan for references')
+    console.log('  -root <dir>           Directory to scan for references')
     console.log('                         (default: nearest git repo root of <oldPath>, or its own directory)')
-    console.log('  --dry, -n              Preview changes without applying them')
-    console.log('  --force                Overwrite destination file if it already exists')
-    console.log('  --no-update-content    Skip updating references in other files')
+    console.log('  -dry              Preview changes without applying them')
+    console.log('  -force                Overwrite destination file if it already exists')
+    console.log('  -no-update-content    Skip updating references in other files')
     process.exit(0)
   }
 
@@ -404,17 +404,21 @@ if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
 
   for (let i = 0; i < rawArgs.length; i++) {
     const a = rawArgs[i]
-    if (a === '--dry' || a === '-n') dryRun = true
-    else if (a === '--force') force = true
-    else if (a === '--no-update-content') updateContent = false
-    else if (a === '--root') root = rawArgs[++i]
+    if (a === '-dry') dryRun = true
+    else if (a === '-force') force = true
+    else if (a === '-no-update-content') updateContent = false
+    else if (a === '-root' && rawArgs[i + 1] && !rawArgs[i + 1].startsWith('-')) root = rawArgs[++i]
+    else if (a.startsWith('-')) {
+      console.error(`Invalid option or missing value: ${a}`)
+      process.exit(1)
+    }
     else positional.push(a)
   }
 
   const [oldPathArg, newPathArg] = positional
 
-  if (!oldPathArg || !newPathArg) {
-    console.error('Usage: hlpr file move <oldPath> <newPath> [--root <dir>] [--dry|-n] [--force] [--no-update-content]')
+  if (!oldPathArg || !newPathArg || positional.length !== 2) {
+    console.error('Usage: hlpr file move <oldPath> <newPath> [-root <dir>] [-dry] [-force] [-no-update-content]')
     process.exit(1)
   }
 

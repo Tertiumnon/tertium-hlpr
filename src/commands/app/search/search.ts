@@ -18,14 +18,14 @@ export function matchingRemoteApps(apps: App[], name: string): string[] {
 function main(): void {
   const args = process.argv.slice(2)
   if (args.length === 1 && (args[0] === '-h' || args[0] === '--help')) {
-    console.log('Usage: hlpr app search -name <name> [--remote]\nAlias: hlpr app find -name <name> [--remote]')
+    console.log('Usage: hlpr app search -name <name> [-remote]\nAlias: hlpr app find -name <name> [-remote]')
     console.log('Scoop searches configured buckets only; add extras with: scoop bucket add extras')
     console.log('Remote Homebrew results distinguish formulae and casks; Linux searches formulae only.')
     return
   }
-  const remote = args.includes('--remote')
-  const nameArgs = args.filter(value => value !== '--remote')
-  if (nameArgs.length < 2 || nameArgs[0] !== '-name' || nameArgs.slice(1).some(value => !value.trim())) throw new Error('Usage: hlpr app search -name <name> [--remote]')
+  const remote = args.includes('-remote')
+  const nameArgs = args.filter(value => value !== '-remote')
+  if (nameArgs.length < 2 || nameArgs[0] !== '-name' || nameArgs.slice(1).some(value => !value.trim())) throw new Error('Usage: hlpr app search -name <name> [-remote]')
 
   const name = nameArgs.slice(1).join(' ')
   const matches = remote

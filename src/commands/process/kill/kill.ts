@@ -10,9 +10,14 @@ import type { KillPortOptions } from '../../../core/command/command.types.js'
 export type KillTarget = { id: number } | { port: number } | { path: string }
 
 export function parseKillTarget(args: string[]): KillTarget {
-  const idIndex = args.findIndex((arg) => arg === '-id' || arg === '--id')
-  const portIndex = args.findIndex((arg) => arg === '-port' || arg === '--port')
-  const pathIndex = args.findIndex((arg) => ['-folder', '--folder', '-file', '--file', '-path', '--path'].includes(arg))
+  for (let i = 0; i < args.length; i++) {
+    if (['-force', '-verbose'].includes(args[i])) continue
+    if (!['-id', '-port', '-folder', '-file', '-path'].includes(args[i]) || !args[i + 1] || args[i + 1].startsWith('-')) throw new Error(`Invalid option or missing value: ${args[i]}`)
+    i++
+  }
+  const idIndex = args.indexOf('-id')
+  const portIndex = args.indexOf('-port')
+  const pathIndex = args.findIndex((arg) => ['-folder', '-file', '-path'].includes(arg))
   if ([idIndex, portIndex, pathIndex].filter((index) => index >= 0).length !== 1) throw new Error('Specify exactly one of -id <id>, -port <port>, or -folder/-file/-path <path>')
   if (pathIndex >= 0) {
     if (!args[pathIndex + 1]) throw new Error(`Missing ${args[pathIndex].replace(/^-+/, '')} path`)
@@ -309,20 +314,20 @@ if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
     console.log('  -file <path>          Processes running from the file (also -path)')
     console.log()
     console.log('Options:')
-    console.log('  -f, --force           Force kill (SIGKILL on Linux, /F on Windows)')
-    console.log('  -v, --verbose         Show verbose output')
+    console.log('  -force           Force kill (SIGKILL on Linux, /F on Windows)')
+    console.log('  -verbose         Show verbose output')
     console.log('  -h, --help            Show this help message')
     console.log()
     console.log('Examples:')
     console.log('  hlpr process kill -id 1234')
-    console.log('  hlpr process kill -port 3000 --force')
+    console.log('  hlpr process kill -port 3000 -force')
     console.log('  hlpr process kill -folder ./build')
     console.log('  hlpr process kill -file ./app.exe')
     process.exit(0)
   }
 
-  const force = args.includes('-f') || args.includes('--force')
-  const verbose = args.includes('-v') || args.includes('--verbose')
+  const force = args.includes('-force')
+  const verbose = args.includes('-verbose')
 
   Promise.resolve()
     .then(async () => {

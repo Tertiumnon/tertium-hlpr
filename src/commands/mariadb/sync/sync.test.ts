@@ -39,6 +39,8 @@ describe('mariadb sync args', () => {
 
   test('rejects unknown flags', () => {
     expect(() => parse([...base, '-yes'])).toThrow('Unknown or misplaced argument: -yes')
+    expect(() => parse([...base, '--dry-run'])).toThrow('Unknown or misplaced argument: --dry-run')
+    expect(() => parse([...base, '--skip-backup'])).toThrow('Unknown or misplaced argument: --skip-backup')
   })
 
   test('resolves each host with the lookup', () => {

@@ -85,19 +85,18 @@ test('help lists current commands, excludes helpers, and shows the package versi
     for (const command of ['file rename', 'file move', 'file find -name <name>', 'file read -host <hostname> -path <path>', 'file edit -host <hostname> -path <path>', 'file search -name <name>', 'net scan', 'net list -device', 'net status', 'system info', 'battery status', 'disk info', 'memory info', 'process list', 'process kill', 'app list', 'app search -name <name>', 'app find -name <name>', 'app remove -name <app name>', 'app install -name <app name>', 'ssh mkcon', 'ssh mkkey', 'mariadb backup [-ssh-host <host>] [-ssh-user <user>] [-ssm-param <name>] (-db-url <url> | -ssm-param <name>)', 'mariadb sync [-from-ssh-host <host>] [-from-ssh-user <user>] [-from-ssm-param <name>] (-from-db-url <url> | -from-ssm-param <name>)', 'mariadb set-user-password -db-name <name> [-db-password <password>] [-ssh-host <host>] [-ssh-user <user>] [-ssm-param <name>]','aws-param-store read -name <param name>', 'aws-param-store set -name <param name> -key <variable> [-value <value>]', 'aws-param-store edit -name <param name> [-editor code|edit|nano|vi]', 'tool install', 'runtime install', 'self update', 'self fix', 'self upgrade', 'hello', 'hello world']) {
       expect(result.stdout).toContain(`hlpr ${command}`)
     }
-    expect(result.stdout).toContain('hlpr ssh mkkey [--rsa]')
-    expect(result.stdout).toContain('hlpr process status -name <name>')
-    expect(result.stdout).toContain('hlpr process info -name <name>')
-    expect(result.stdout).toContain('hlpr process find (-name <name> | -id <id>)')
-    expect(result.stdout).toContain('hlpr process search (-name <name> | -id <id>)')
-    expect(result.stdout).toContain('also: hlpr net list -d')
+    expect(result.stdout).toContain('hlpr ssh mkkey [-rsa]')
+    expect(result.stdout).toContain('hlpr process status --name=<name>')
+    expect(result.stdout).toContain('hlpr process info --name=<name>')
+    expect(result.stdout).toContain('hlpr process find (--name=<name> | --id=<id>)')
+    expect(result.stdout).toContain('hlpr process search (--name=<name> | --id=<id>)')
     expect(result.stdout).not.toMatch(/also: (?!hlpr )/)
     for (const obsolete of ['.types', 'hlpr demo ', 'hlpr rename ', 'hlpr mv ', 'hlpr list process', 'hlpr list app', 'hlpr kill process', 'hlpr ssh add connection', 'git precommit', 'git fodd', 'hlpr nvm', 'hlpr net devices', 'hlpr ssh read', 'hlpr mariadb backup -ssh-config', 'hlpr mariadb sync -from-ssh-config', 'hlpr mariadb set-user-password --remote', 'hlpr file read -ssh-config']) {
       expect(result.stdout).not.toContain(obsolete)
     }
     expect(result.stdout).toContain('hlpr [options] <domain> <command> [params...]')
     expect(result.stdout).toContain('hlpr process kill (-id <id> | -port <port> | -folder|-file|-path <path>) [options]')
-    expect(result.stdout).toContain('hlpr file rename -dir <dir> -style <style> [-r] [-d] [-f]')
+    expect(result.stdout).toContain('hlpr file rename -dir <dir> -style <style> [-recursive] [-directories] [-files]')
     for (const alias of ['battery info', 'net info', 'disk status', 'memory status', 'system status', 'app delete -name <app name>', 'app uninstall -name <app name>', 'file mv']) expect(result.stdout).toContain(`hlpr ${alias}`)
   }
   for (const [category, alias, original] of [['battery', 'info', 'status'], ['net', 'info', 'status'], ['disk', 'status', 'info'], ['memory', 'status', 'info'], ['system', 'status', 'info']]) {
@@ -119,23 +118,23 @@ test('help lists current commands, excludes helpers, and shows the package versi
   expect(hello.status).toBe(0)
   expect(hello.stdout).toContain('Usage: hlpr hello')
   for (const action of ['status', 'info']) {
-    const result = spawnSync('node', ['bin/index.js', 'process', action, '-name', 'hlpr-process-name-that-cannot-exist-000000'], { encoding: 'utf8' })
+    const result = spawnSync('node', ['bin/index.js', 'process', action, '--name=hlpr-process-name-that-cannot-exist-000000'], { encoding: 'utf8' })
     expect(result.status).toBe(1)
     expect(result.stderr).toContain('No processes match')
   }
   for (const action of ['find', 'search']) {
-    const result = spawnSync('node', ['bin/index.js', 'process', action, '-id', String(process.pid)], { encoding: 'utf8' })
+    const result = spawnSync('node', ['bin/index.js', 'process', action, `--id=${process.pid}`], { encoding: 'utf8' })
     expect(result.status).toBe(0)
     expect(result.stdout.split('\n').filter(line => /^\s*\d+\s/.test(line))).toHaveLength(1)
     expect(result.stdout).toContain(String(process.pid))
-    const help = spawnSync('node', ['bin/index.js', 'process', action, '--help'], { encoding: 'utf8' })
-    expect(help.stdout).toContain('Usage: hlpr process find (-name <name> | -id <id>)')
+    const help = spawnSync('node', ['bin/index.js', 'help', 'process', action], { encoding: 'utf8' })
+    expect(help.stdout).toContain('Usage: hlpr process find (--name=<name> | --id=<id>)')
   }
   const fileFind = spawnSync('node', ['bin/index.js', 'file', 'find', '-name', 'AGENTS.md'], { encoding: 'utf8' })
   expect(fileFind.status).toBe(0)
   expect(fileFind.stdout).toContain('AGENTS.md')
   expect(fileFind.stdout).not.toContain('--- finished by')
-  for (const flag of ['-device', '-d']) {
+  for (const flag of ['-device']) {
     const result = spawnSync('node', ['bin/index.js', 'net', 'list', flag], { encoding: 'utf8' })
     expect(result.status).toBe(0)
     expect(result.stdout).toMatch(/--- finished by \d+\.\d{2}s ---\s*$/)

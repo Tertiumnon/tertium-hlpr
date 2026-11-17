@@ -36,12 +36,15 @@ const args = process.argv.slice(2);
 let forceFlag = false;
 let commandArgs: string[] = [];
 
-// Check for -f flag
-if (args[0] === "-f") {
+// Check for --force flag
+if (args[0] === "--force") {
   forceFlag = true;
   commandArgs = args.slice(1);
 } else {
   commandArgs = args;
+}
+if (commandArgs[0] === 'help' && commandArgs.length > 1) {
+  commandArgs = [...commandArgs.slice(1), '--help'];
 }
 
 // Create readline interface for user input (only for non-help commands)
@@ -329,9 +332,9 @@ async function main() {
       if (restArgs.length > 0 && restArgs[0] && scriptPath) {
         const subcategory = resolveSubcommandAlias(category, restArgs[0]);
         const isNested = path.basename(scriptPath) === `${subcategory}.js` && path.basename(path.dirname(scriptPath)) === subcategory;
-        tsArgs = isNested ? process.argv.slice(4) : process.argv.slice(3);
+        tsArgs = isNested ? commandArgs.slice(2) : commandArgs.slice(1);
       } else {
-        tsArgs = process.argv.slice(3);
+        tsArgs = commandArgs.slice(1);
       }
 
       // Use node to run built JavaScript files

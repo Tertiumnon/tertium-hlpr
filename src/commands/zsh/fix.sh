@@ -9,7 +9,7 @@ case "$(uname -s 2>/dev/null)" in
     ;;
 esac
 
-usage="Usage: hlpr zsh fix --bun"
+usage="Usage: hlpr zsh fix -bun"
 
 case "${1:-}" in
   -h|--help)
@@ -19,7 +19,7 @@ case "${1:-}" in
     ;;
 esac
 
-if [[ $# -ne 1 || "$1" != "--bun" ]]; then
+if [[ $# -ne 1 || "$1" != "-bun" ]]; then
   echo "$usage" >&2
   exit 1
 fi

@@ -7,18 +7,18 @@ import path from 'node:path'
 const script = path.join(import.meta.dir, 'fix.sh')
 
 test.skipIf(process.platform !== 'win32')('refuses to run on Windows', () => {
-  const result = spawnSync('bash', [script, '--bun'], { encoding: 'utf8' })
+  const result = spawnSync('bash', [script, '-bun'], { encoding: 'utf8' })
   expect(result.status).toBe(1)
   expect(result.stderr).toContain('Wrong OS')
 })
 
-test.skipIf(process.platform === 'win32')('prints usage and rejects anything other than --bun', () => {
+test.skipIf(process.platform === 'win32')('prints usage and rejects anything other than -bun', () => {
   const help = spawnSync('bash', [script, '--help'], { encoding: 'utf8' })
   expect(help.status).toBe(0)
-  expect(help.stdout).toContain('Usage: hlpr zsh fix --bun')
+  expect(help.stdout).toContain('Usage: hlpr zsh fix -bun')
   const other = spawnSync('bash', [script, '--node'], { encoding: 'utf8' })
   expect(other.status).toBe(1)
-  expect(other.stderr).toContain('Usage: hlpr zsh fix --bun')
+  expect(other.stderr).toContain('Usage: hlpr zsh fix -bun')
 })
 
 test.skipIf(process.platform === 'win32')('writes one bun PATH block to .zshrc, backs it up, and replaces it on rerun', async () => {
@@ -30,7 +30,7 @@ test.skipIf(process.platform === 'win32')('writes one bun PATH block to .zshrc, 
     await writeFile(path.join(home, '.zshrc'), 'alias ll="ls -l"\n')
     const env = { ...process.env, HOME: home, ZDOTDIR: '' }
     for (let run = 0; run < 2; run++) {
-      const result = spawnSync('bash', [script, '--bun'], { env, encoding: 'utf8' })
+      const result = spawnSync('bash', [script, '-bun'], { env, encoding: 'utf8' })
       expect(result.status).toBe(0)
     }
     const zshrc = await readFile(path.join(home, '.zshrc'), 'utf8')
@@ -49,7 +49,7 @@ test.skipIf(process.platform === 'win32')('writes one bun PATH block to .zshrc, 
 test.skipIf(process.platform === 'win32')('refuses to run when bun is not installed', async () => {
   const home = await mkdtemp(path.join(os.tmpdir(), 'hlpr-zsh-fix-'))
   try {
-    const result = spawnSync('bash', [script, '--bun'], { env: { ...process.env, HOME: home, BUN_INSTALL: '' }, encoding: 'utf8' })
+    const result = spawnSync('bash', [script, '-bun'], { env: { ...process.env, HOME: home, BUN_INSTALL: '' }, encoding: 'utf8' })
     expect(result.status).toBe(1)
     expect(result.stderr).toContain('hlpr runtime install bun')
   } finally { await rm(home, { recursive: true, force: true }) }

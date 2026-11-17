@@ -5,7 +5,7 @@ import { parseRenameArgs, renameRecursive, transformBasename } from './rename.js
 
 describe('rename module', () => {
   test('parses directory, style, and scope flags', () => {
-    expect(parseRenameArgs(['-dir', './src', '-style', 'kebab', '-r', '-d', '-f'])).toEqual({
+    expect(parseRenameArgs(['-dir', './src', '-style', 'kebab', '-recursive', '-directories', '-files'])).toEqual({
       root: './src',
       style: 'kebab',
       recursive: true,

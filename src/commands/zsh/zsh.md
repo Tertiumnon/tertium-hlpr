@@ -2,9 +2,9 @@
 
 Fix zsh shell setup for tools installed under your home directory.
 
-## fix --bun
+## fix -bun
 
-Run `hlpr zsh fix --bun` when `bun` works in other shells but zsh reports
+Run `hlpr zsh fix -bun` when `bun` works in other shells but zsh reports
 `command not found`. The command:
 
 1. Finds bun at `$BUN_INSTALL/bin/bun`, or `~/.bun/bin/bun` when `BUN_INSTALL` is unset. If it is missing, it stops and suggests `hlpr runtime install bun`.

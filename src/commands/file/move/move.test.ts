@@ -1,8 +1,22 @@
 import { describe, expect, test } from 'bun:test'
+import { spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { renameFile } from './move.js'
+
+test('rejects a missing root value and the old root flag without moving files', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'hlpr-move-flags-'))
+  try {
+    const source = path.join(dir, 'old.txt')
+    fs.writeFileSync(source, 'content')
+    for (const args of [['-root'], ['--root', dir]]) {
+      const result = spawnSync(process.execPath, [path.join(import.meta.dir, 'move.ts'), source, path.join(dir, 'new.txt'), ...args], { encoding: 'utf8' })
+      expect(result.status).toBe(1)
+      expect(fs.readFileSync(source, 'utf8')).toBe('content')
+    }
+  } finally { fs.rmSync(dir, { recursive: true, force: true }) }
+})
 
 function mktmp(): string {
   return fs.mkdtempSync(path.join(process.cwd(), 'test-tmp-mv-'))
@@ -189,7 +203,7 @@ describe('mv module', () => {
     }
   })
 
-  test('throws when destination exists and --force not set', async () => {
+  test('throws when destination exists and -force not set', async () => {
     const tmp = mktmp()
     try {
       fs.writeFileSync(path.join(tmp, 'old-name.md'), '# hi')
@@ -201,7 +215,7 @@ describe('mv module', () => {
     }
   })
 
-  test('overwrites destination when --force is set', async () => {
+  test('overwrites destination when -force is set', async () => {
     const tmp = mktmp()
     try {
       fs.writeFileSync(path.join(tmp, 'old-name.md'), '# new content')
@@ -333,7 +347,7 @@ describe('mv module', () => {
     }
   })
 
-  test('without --root, walks up to the nearest git repo root instead of using cwd', async () => {
+  test('without -root, walks up to the nearest git repo root instead of using cwd', async () => {
     // Simulate a repo: tmp/.git at the top, file + referrer several levels deep,
     // and confirm scanning finds the referrer even though it isn't in the same
     // directory as the file and process.cwd() is somewhere else entirely.
@@ -356,7 +370,7 @@ describe('mv module', () => {
     }
   })
 
-  test('without --root and no git repo found, falls back to the file own directory', async () => {
+  test('without -root and no git repo found, falls back to the file own directory', async () => {
     const tmp = mktmpOutsideRepo()
     try {
       const itemDir = path.join(tmp, 'nested', 'deep')
