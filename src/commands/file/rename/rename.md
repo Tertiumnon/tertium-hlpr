@@ -5,13 +5,13 @@ Rename selected files and directories according to a specific case style.
 ## Usage
 
 ```bash
-hlpr file rename -dir <dir> -style <style> [-recursive] [-directories] [-files]
+hlpr file rename --dir=<dir> --style=<style> [-recursive] [-directories] [-files]
 ```
 
 ### Arguments
 
-- `-dir <dir>` - The root directory to process
-- `-style <style>` - The target case style (see Supported Styles below)
+- `--dir=<dir>` - The root directory to process
+- `--style=<style>` - The target case style (see Supported Styles below)
 - `-recursive` - Process subdirectories recursively
 - `-directories` - Rename directories
 - `-files` - Rename files
@@ -37,23 +37,23 @@ hlpr file rename -dir <dir> -style <style> [-recursive] [-directories] [-files]
 
 ```bash
 # Preview renaming all files/folders to kebab-case
-hlpr file rename -dir ./my-project -style kebab -recursive -directories -files -dry
+hlpr file rename --dir=./my-project --style=kebab -recursive -directories -files -dry
 
 # Preview renaming with short flag
-hlpr file rename -dir ./src -style snake -recursive -files -dry
+hlpr file rename --dir=./src --style=snake -recursive -files -dry
 ```
 
 ### Apply Changes
 
 ```bash
 # Rename all files/folders to kebab-case
-hlpr file rename -dir ./my-project -style kebab -recursive -directories -files
+hlpr file rename --dir=./my-project --style=kebab -recursive -directories -files
 
 # Rename to PascalCase
-hlpr file rename -dir ./docs -style pascal -recursive -directories -files
+hlpr file rename --dir=./docs --style=pascal -recursive -directories -files
 
 # Rename current directory
-hlpr file rename -dir . -style snake -recursive -directories -files
+hlpr file rename --dir=. --style=snake -recursive -directories -files
 ```
 
 ## Features
@@ -79,7 +79,7 @@ Example:
 import { helper } from './my-utils'
 const x = require('./my-utils')
 
-// After running: hlpr file rename -dir . -style snake -recursive -files
+// After running: hlpr file rename --dir=. --style=snake -recursive -files
 import { helper } from './my_utils'
 const x = require('./my_utils')
 ```
@@ -132,7 +132,7 @@ If a renamed file would conflict with an existing file, the command automaticall
 Use `-dry` to preview all changes before applying them:
 
 ```bash
-hlpr file rename -dir ./src -style kebab -recursive -directories -files -dry
+hlpr file rename --dir=./src --style=kebab -recursive -directories -files -dry
 ```
 
 Output:

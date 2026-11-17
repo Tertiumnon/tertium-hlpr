@@ -37,7 +37,7 @@ hlpr system info
 hlpr battery status
 hlpr ssh mkcon
 hlpr ssh mkkey
-hlpr file rename -dir ./src -style kebab -recursive -directories -files -dry
+hlpr file rename --dir=./src --style=kebab -recursive -directories -files -dry
 ```
 
 ## Commands

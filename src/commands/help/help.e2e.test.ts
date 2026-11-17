@@ -96,7 +96,7 @@ test('help lists current commands, excludes helpers, and shows the package versi
     }
     expect(result.stdout).toContain('hlpr [options] <domain> <command> [params...]')
     expect(result.stdout).toContain('hlpr process kill (--id=<id> | --port=<port> | --folder=<path> | --file=<path> | --path=<path>) [options]')
-    expect(result.stdout).toContain('hlpr file rename -dir <dir> -style <style> [-recursive] [-directories] [-files]')
+    expect(result.stdout).toContain('hlpr file rename --dir=<dir> --style=<style> [-recursive] [-directories] [-files]')
     for (const alias of ['battery info', 'net info', 'disk status', 'memory status', 'system status', 'app delete -name <app name>', 'app uninstall -name <app name>', 'file mv']) expect(result.stdout).toContain(`hlpr ${alias}`)
   }
   for (const [category, alias, original] of [['battery', 'info', 'status'], ['net', 'info', 'status'], ['disk', 'status', 'info'], ['memory', 'status', 'info'], ['system', 'status', 'info']]) {
