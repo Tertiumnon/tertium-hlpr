@@ -54,8 +54,8 @@ hlpr file rename --dir=./src --style=kebab -recursive -directories -files -dry
 | git commands | Moved to [@tertium/gith](https://www.npmjs.com/package/@tertium/gith) (`gith setup -n npm` writes the pre-commit hook); see the changelog |
 | [npm scripts](src/commands/npm/scripts/scripts.md) | Add missing start and dev npm scripts |
 | [gh setup](src/commands/gh/setup/setup.md) | Write GitHub workflows: npm publish (trusted publishing) and SSH deploy |
-| [gh rename](src/commands/gh/rename/rename.md) | Rename a GitHub repository (`-repo <owner/repo> -to <new name>`) |
-| [gh change](src/commands/gh/change/change.md) | Rename the default branch of the current repository (`-default-branch <name> -to <new name>`) |
+| [gh rename](src/commands/gh/rename/rename.md) | Rename a GitHub repository (`--repo=<owner/repo> --to=<new name>`) |
+| [gh change](src/commands/gh/change/change.md) | Rename the default branch of the current repository (`--default-branch=<name> --to=<new name>`) |
 | [az setup](src/commands/az/setup/setup.md) | Write an Azure Pipelines SSH deploy (`azure-pipelines.yml`) |
 | [angular setup](src/commands/angular/setup/setup.md) | Set up an Angular project with bun, biome, hooks, and changelog |
 | [net list -device](src/commands/net/list/list.md)   | List cached local device IPv4 addresses |
