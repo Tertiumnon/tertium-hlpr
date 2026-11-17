@@ -4,6 +4,7 @@
 
 import { animateUntilQuit } from '../../../core/terminal.js'
 import { wakeUpNeo } from '../../../core/matrix.js'
+import { parseFlags } from '../../../core/args.js'
 
 type Frame = () => string[]
 type Animation = { color: string; create: (width: number, height: number) => Frame }
@@ -96,11 +97,13 @@ export const animations: Record<string, Animation> = {
 
 async function main(): Promise<void> {
   const names = ['matrix', ...Object.keys(animations)]
-  const requested = process.argv[2]
-  if (!requested || requested === '--help' || requested === '-h') {
-    console.log('Usage: hlpr animation play <wave|stars|fire|pipes|matrix|random>\nPress q or Esc to stop.')
+  const args = process.argv.slice(2)
+  if (args.length === 0 || args.includes('--help') || args.includes('-h')) {
+    console.log('Usage: hlpr animation play --name=<wave|stars|fire|pipes|matrix|random>\nPress q or Esc to stop.')
     return
   }
+  const requested = parseFlags(args, ['-name'])['-name']
+  if (typeof requested !== 'string') throw new Error('Provide --name=<animation>')
   const name = requested === 'random' ? names[Math.floor(Math.random() * names.length)] : requested
   if (name === 'matrix') return wakeUpNeo()
   const animation = animations[name]

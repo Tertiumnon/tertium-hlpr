@@ -4,14 +4,14 @@ Install Node.js, Python, Bun, Rust, or Go. Run without a name to choose from a k
 
 ```bash
 hlpr runtime install
-hlpr runtime install node -v 24
-hlpr runtime install python -v 3
-hlpr runtime install bun -v 1
-hlpr runtime install rust
-hlpr runtime install go
+hlpr runtime install --name=node --version=24
+hlpr runtime install --name=python --version=3
+hlpr runtime install --name=bun --version=1
+hlpr runtime install --name=rust
+hlpr runtime install --name=go
 ```
 
-The menu uses ↑/↓, Enter or Space to install, and Esc to cancel. `-version` also accepts a major number for Node.js, Python, and Bun. Rust and Go install the current package version and do not accept a version flag.
+The menu uses ↑/↓, Enter or Space to install, and Esc to cancel. `--version` also accepts a major number for Node.js, Python, and Bun. Rust and Go install the current package version and do not accept a version flag.
 
 | Runtime | Windows | macOS | Linux |
 | --- | --- | --- | --- |

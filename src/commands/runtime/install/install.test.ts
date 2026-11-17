@@ -9,8 +9,8 @@ test('recognizes runtimes and selects from the menu', () => {
 })
 
 test('keeps major version handling for Node, Python, and Bun', () => {
-  expect(parseVersion(['-v', '24'])).toBe('24')
-  expect(parseVersion(['-version', '24'])).toBe('24')
+  expect(() => parseVersion(['-v', '24'])).toThrow()
+  expect(parseVersion(['--version=24'])).toBe('24')
   expect(() => parseVersion(['--version', '24'])).toThrow()
   expect(runtimeInstallCommands('node', 'win32', '24')[0].args).toContain('OpenJS.NodeJS.LTS')
   expect(runtimeInstallCommands('node', 'darwin')[0].args).toContain('node@24')
@@ -33,7 +33,7 @@ test('uses native packages for Rust and Go on each platform', () => {
   expect(runtimeInstallCommands('go', 'linux', undefined, 'dnf')[0].args).toEqual(['dnf', 'install', 'golang'])
   expect(runtimeInstallCommands('rust', 'linux', undefined, 'pacman')[0].args).toEqual(['pacman', '-S', 'rust'])
   expect(runtimeInstallCommands('go', 'linux', undefined, 'pacman')[0].args).toEqual(['pacman', '-S', 'go'])
-  expect(() => runtimeInstallCommands('rust', 'linux', '1', 'apt-get')).toThrow('does not support -v')
+  expect(() => runtimeInstallCommands('rust', 'linux', '1', 'apt-get')).toThrow('does not support --version')
   expect(() => runtimeInstallCommands('go', 'linux')).toThrow('No supported package manager')
   expect(() => runtimeInstallCommands('node', 'linux', undefined, 'dnf')).toThrow('Debian/Ubuntu only')
 })

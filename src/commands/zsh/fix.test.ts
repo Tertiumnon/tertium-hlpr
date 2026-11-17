@@ -51,6 +51,6 @@ test.skipIf(process.platform === 'win32')('refuses to run when bun is not instal
   try {
     const result = spawnSync('bash', [script, '-bun'], { env: { ...process.env, HOME: home, BUN_INSTALL: '' }, encoding: 'utf8' })
     expect(result.status).toBe(1)
-    expect(result.stderr).toContain('hlpr runtime install bun')
+    expect(result.stderr).toContain('hlpr runtime install --name=bun')
   } finally { await rm(home, { recursive: true, force: true }) }
 })

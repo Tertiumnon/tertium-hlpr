@@ -5,7 +5,7 @@ Play a terminal animation until you press `q` or `Esc` (Ctrl+C also exits).
 ## Usage
 
 ```bash
-hlpr animation play <wave|stars|fire|pipes|matrix|random>
+hlpr animation play --name=<wave|stars|fire|pipes|matrix|random>
 ```
 
 `random` picks one of the animations above at random.

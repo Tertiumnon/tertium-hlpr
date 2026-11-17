@@ -10,7 +10,7 @@ describe('install', () => {
     const zshDir = fs.mkdtempSync(path.join(os.tmpdir(), 'hlpr-oh-my-zsh-'))
     try {
       fs.writeFileSync(path.join(zshDir, 'oh-my-zsh.sh'), '')
-      const result = spawnSync(process.execPath, [path.join(import.meta.dir, 'install.ts'), 'oh-my-zsh'], {
+      const result = spawnSync(process.execPath, [path.join(import.meta.dir, 'install.ts'), '--name=oh-my-zsh'], {
         encoding: 'utf8', env: { ...process.env, ZSH: zshDir },
       })
       expect(result.status).toBe(0)
@@ -21,9 +21,9 @@ describe('install', () => {
   })
 
   test('rejects extra arguments for every tool before installing', () => {
-    const result = spawnSync(process.execPath, [path.join(import.meta.dir, 'install.ts'), 'tldr', 'extra'], { encoding: 'utf8' })
+    const result = spawnSync(process.execPath, [path.join(import.meta.dir, 'install.ts'), '--name=tldr', 'extra'], { encoding: 'utf8' })
     expect(result.status).toBe(1)
-    expect(result.stderr).toContain('tldr does not accept extra arguments')
+    expect(result.stderr).toContain('Unknown or misplaced argument: extra')
   })
 
   test('menu lists only tools that install on the platform', () => {
@@ -33,13 +33,11 @@ describe('install', () => {
     expect(names('linux')).toEqual(['docker', 'oh-my-zsh', 'htop', 'fastfetch', 'tldr', 'claude-cli', 'codex-cli', 'copilot-cli'])
   })
 
-  test('accepts a tool as a name, -name, or -n', () => {
-    expect(toolArgs(['claude-cli'])).toEqual({ value: 'claude-cli', extra: [] })
-    expect(toolArgs(['-name', 'codex-cli'])).toEqual({ value: 'codex-cli', extra: [] })
-    expect(toolArgs(['-n', 'copilot-cli'])).toEqual({ value: 'copilot-cli', extra: [] })
-    expect(toolArgs([])).toEqual({ value: undefined, extra: [] })
-    expect(() => toolArgs(['-name'])).toThrow('Missing tool name')
-    expect(() => toolArgs(['--claude-cli'])).toThrow('Unknown option: --claude-cli')
+  test('accepts --name and rejects invalid arguments', () => {
+    expect(toolArgs(['--name=codex-cli'])).toBe('codex-cli')
+    expect(toolArgs([])).toBeUndefined()
+    expect(() => toolArgs(['-name', 'codex-cli'])).toThrow()
+    expect(() => toolArgs(['--name='])).toThrow()
   })
 
   test('arrow selection wraps at both ends', () => {

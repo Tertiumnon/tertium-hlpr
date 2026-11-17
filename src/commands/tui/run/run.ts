@@ -4,6 +4,7 @@
 
 import * as fs from 'node:fs'
 import * as path from 'node:path'
+import { parseFlags } from '../../../core/args.js'
 import { isQuitKey, type Key, readKeys } from '../../../core/terminal.js'
 
 export interface Entry {
@@ -207,15 +208,17 @@ const tuis: Record<string, (folder: string) => Promise<void>> = {
 
 async function main(): Promise<void> {
   const names = Object.keys(tuis)
-  const [name, folder] = process.argv.slice(2)
+  const values = parseFlags(process.argv.slice(2), ['-name', '-path'])
+  const name = typeof values['-name'] === 'string' ? values['-name'] : ''
+  const folder = typeof values['-path'] === 'string' ? values['-path'] : '.'
   const tui = tuis[name]
   if (!tui) throw new Error(`Unknown tui "${name ?? ''}". Choose one of: ${names.join(', ')}`)
-  await tui(path.resolve(folder ?? '.'))
+  await tui(path.resolve(folder))
 }
 
 if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
   if (!process.argv[2] || process.argv.slice(2).includes('--help') || process.argv.slice(2).includes('-h')) {
-    console.log('Usage: hlpr tui run <explorer> [folder]\nexplorer: two panels. Tab switches panel, Enter opens a folder, Backspace goes up.\nF5 copy, F6 move, F7 new folder, F8 delete, F10 or q quits.')
+    console.log('Usage: hlpr tui run --name=explorer [--path=<folder>]\nexplorer: two panels. Tab switches panel, Enter opens a folder, Backspace goes up.\nF5 copy, F6 move, F7 new folder, F8 delete, F10 or q quits.')
     process.exit(0)
   }
   main().catch((error) => {

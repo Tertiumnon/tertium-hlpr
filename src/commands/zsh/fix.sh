@@ -26,7 +26,7 @@ fi
 
 bun_home="${BUN_INSTALL:-$HOME/.bun}"
 if [[ ! -x "$bun_home/bin/bun" ]]; then
-  echo "bun not found at $bun_home/bin/bun. Install it with: hlpr runtime install bun" >&2
+  echo "bun not found at $bun_home/bin/bun. Install it with: hlpr runtime install --name=bun" >&2
   exit 1
 fi
 

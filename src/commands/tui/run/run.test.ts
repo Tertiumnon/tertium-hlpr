@@ -1,8 +1,15 @@
 import { describe, expect, test } from 'bun:test'
+import { spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { deleteEntry, makeDir, readEntries, transfer, visibleRange } from './run.js'
+
+test('rejects positional and unknown interface names', () => {
+  const script = path.join(import.meta.dir, 'run.ts')
+  expect(spawnSync(process.execPath, [script, 'explorer']).status).toBe(1)
+  expect(spawnSync(process.execPath, [script, '--name=unknown']).status).toBe(1)
+})
 
 const withTempDir = async (run: (root: string) => Promise<void>): Promise<void> => {
   const root = mkdtempSync(path.join(os.tmpdir(), 'hlpr-explorer-'))

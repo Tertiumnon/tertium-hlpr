@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process'
 import readline from 'node:readline'
+import { parseFlags } from '../../../core/args.js'
 
 // @description Install Node.js, Python, Bun, Rust, or Go
 
@@ -24,8 +25,9 @@ export function parseRuntime(value?: string): Runtime | undefined {
 
 export function parseVersion(args: string[]): string | undefined {
   if (args.length === 0) return undefined
-  if (args.length !== 2 || !['-v', '-version'].includes(args[0]) || !/^\d+$/.test(args[1])) throw new Error('Version must be a major number, for example: -v 24')
-  return args[1]
+  const version = parseFlags(args, ['-version'])['-version']
+  if (typeof version !== 'string' || !/^\d+$/.test(version)) throw new Error('Version must be a major number, for example: --version=24')
+  return version
 }
 
 export function runtimeInstallCommands(runtime: Runtime, platform: Platform, version?: string, manager?: LinuxManager): InstallCommand[] {
@@ -67,7 +69,7 @@ export function runtimeInstallCommands(runtime: Runtime, platform: Platform, ver
     return [{ command: 'sh', args: ['-c', 'curl -fsSL https://bun.sh/install | bash'] }]
   }
 
-  if (version) throw new Error(`${runtime} does not support -v; install the distribution's current version`)
+  if (version) throw new Error(`${runtime} does not support --version; install the distribution's current version`)
   if (platform === 'win32') return [{ command: 'winget', args: ['install', '--id', runtime === 'rust' ? 'Rustlang.Rustup' : 'GoLang.Go', '--exact'] }]
   if (platform === 'darwin') return [{ command: 'brew', args: ['install', runtime] }]
   if (manager === 'apt-get') return [{ command: 'sudo', args: ['apt-get', 'install', ...(runtime === 'rust' ? ['rustc', 'cargo'] : ['golang-go'])] }]
@@ -123,15 +125,16 @@ async function selectRuntime(value?: string): Promise<Runtime | undefined> {
 
 async function main(): Promise<void> {
   if (process.argv.slice(2).some(arg => arg === '--help' || arg === '-h')) {
-    console.log('Usage: hlpr runtime install [name] [-v 24]')
-    console.log('Install Node.js, Python, Bun, Rust, or Go. Run without a name to choose from a keyboard menu. -v is supported for Node.js, Python, and Bun.')
+    console.log('Usage: hlpr runtime install [--name=<name>] [--version=<major>]')
+    console.log('Install Node.js, Python, Bun, Rust, or Go. Run without a name to choose from a keyboard menu. --version is supported for Node.js, Python, and Bun.')
     return
   }
-  const runtime = await selectRuntime(process.argv[2])
+  const values = parseFlags(process.argv.slice(2), ['-name', '-version'])
+  const version = typeof values['-version'] === 'string' ? parseVersion([`--version=${values['-version']}`]) : undefined
+  const runtime = await selectRuntime(typeof values['-name'] === 'string' ? values['-name'] : undefined)
   if (!runtime) return
   const platform = process.platform
   if (platform !== 'win32' && platform !== 'darwin' && platform !== 'linux') throw new Error(`${runtime} installation is not supported on ${platform}`)
-  const version = parseVersion(process.argv.slice(3))
   const manager = platform === 'linux' && runtime !== 'bun'
     ? (['apt-get', 'dnf', 'pacman'] as const).find(name => spawnSync(name, ['--version'], { stdio: 'ignore' }).status === 0)
     : undefined
