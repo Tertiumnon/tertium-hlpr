@@ -23,17 +23,17 @@ const editTo = (content: string) => (file: string) => writeFileSync(file, conten
 
 describe('aws-param-store edit', () => {
   test('parses -name and rejects anything else', () => {
-    expect(parseEditArgs(['-name', '/env/app/env.dev'])).toEqual({ name: '/env/app/env.dev' })
+    expect(parseEditArgs(['--name=/env/app/env.dev'])).toEqual({ name: '/env/app/env.dev' })
     expect(() => parseEditArgs(['-name'])).toThrow('Usage: hlpr aws-param-store edit')
     expect(() => parseEditArgs(['/env/app/env.dev'])).toThrow('Usage: hlpr aws-param-store edit')
-    expect(() => parseEditArgs(['-name', 'env/app'])).toThrow('Invalid -name')
+    expect(() => parseEditArgs(['--name=env/app'])).toThrow('Invalid -name')
   })
 
   test('takes an optional -editor from code, edit, nano or vi, in any order', () => {
-    expect(parseEditArgs(['-editor', 'nano', '-name', '/env/app/env.dev'])).toEqual({ name: '/env/app/env.dev', editor: 'nano' })
-    expect(parseEditArgs(['-name', '/env/app/env.dev', '-editor', 'code'])).toEqual({ name: '/env/app/env.dev', editor: 'code' })
-    expect(() => parseEditArgs(['-name', '/env/app/env.dev', '-editor', 'notepad'])).toThrow('Invalid -editor')
-    expect(() => parseEditArgs(['-name', '/env/app/env.dev', '-editor'])).toThrow('Usage: hlpr aws-param-store edit')
+    expect(parseEditArgs(['--editor=nano', '--name=/env/app/env.dev'])).toEqual({ name: '/env/app/env.dev', editor: 'nano' })
+    expect(parseEditArgs(['--name=/env/app/env.dev', '--editor=code'])).toEqual({ name: '/env/app/env.dev', editor: 'code' })
+    expect(() => parseEditArgs(['--name=/env/app/env.dev', '--editor=notepad'])).toThrow('Invalid -editor')
+    expect(() => parseEditArgs(['--name=/env/app/env.dev', '-editor'])).toThrow('Usage: hlpr aws-param-store edit')
   })
 
   test('writes nothing when the editor leaves the value unchanged', () => {

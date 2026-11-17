@@ -4,14 +4,14 @@ Replace the value of one `KEY=value` line in a `.env` value stored in AWS System
 Every other line stays as it is:
 
 ```sh
-printf '%s' "$NEW_PASSWORD" | hlpr aws-param-store set -name /env/app/env.prod -key DB_PASSWORD
-hlpr aws-param-store set -name /env/app/env.prod -key DB_HOST -value 10.0.0.6
+printf '%s' "$NEW_PASSWORD" | hlpr aws-param-store set --name=/env/app/env.prod --key=DB_PASSWORD
+hlpr aws-param-store set --name=/env/app/env.prod --key=DB_HOST --value=10.0.0.6
 ```
 
-- `-name` is the parameter that holds the `.env` text.
-- `-key` is the variable to change. It must be a variable name such as `DB_PASSWORD`.
-- `-value` is the new value. Without it, the value is read from stdin, so it stays off the command line.
-  `-value` is visible in shell history and in local process listings while the command runs.
+- `--name` is the parameter that holds the `.env` text.
+- `--key` is the variable to change. It must be a variable name such as `DB_PASSWORD`.
+- `--value` is the new value. Without it, the value is read from stdin, so it stays off the command line.
+  `--value` is visible in shell history and in local process listings while the command runs.
 
 ## What it changes
 
@@ -29,7 +29,7 @@ Change the password on the database first, then store it in the `.env` parameter
 ```sh
 NEW_PASSWORD=$(openssl rand -base64 24)
 hlpr mariadb set-user-password -db-name app -db-password "$NEW_PASSWORD" -host 10.0.0.5
-printf '%s' "$NEW_PASSWORD" | hlpr aws-param-store set -name /env/app/env.prod -key DB_PASSWORD
+printf '%s' "$NEW_PASSWORD" | hlpr aws-param-store set --name=/env/app/env.prod --key=DB_PASSWORD
 ```
 
 Run the two steps back to back. If the second one fails, the database has the new password and the parameter

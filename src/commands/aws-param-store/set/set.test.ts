@@ -22,11 +22,11 @@ const env = 'APP=dungeons\nDB_PASSWORD=old\nDB_HOST=10.0.0.5\n'
 
 describe('aws-param-store set', () => {
   test('parses -name, -key and an optional -value, in any order', () => {
-    expect(parseSetArgs(['-key', 'DB_PASSWORD', '-name', '/env/app/env.prod'])).toEqual({ name: '/env/app/env.prod', key: 'DB_PASSWORD', value: undefined })
-    expect(parseSetArgs(['-name', '/env/app/env.prod', '-key', 'DB_PASSWORD', '-value', '-x-1'])).toEqual({ name: '/env/app/env.prod', key: 'DB_PASSWORD', value: '-x-1' })
-    expect(() => parseSetArgs(['-name', '/env/app/env.prod', '-key'])).toThrow('Usage: hlpr aws-param-store set')
-    expect(() => parseSetArgs(['-name', '/env/app/env.prod', '-key', 'DB_PASSWORD', '-key', 'X'])).toThrow('Usage: hlpr aws-param-store set')
-    expect(() => parseSetArgs(['-name', '/env/app/env.prod', '-key', 'DB-PASSWORD'])).toThrow('Invalid -key')
+    expect(parseSetArgs(['--key=DB_PASSWORD', '--name=/env/app/env.prod'])).toEqual({ name: '/env/app/env.prod', key: 'DB_PASSWORD', value: undefined })
+    expect(parseSetArgs(['--name=/env/app/env.prod', '--key=DB_PASSWORD', '--value=-x-1'])).toEqual({ name: '/env/app/env.prod', key: 'DB_PASSWORD', value: '-x-1' })
+    expect(() => parseSetArgs(['--name=/env/app/env.prod', '-key'])).toThrow('Usage: hlpr aws-param-store set')
+    expect(() => parseSetArgs(['--name=/env/app/env.prod', '--key=DB_PASSWORD', '--key=X'])).toThrow('Usage: hlpr aws-param-store set')
+    expect(() => parseSetArgs(['--name=/env/app/env.prod', '--key=DB-PASSWORD'])).toThrow('Invalid -key')
   })
 
   test('replaces only the named line and keeps the parameter type', () => {

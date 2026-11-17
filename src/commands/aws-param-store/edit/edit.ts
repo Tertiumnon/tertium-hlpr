@@ -9,13 +9,15 @@ import { type AwsRunner, getParameter, putParameter, runAws, validateParamName }
 // @description Edit one AWS Systems Manager Parameter Store value in your editor
 
 // Literal on purpose: `hlpr help` scrapes "Usage:" lines from this source file.
-const USAGE = 'Usage: hlpr aws-param-store edit -name <param name> [-editor code|edit|nano|vi]'
+const USAGE = 'Usage: hlpr aws-param-store edit --name=<param name> [--editor=code|edit|nano|vi]'
 
 export function parseEditArgs(args: string[]): { name: string, editor?: string } {
   const values: Record<string, string> = {}
-  for (let index = 0; index < args.length; index += 2) {
-    const flag = args[index]
-    const value = args[index + 1]
+  for (const arg of args) {
+    const match = arg.match(/^--([a-z-]+)=(.*)$/s)
+    if (!match) throw new Error(USAGE)
+    const flag = `-${match[1]}`
+    const value = match[2]
     if (!['-name', '-editor'].includes(flag) || values[flag] !== undefined || !value || value.startsWith('-')) throw new Error(USAGE)
     values[flag] = value
   }
@@ -61,7 +63,7 @@ export function editParameter(name: string, deps: EditDeps = {}): number | undef
 async function main(): Promise<void> {
   const args = process.argv.slice(2)
   if (args.includes('-h') || args.includes('--help')) {
-    console.log(`${USAGE}\nOpens the parameter value in the -editor choice (code, edit, nano or vi), else $VISUAL, $EDITOR, or edit (Windows) / vi, then writes it back if it changed. The temp copy is removed afterwards. The parameter keeps its type.`)
+    console.log(`${USAGE}\nOpens the parameter value in the --editor choice (code, edit, nano or vi), else $VISUAL, $EDITOR, or edit (Windows) / vi, then writes it back if it changed. The temp copy is removed afterwards. The parameter keeps its type.`)
     return
   }
   const parsed = parseEditArgs(args)

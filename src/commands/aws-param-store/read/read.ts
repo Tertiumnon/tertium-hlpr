@@ -5,7 +5,7 @@ import { readEnvKey, validateEnvKey } from '../../../core/env-file.js'
 // @description Print one AWS Systems Manager Parameter Store value, or one variable from a .env value
 
 // Literal on purpose: `hlpr help` scrapes "Usage:" lines from this source file.
-const USAGE = 'Usage: hlpr aws-param-store read -name <param name> [-key <variable>]'
+const USAGE = 'Usage: hlpr aws-param-store read --name=<param name> [--key=<variable>]'
 
 export interface ReadOptions {
   name: string
@@ -14,9 +14,11 @@ export interface ReadOptions {
 
 export function parseReadArgs(args: string[]): ReadOptions {
   const values: Record<string, string> = {}
-  for (let index = 0; index < args.length; index += 2) {
-    const flag = args[index]
-    const value = args[index + 1]
+  for (const arg of args) {
+    const match = arg.match(/^--([a-z-]+)=(.*)$/s)
+    if (!match) throw new Error(USAGE)
+    const flag = `-${match[1]}`
+    const value = match[2]
     if (!['-name', '-key'].includes(flag) || values[flag] !== undefined || !value || value.startsWith('-')) throw new Error(USAGE)
     values[flag] = value
   }
