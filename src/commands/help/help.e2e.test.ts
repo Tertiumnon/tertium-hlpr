@@ -6,6 +6,12 @@ import path from 'node:path'
 import { HLPR_LOGO } from '../../core/command/logo.js'
 import { renderHelp } from '../../core/command/help.js'
 
+test('rejects help flags and points to the help command', () => {
+  const result = spawnSync('node', ['bin/index.js', 'process', 'find', '--help'], { encoding: 'utf8' })
+  expect(result.status).toBe(1)
+  expect(result.stderr).toContain('use hlpr help')
+})
+
 test('help adds color only when requested', () => {
   const commands = [{ category: 'net', name: 'scan', usages: ['hlpr net scan'] }]
   expect(renderHelp(commands, '1.0.0', false)).not.toContain('\u001b[')
@@ -40,7 +46,7 @@ test('help lists current commands, excludes helpers, and shows the package versi
     mkdirSync(path.join(incomplete, 'bin'))
     copyFileSync('bin/index.js', path.join(incomplete, 'bin', 'index.js'))
     writeFileSync(path.join(incomplete, 'package.json'), '{"type":"module"}')
-    const help = spawnSync('node', [path.join(incomplete, 'bin', 'index.js'), 'self', 'fix', '--help'], { encoding: 'utf8' })
+    const help = spawnSync('node', [path.join(incomplete, 'bin', 'index.js'), 'help', 'self', 'fix'], { encoding: 'utf8' })
     expect(help.status).toBe(0)
     expect(help.stdout).toContain('Usage: hlpr self fix')
     const fakeTools = path.join(incomplete, 'tools')
@@ -72,7 +78,7 @@ test('help lists current commands, excludes helpers, and shows the package versi
   expect(bare.stdout).not.toMatch(/\nhlpr v/)
   expect(bare.stdout).not.toContain('AVAILABLE COMMANDS')
 
-  for (const args of [['bin/index.js', 'help'], ['bin/index.js', '--help'], ['bin/commands/help/help.js']]) {
+  for (const args of [['bin/index.js', 'help'], ['bin/index.js', 'help'], ['bin/commands/help/help.js']]) {
     const result = spawnSync('node', args, { encoding: 'utf8' })
     expect(result.status).toBe(0)
     expect(result.stderr).toBe('')
@@ -100,7 +106,7 @@ test('help lists current commands, excludes helpers, and shows the package versi
     for (const alias of ['battery info', 'net info', 'disk status', 'memory status', 'system status', 'app delete --name=<app name>', 'app uninstall --name=<app name>', 'file mv']) expect(result.stdout).toContain(`hlpr ${alias}`)
   }
   for (const [category, alias, original] of [['battery', 'info', 'status'], ['net', 'info', 'status'], ['disk', 'status', 'info'], ['memory', 'status', 'info'], ['system', 'status', 'info']]) {
-    const result = spawnSync('node', ['bin/index.js', category, alias, '--help'], { encoding: 'utf8' })
+    const result = spawnSync('node', ['bin/index.js', 'help', category, alias], { encoding: 'utf8' })
     expect(result.status).toBe(0)
     expect(result.stdout).toContain(`Usage: hlpr ${category} ${original}`)
     expect(result.stdout).toContain(`Alias: hlpr ${category} ${alias}`)
@@ -110,11 +116,11 @@ test('help lists current commands, excludes helpers, and shows the package versi
   expect(typo.stderr).toContain('Command not found: hlpr self ifx')
   expect(typo.stderr).not.toContain('.sh')
   for (const [domain, action] of [['file', 'rename'], ['file', 'move'], ['file', 'find'], ['file', 'search'], ['process', 'list'], ['process', 'kill'], ['app', 'list'], ['app', 'search'], ['app', 'find'], ['app', 'install'], ['ssh', 'mkcon'], ['tool', 'install'], ['runtime', 'install'], ['self', 'update'], ['self', 'fix'], ['self', 'upgrade'], ['hello', 'world']]) {
-    const result = spawnSync('node', ['bin/index.js', domain, action, '--help'], { encoding: 'utf8' })
+    const result = spawnSync('node', ['bin/index.js', 'help', domain, action], { encoding: 'utf8' })
     expect(result.status).toBe(0)
     expect(result.stdout).toContain(`hlpr ${domain} ${action === 'upgrade' ? 'update' : domain === 'app' && action === 'find' ? 'search' : domain === 'file' && action === 'search' ? 'find' : action}`)
   }
-  const hello = spawnSync('node', ['bin/index.js', 'hello', '--help'], { encoding: 'utf8' })
+  const hello = spawnSync('node', ['bin/index.js', 'help', 'hello'], { encoding: 'utf8' })
   expect(hello.status).toBe(0)
   expect(hello.stdout).toContain('Usage: hlpr hello')
   for (const action of ['status', 'info']) {

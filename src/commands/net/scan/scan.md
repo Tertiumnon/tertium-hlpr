@@ -4,7 +4,7 @@ Show TCP/UDP ports in use on this computer, including listening sockets and acti
 
 ```bash
 hlpr net scan
-hlpr net scan --help
+hlpr help net scan
 ```
 
 Uses the native tool's table: `netstat -ano` on Windows, `ss -tunap` on Linux

@@ -4,7 +4,7 @@ List known local-network device IPv4 addresses, one per line.
 
 ```bash
 hlpr net list -device
-hlpr net list -device --help
+hlpr help net list
 ```
 
 `-device` is required.
