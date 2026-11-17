@@ -23,13 +23,13 @@ const config = [
 
 describe('remote file args', () => {
   test('parses -host and -path in any order', () => {
-    expect(parseRemoteFileArgs(['-path', '/etc/hosts', '-host', '10.0.0.5'], usage)).toEqual({ path: '/etc/hosts', host: '10.0.0.5' })
+    expect(parseRemoteFileArgs(['--path=/etc/hosts', '--host=10.0.0.5'], usage)).toEqual({ path: '/etc/hosts', host: '10.0.0.5' })
   })
 
   test('rejects duplicates, missing values and missing flags', () => {
-    expect(() => parseRemoteFileArgs(['-path', '/a', '-path', '/b', '-host', 'h'], usage)).toThrow(usage)
-    expect(() => parseRemoteFileArgs(['-path', '-x', '-host', 'h'], usage)).toThrow(usage)
-    expect(() => parseRemoteFileArgs(['-path', '/a'], usage)).toThrow(usage)
+    expect(() => parseRemoteFileArgs(['--path=/a', '--path=/b', '--host=h'], usage)).toThrow(usage)
+    expect(() => parseRemoteFileArgs(['--path=-x', '--host=h'], usage)).toThrow(usage)
+    expect(() => parseRemoteFileArgs(['--path=/a'], usage)).toThrow(usage)
   })
 })
 

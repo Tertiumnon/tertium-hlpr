@@ -9,17 +9,17 @@ import { parseRemoteFileArgs, remoteShellPath, resolveRemoteFile, runSsh, type R
 // @description Edit a remote file over SSH in your local editor, then upload it if changed
 
 // Literal on purpose: `hlpr help` scrapes "Usage:" lines from this source file.
-const USAGE = 'Usage: hlpr file edit -host <hostname> -path <path> [-editor code|edit|nano|vi]'
+const USAGE = 'Usage: hlpr file edit --host=<hostname> --path=<path> [--editor=code|edit|nano|vi]'
 
 export type OpenEditor = (file: string) => Promise<void>
 
 export function parseEditArgs(args: string[]): RemoteFileArgs & { editor?: string } {
-  const at = args.indexOf('-editor')
+  const at = args.findIndex(arg => arg.startsWith('--editor='))
   if (at === -1) return parseRemoteFileArgs(args, USAGE)
-  const editor = args[at + 1]
-  if (editor === undefined || editor.startsWith('-')) throw new Error(USAGE)
+  const editor = args[at].slice('--editor='.length)
+  if (!editor || editor.startsWith('-')) throw new Error(USAGE)
   editorFlagCommand(editor)
-  return { ...parseRemoteFileArgs(args.filter((_, i) => i !== at && i !== at + 1), USAGE), editor }
+  return { ...parseRemoteFileArgs(args.filter((_, i) => i !== at), USAGE), editor }
 }
 
 // Waits until the editor exits. The command comes from -editor, $VISUAL or $EDITOR (see core/editor.ts).

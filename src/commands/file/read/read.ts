@@ -4,7 +4,7 @@ import { parseRemoteFileArgs, remoteShellPath, resolveRemoteFile, runSsh, type R
 // @description Print a file from a remote host over SSH
 
 // Literal on purpose: `hlpr help` scrapes "Usage:" lines from this source file.
-const USAGE = 'Usage: hlpr file read -host <hostname> -path <path>'
+const USAGE = 'Usage: hlpr file read --host=<hostname> --path=<path>'
 
 export function parseReadArgs(args: string[]): RemoteFileArgs {
   return parseRemoteFileArgs(args, USAGE)
@@ -17,7 +17,7 @@ export async function readRemoteFile(options: RemoteFileOptions, run: RemoteRun 
 async function main(): Promise<void> {
   const args = process.argv.slice(2)
   if (args.includes('-h') || args.includes('--help')) {
-    console.log(`${USAGE}\nPrints a file from the remote host over SSH. The -host value is the HostName in ~/.ssh/config (see ~/.ssh/config).`)
+    console.log(`${USAGE}\nPrints a file from the remote host over SSH. The --host value is the HostName in ~/.ssh/config (see ~/.ssh/config).`)
     return
   }
   process.stdout.write(await readRemoteFile(resolveRemoteFile(parseReadArgs(args))))
