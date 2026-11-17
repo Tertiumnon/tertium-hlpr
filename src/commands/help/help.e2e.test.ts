@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test'
 import { spawnSync } from 'node:child_process'
-import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { HLPR_LOGO } from '../../core/command/logo.js'
@@ -11,6 +11,23 @@ test('rejects help flags and points to the help command', () => {
   expect(result.status).toBe(1)
   expect(result.stderr).toContain('use hlpr help')
 })
+
+test('every built command shows help through the help command', () => {
+  for (const domain of readdirSync('bin/commands', { withFileTypes: true })) {
+    if (!domain.isDirectory() || domain.name === 'help') continue
+    const dir = path.join('bin/commands', domain.name)
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      let command: string[]
+      if (entry.isDirectory() && (existsSync(path.join(dir, entry.name, `${entry.name}.js`)) || existsSync(path.join(dir, entry.name, `${entry.name}.sh`)))) command = [domain.name, entry.name]
+      else if (entry.isFile() && entry.name.endsWith('.sh')) command = [domain.name, entry.name.slice(0, -3)]
+      else if (entry.isFile() && entry.name === `${domain.name}.js`) command = [domain.name]
+      else continue
+      const result = spawnSync('node', ['bin/index.js', 'help', ...command], { encoding: 'utf8' })
+      expect(result.status).toBe(0)
+      expect(result.stdout).toContain('Usage: hlpr')
+    }
+  }
+}, 60000)
 
 test('help adds color only when requested', () => {
   const commands = [{ category: 'net', name: 'scan', usages: ['hlpr net scan'] }]

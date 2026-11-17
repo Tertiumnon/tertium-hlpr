@@ -1,14 +1,6 @@
 #!/bin/bash
 # @description Add bun to PATH in ~/.zshrc so new zsh sessions find it
 
-case "$(uname -s 2>/dev/null)" in
-  Darwin|Linux) ;;
-  *)
-    echo "Wrong OS: hlpr zsh works on macOS and Linux only." >&2
-    exit 1
-    ;;
-esac
-
 usage="Usage: hlpr zsh fix -bun"
 
 case "${1:-}" in
@@ -16,6 +8,14 @@ case "${1:-}" in
     echo "$usage"
     echo "Write a marked PATH block for bun into ~/.zshrc (or \$ZDOTDIR/.zshrc). Running it again replaces the block."
     exit 0
+    ;;
+esac
+
+case "$(uname -s 2>/dev/null)" in
+  Darwin|Linux) ;;
+  *)
+    echo "Wrong OS: hlpr zsh works on macOS and Linux only." >&2
+    exit 1
     ;;
 esac
 

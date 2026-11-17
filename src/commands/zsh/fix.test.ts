@@ -6,6 +6,12 @@ import path from 'node:path'
 
 const script = path.join(import.meta.dir, 'fix.sh')
 
+test('shows help on every platform', () => {
+  const result = spawnSync('bash', [script, '--help'], { encoding: 'utf8' })
+  expect(result.status).toBe(0)
+  expect(result.stdout).toContain('Usage: hlpr zsh fix -bun')
+})
+
 test.skipIf(process.platform !== 'win32')('refuses to run on Windows', () => {
   const result = spawnSync('bash', [script, '-bun'], { encoding: 'utf8' })
   expect(result.status).toBe(1)
