@@ -3,7 +3,7 @@
 Prepares an Angular project for this team's workflow. Works for Angular and Angular universal (SSR, `@angular/ssr`) projects. Each step is committed separately.
 
 ```bash
-hlpr angular setup [projectPath]
+hlpr angular setup [--path=<projectPath>]
 ```
 
 Steps, in order:

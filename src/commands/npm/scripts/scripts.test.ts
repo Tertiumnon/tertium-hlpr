@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test'
+import { spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
@@ -7,6 +8,17 @@ import { ensureScripts, suggestedScripts } from '../../../core/npm/scripts.js'
 const noServer = (): string => {
   throw new Error('serverEntry should not be needed')
 }
+
+test('rejects an unknown option without changing package.json', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'hlpr-npm-args-'))
+  try {
+    const file = path.join(dir, 'package.json')
+    fs.writeFileSync(file, '{}')
+    const result = spawnSync(process.execPath, [path.join(import.meta.dir, 'scripts.ts'), `--path=${dir}`, '-unknown'], { encoding: 'utf8' })
+    expect(result.status).toBe(1)
+    expect(fs.readFileSync(file, 'utf8')).toBe('{}')
+  } finally { fs.rmSync(dir, { recursive: true, force: true }) }
+})
 
 describe('npm scripts', () => {
   test('suggests framework commands', () => {

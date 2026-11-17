@@ -3,7 +3,7 @@
 Adds missing `start` and `dev` scripts to `package.json`, based on the detected framework.
 
 ```bash
-hlpr npm scripts [projectPath]
+hlpr npm scripts [--path=<projectPath>]
 hlpr npm scripts -force
 ```
 
