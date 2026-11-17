@@ -4,11 +4,12 @@ import { parseDatabaseUrl, parseFlags, readDatabaseUrl, remoteCommand, sq, sqlSt
 
 describe('mariadb core', () => {
   test('parseFlags reads valued flags and switches, and rejects bad input', () => {
-    expect(parseFlags(['-a', 'x', '-s'], ['-a'], ['-s'])).toEqual({ '-a': 'x', '-s': true })
-    expect(() => parseFlags(['-a'], ['-a'])).toThrow('-a needs a value')
-    expect(() => parseFlags(['-a', '-b'], ['-a'])).toThrow('-a needs a value')
+    expect(parseFlags(['--a=x=y', '-s'], ['-a'], ['-s'])).toEqual({ '-a': 'x=y', '-s': true })
+    expect(() => parseFlags(['--a='], ['-a'])).toThrow('Unknown or misplaced argument')
+    expect(() => parseFlags(['-a', 'x'], ['-a'])).toThrow('Unknown or misplaced argument')
     expect(() => parseFlags(['-z'], ['-a'])).toThrow('Unknown or misplaced argument: -z')
-    expect(() => parseFlags(['-a', 'x', '-a', 'y'], ['-a'])).toThrow('Repeated flag -a')
+    expect(() => parseFlags(['--unknown=secret'], ['-a'])).toThrow('Unknown or misplaced argument: --unknown')
+    expect(() => parseFlags(['--a=x', '--a=y'], ['-a'])).toThrow('Repeated flag --a')
     expect(() => parseFlags(['-s', '-s'], [], ['-s'])).toThrow('Repeated flag -s')
   })
 
