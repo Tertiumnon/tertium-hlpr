@@ -3,6 +3,7 @@ import { execFileSync, execSync, spawnSync } from 'node:child_process'
 import { readdirSync, readlinkSync, statSync } from 'node:fs'
 import { platform } from 'node:os'
 import { dirname, resolve } from 'node:path'
+import { parseFlags } from '../../../core/args.js'
 import type { KillPortOptions } from '../../../core/command/command.types.js'
 
 // @description Kill a process by ID, processes using a port, or processes running in a folder or from a file
@@ -10,23 +11,16 @@ import type { KillPortOptions } from '../../../core/command/command.types.js'
 export type KillTarget = { id: number } | { port: number } | { path: string }
 
 export function parseKillTarget(args: string[]): KillTarget {
-  for (let i = 0; i < args.length; i++) {
-    if (['-force', '-verbose'].includes(args[i])) continue
-    if (!['-id', '-port', '-folder', '-file', '-path'].includes(args[i]) || !args[i + 1] || args[i + 1].startsWith('-')) throw new Error(`Invalid option or missing value: ${args[i]}`)
-    i++
-  }
-  const idIndex = args.indexOf('-id')
-  const portIndex = args.indexOf('-port')
-  const pathIndex = args.findIndex((arg) => ['-folder', '-file', '-path'].includes(arg))
-  if ([idIndex, portIndex, pathIndex].filter((index) => index >= 0).length !== 1) throw new Error('Specify exactly one of -id <id>, -port <port>, or -folder/-file/-path <path>')
-  if (pathIndex >= 0) {
-    if (!args[pathIndex + 1]) throw new Error(`Missing ${args[pathIndex].replace(/^-+/, '')} path`)
-    return { path: resolve(args[pathIndex + 1]) }
-  }
-  const index = idIndex >= 0 ? idIndex : portIndex
-  const value = Number(args[index + 1])
-  if (!Number.isInteger(value) || value <= 0) throw new Error(`Invalid ${idIndex >= 0 ? 'process ID' : 'port'}`)
-  return idIndex >= 0 ? { id: value } : { port: value }
+  const values = parseFlags(args, ['-id', '-port', '-folder', '-file', '-path'], ['-force', '-verbose'])
+  const targets = ['-id', '-port', '-folder', '-file', '-path'].filter(key => values[key] !== undefined)
+  if (targets.length !== 1) throw new Error('Specify exactly one of --id, --port, --folder, --file, or --path')
+  const target = targets[0]
+  const input = values[target] as string
+  if (input.startsWith('-')) throw new Error(`Invalid value for -${target}`)
+  if (['-folder', '-file', '-path'].includes(target)) return { path: resolve(input) }
+  const value = Number(input)
+  if (!Number.isInteger(value) || value <= 0) throw new Error(`Invalid ${target === '-id' ? 'process ID' : 'port'}`)
+  return target === '-id' ? { id: value } : { port: value }
 }
 
 // ponytail: Windows only sees executable path and command line, not the working directory (needs a native handle/PEB lookup)
@@ -304,14 +298,14 @@ if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
   const args = process.argv.slice(2)
 
   if (args.includes('--help') || args.includes('-h') || args.length === 0) {
-    console.log('Usage: hlpr process kill (-id <id> | -port <port> | -folder|-file|-path <path>) [options]')
+    console.log('Usage: hlpr process kill (--id=<id> | --port=<port> | --folder=<path> | --file=<path> | --path=<path>) [options]')
     console.log('Kill a process by ID, processes using a port, or processes running in a folder or from a file')
     console.log()
     console.log('Targets:')
-    console.log('  -id <id>              Process ID')
-    console.log('  -port <port>          Port number (1-65535)')
-    console.log('  -folder <path>        Processes running from or in the folder (also -path)')
-    console.log('  -file <path>          Processes running from the file (also -path)')
+    console.log('  --id=<id>              Process ID')
+    console.log('  --port=<port>          Port number (1-65535)')
+    console.log('  --folder=<path>        Processes running from or in the folder (also --path)')
+    console.log('  --file=<path>          Processes running from the file (also --path)')
     console.log()
     console.log('Options:')
     console.log('  -force           Force kill (SIGKILL on Linux, /F on Windows)')
@@ -319,10 +313,10 @@ if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
     console.log('  -h, --help            Show this help message')
     console.log()
     console.log('Examples:')
-    console.log('  hlpr process kill -id 1234')
-    console.log('  hlpr process kill -port 3000 -force')
-    console.log('  hlpr process kill -folder ./build')
-    console.log('  hlpr process kill -file ./app.exe')
+    console.log('  hlpr process kill --id=1234')
+    console.log('  hlpr process kill --port=3000 -force')
+    console.log('  hlpr process kill --folder=./build')
+    console.log('  hlpr process kill --file=./app.exe')
     process.exit(0)
   }
 

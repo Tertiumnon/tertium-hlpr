@@ -5,14 +5,14 @@ Kill one process by ID, every process using a port, or every process running in 
 ## Usage
 
 ```bash
-hlpr process kill -id <id>
-hlpr process kill -port <port>
-hlpr process kill -folder <path>
-hlpr process kill -file <path>
-hlpr process kill -path <path>
+hlpr process kill --id=<id>
+hlpr process kill --port=<port>
+hlpr process kill --folder=<path>
+hlpr process kill --file=<path>
+hlpr process kill --path=<path>
 ```
 
-`-folder`, `-file`, and `-path` are the same target: a folder matches everything under it, a file matches processes running that exact file.
+`--folder`, `--file`, and `--path` are the same target: a folder matches everything under it, a file matches processes running that exact file.
 
 Use `-force` to force termination and `-verbose` for details. Windows console processes can only be ended with `-force`.
 

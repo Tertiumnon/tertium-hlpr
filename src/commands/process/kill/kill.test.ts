@@ -8,19 +8,19 @@ import { findProcessesAt, killPath, parseKillTarget } from './kill.js'
 
 describe('process kill', () => {
   test('parses process ID and port targets', () => {
-    expect(parseKillTarget(['-id', '123'])).toEqual({ id: 123 })
-    expect(parseKillTarget(['-port', '3000'])).toEqual({ port: 3000 })
-    expect(() => parseKillTarget(['-id', '1', '-port', '2'])).toThrow()
+    expect(parseKillTarget(['--id=123'])).toEqual({ id: 123 })
+    expect(parseKillTarget(['--port=3000'])).toEqual({ port: 3000 })
+    expect(() => parseKillTarget(['--id=1', '--port=2'])).toThrow()
   })
 
   test('parses folder, file and path targets as the same path', () => {
-    for (const flag of ['-folder', '-file', '-path']) {
-      expect(parseKillTarget([flag, 'some-dir'])).toEqual({ path: resolve('some-dir') })
+    for (const flag of ['--folder', '--file', '--path']) {
+      expect(parseKillTarget([`${flag}=some-dir`])).toEqual({ path: resolve('some-dir') })
     }
-    expect(() => parseKillTarget(['-file'])).toThrow('missing value')
-    expect(() => parseKillTarget(['-id', '1', '-path', 'x'])).toThrow()
-    expect(() => parseKillTarget(['-id', '1', '-f'])).toThrow('Invalid option')
-    expect(() => parseKillTarget(['--id', '1'])).toThrow('Invalid option')
+    expect(() => parseKillTarget(['-file'])).toThrow('Unknown or misplaced')
+    expect(() => parseKillTarget(['--id=1', '--path=x'])).toThrow()
+    expect(() => parseKillTarget(['--id=1', '-f'])).toThrow('Unknown or misplaced')
+    expect(() => parseKillTarget(['--id', '1'])).toThrow('Unknown or misplaced')
   })
 
   test('finds a process started inside a temporary folder', async () => {
