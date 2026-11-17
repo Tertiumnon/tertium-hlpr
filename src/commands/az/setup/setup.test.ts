@@ -7,9 +7,9 @@ import { parseSetupArgs } from './setup.js'
 
 describe('az setup', () => {
   test('requires -workflow deploy, optional project path and -force', () => {
-    expect(parseSetupArgs(['-workflow', 'deploy'])).toEqual({ workflow: 'deploy', projectPath: process.cwd(), force: false })
-    expect(parseSetupArgs(['-workflow', 'deploy', './app', '-force']).force).toBe(true)
-    expect(() => parseSetupArgs(['-workflow', 'publish'])).toThrow('Usage: hlpr az setup')
+    expect(parseSetupArgs(['--workflow=deploy'])).toEqual({ workflow: 'deploy', projectPath: process.cwd(), force: false })
+    expect(parseSetupArgs(['--workflow=deploy', '--path=./app', '-force']).force).toBe(true)
+    expect(() => parseSetupArgs(['--workflow=publish'])).toThrow('Usage: hlpr az setup')
     expect(() => parseSetupArgs(['deploy'])).toThrow('Usage: hlpr az setup')
   })
 

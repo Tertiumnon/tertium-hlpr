@@ -5,7 +5,7 @@ import { parseWorkflowArgs } from '../../../core/command/workflow-args.js'
 // @description Set up an Azure Pipelines deploy over SSH (azure-pipelines.yml)
 
 // Literal on purpose: `hlpr help` scrapes "Usage:" lines from this source file.
-const USAGE = 'Usage: hlpr az setup -workflow <deploy> [projectPath] [-force]'
+const USAGE = 'Usage: hlpr az setup --workflow=<deploy> [--path=<projectPath>] [-force]'
 const WORKFLOWS = ['deploy'] as const
 
 export function parseSetupArgs(args: string[]) {

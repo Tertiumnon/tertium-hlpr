@@ -7,13 +7,15 @@ import { parseSetupArgs } from './setup.js'
 
 describe('gh setup args', () => {
   test('requires a known workflow and accepts an optional project path and -force', () => {
-    expect(parseSetupArgs(['-workflow', 'publish'])).toEqual({ workflow: 'publish', projectPath: process.cwd(), force: false })
-    expect(parseSetupArgs(['-workflow', 'publish', './app', '-force'])).toEqual({ workflow: 'publish', projectPath: './app', force: true })
+    expect(parseSetupArgs(['--workflow=publish'])).toEqual({ workflow: 'publish', projectPath: process.cwd(), force: false })
+    expect(parseSetupArgs(['--workflow=publish', '--path=./app', '-force'])).toEqual({ workflow: 'publish', projectPath: './app', force: true })
     expect(() => parseSetupArgs([])).toThrow('Usage: hlpr gh setup')
-    expect(parseSetupArgs(['-workflow', 'deploy']).workflow).toBe('deploy')
-    expect(() => parseSetupArgs(['-workflow', 'lint'])).toThrow('Usage: hlpr gh setup')
+    expect(parseSetupArgs(['--workflow=deploy']).workflow).toBe('deploy')
+    expect(() => parseSetupArgs(['--workflow=lint'])).toThrow('Usage: hlpr gh setup')
     expect(() => parseSetupArgs(['publish'])).toThrow('Usage: hlpr gh setup')
-    expect(() => parseSetupArgs(['-workflow', 'publish', '-dry'])).toThrow('Unknown option -dry')
+    expect(() => parseSetupArgs(['--workflow=publish', '-dry'])).toThrow('Unknown or misplaced argument: -dry')
+    expect(() => parseSetupArgs(['--workflow=publish', '--path='])).toThrow()
+    expect(() => parseSetupArgs(['--workflow=publish', '--workflow=deploy'])).toThrow('Repeated flag')
   })
 })
 
