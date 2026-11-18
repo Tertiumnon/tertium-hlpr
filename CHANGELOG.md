@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.26.0 - 2026-11-18
+
+- test(cli): verify help for all commands
+- fix(help): correct parameter confirmation option
+- fix(cli): align option validation messages
+- fix(ssh): support setup help command
+- feat(cli): make help a command
+- feat(cli): migrate interactive selectors
+- feat(cli): migrate project setup paths
+- feat(gh): migrate rename options
+- feat(cli): migrate workflow setup options
+- feat(mariadb): migrate password options
+- feat(cli): migrate name search options
+- feat(file): migrate move options
+- feat(file): migrate rename options
+- feat(process): migrate kill target options
+- feat(aws): migrate parameter store options
+- feat(file): migrate remote file options
+- feat(image): migrate option syntax
+- feat(cli): migrate database and pm2 options
+- feat(cli): begin adopting flag convention
+- fix(ssh): preserve key boundaries during authorization
+- docs(manifest): update project.yml to the flat layout
+
 ## 0.25.7 - 2026-11-08
 
 - feat: add process search and usage status
