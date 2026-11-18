@@ -7,13 +7,13 @@ import path from 'node:path'
 const script = path.join(import.meta.dir, 'fix.sh')
 const mode = async (file: string) => ((await stat(file)).mode & 0o777).toString(8)
 
-test('prints usage and rejects anything other than --permissions', () => {
+test('prints usage and rejects anything other than -permissions', () => {
   const help = spawnSync('bash', [script, '--help'], { encoding: 'utf8' })
   expect(help.status).toBe(0)
-  expect(help.stdout).toContain('Usage: hlpr ssh fix --permissions')
+  expect(help.stdout).toContain('Usage: hlpr ssh fix -permissions')
   const bare = spawnSync('bash', [script], { encoding: 'utf8' })
   expect(bare.status).toBe(1)
-  expect(bare.stderr).toContain('Usage: hlpr ssh fix --permissions')
+  expect(bare.stderr).toContain('Usage: hlpr ssh fix -permissions')
 })
 
 test.skipIf(process.platform === 'win32')('sets ~/.ssh and each file to its required mode', async () => {
@@ -27,7 +27,7 @@ test.skipIf(process.platform === 'win32')('sets ~/.ssh and each file to its requ
       await writeFile(path.join(sshDir, name), '')
       await chmod(path.join(sshDir, name), value)
     }
-    const run = spawnSync('bash', [script, '--permissions'], { env: { ...process.env, HOME: home }, encoding: 'utf8' })
+    const run = spawnSync('bash', [script, '-permissions'], { env: { ...process.env, HOME: home }, encoding: 'utf8' })
     expect(run.status).toBe(0)
     expect(await mode(sshDir)).toBe('700')
     expect(await mode(path.join(sshDir, 'id_ed25519'))).toBe('600')

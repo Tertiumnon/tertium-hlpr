@@ -37,7 +37,7 @@ hlpr system info
 hlpr battery status
 hlpr ssh mkcon
 hlpr ssh mkkey
-hlpr file rename -dir ./src -style kebab -r -d -f --dry
+hlpr file rename --dir=./src --style=kebab -recursive -directories -files -dry
 ```
 
 ## Commands
@@ -49,13 +49,13 @@ hlpr file rename -dir ./src -style kebab -r -d -f --dry
 | [file find](src/commands/file/find/find.md) (`search`) | Find files by name |
 | [file read](src/commands/file/read/read.md) | Print a remote file over SSH |
 | [file edit](src/commands/file/edit/edit.md) | Edit a remote file in your editor over SSH |
-| [image crop](src/commands/image/crop/crop.md) | Create a copy cropped to an exact size (`-size <w>x<h>`, `-align left|center|right`) |
-| [image resize](src/commands/image/resize/resize.md) | Create resized copies of an image (`-size <px>`, `-size <w>x<h>` with black bars and `-align`, `--all` popular widths, or `--favicon` single `.ico`) |
+| [image crop](src/commands/image/crop/crop.md) | Create a copy cropped to an exact size (`--size=<w>x<h>`, `-align left|center|right`) |
+| [image resize](src/commands/image/resize/resize.md) | Create resized copies of an image (`--size=<px>`, `--size=<w>x<h>` with black bars and `--align`, `--all` popular widths, or `--favicon` single `.ico`) |
 | git commands | Moved to [@tertium/gith](https://www.npmjs.com/package/@tertium/gith) (`gith setup -n npm` writes the pre-commit hook); see the changelog |
 | [npm scripts](src/commands/npm/scripts/scripts.md) | Add missing start and dev npm scripts |
 | [gh setup](src/commands/gh/setup/setup.md) | Write GitHub workflows: npm publish (trusted publishing) and SSH deploy |
-| [gh rename](src/commands/gh/rename/rename.md) | Rename a GitHub repository (`-repo <owner/repo> -to <new name>`) |
-| [gh change](src/commands/gh/change/change.md) | Rename the default branch of the current repository (`-default-branch <name> -to <new name>`) |
+| [gh rename](src/commands/gh/rename/rename.md) | Rename a GitHub repository (`--repo=<owner/repo> --to=<new name>`) |
+| [gh change](src/commands/gh/change/change.md) | Rename the default branch of the current repository (`--default-branch=<name> --to=<new name>`) |
 | [az setup](src/commands/az/setup/setup.md) | Write an Azure Pipelines SSH deploy (`azure-pipelines.yml`) |
 | [angular setup](src/commands/angular/setup/setup.md) | Set up an Angular project with bun, biome, hooks, and changelog |
 | [net list -device](src/commands/net/list/list.md)   | List cached local device IPv4 addresses |
@@ -77,9 +77,9 @@ hlpr file rename -dir ./src -style kebab -r -d -f --dry
 | [runtime install](src/commands/runtime/install/install.md) | Install Node.js, Python, Bun, Rust, or Go |
 | [ssh mkcon](src/commands/ssh/mkcon/mkcon.md) | Create a key, authorize it on a host, and save the connection |
 | [ssh mkkey](src/commands/ssh/mkkey/mkkey.md) | Create an Ed25519 or RSA key pair and save the connection locally |
-| [zsh fix --bun](src/commands/zsh/zsh.md) | Add bun to PATH in ~/.zshrc |
+| [zsh fix -bun](src/commands/zsh/zsh.md) | Add bun to PATH in ~/.zshrc |
 | [ssh setup](src/commands/ssh/ssh.md#setup) | Create ~/.ssh with the permissions SSH requires |
-| [ssh fix --permissions](src/commands/ssh/ssh.md#fix) | Fix permissions of ~/.ssh and its files |
+| [ssh fix -permissions](src/commands/ssh/ssh.md#fix) | Fix permissions of ~/.ssh and its files |
 | [mariadb backup](src/commands/mariadb/backup/backup.md) | Dump a MariaDB database over SSH into a local .sql file |
 | [mariadb sync](src/commands/mariadb/sync/sync.md) | Copy one MariaDB database over another, backing up the target first |
 | [mariadb set-user-password](src/commands/mariadb/set-user-password/set-user-password.md) | Set a MariaDB user's password on a remote host over SSH |

@@ -5,7 +5,7 @@ import { parseRenameArgs, renameRecursive, transformBasename } from './rename.js
 
 describe('rename module', () => {
   test('parses directory, style, and scope flags', () => {
-    expect(parseRenameArgs(['-dir', './src', '-style', 'kebab', '-r', '-d', '-f'])).toEqual({
+    expect(parseRenameArgs(['--dir=./src', '--style=kebab', '-recursive', '-directories', '-files'])).toEqual({
       root: './src',
       style: 'kebab',
       recursive: true,
@@ -14,7 +14,12 @@ describe('rename module', () => {
       dryRun: false,
       updateContent: true,
     })
-    expect(() => parseRenameArgs(['-dir', './src', '-style', 'kebab'])).toThrow('Select files')
+    expect(() => parseRenameArgs(['--dir=./src', '--style=kebab'])).toThrow('Select files')
+  })
+
+  test('rejects old syntax and repeated directories', () => {
+    expect(() => parseRenameArgs(['-dir', './src', '--style=kebab', '-files'])).toThrow()
+    expect(() => parseRenameArgs(['--dir=one', '--dir=two', '--style=kebab', '-files'])).toThrow('Repeated flag')
   })
 
   test('transformBasename styles', () => {

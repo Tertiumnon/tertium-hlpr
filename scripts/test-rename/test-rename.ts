@@ -50,7 +50,7 @@ async function main(): Promise<void> {
   }
 
   log(MESSAGES.dryRun);
-  const args = ["bin/index.js", ...TEST_COMMAND, "-dir", TMP_DIR, "-style", TEST_CASE, "-r", "-d", "-f"];
+  const args = ["bin/index.js", ...TEST_COMMAND, `--dir=${TMP_DIR}`, `--style=${TEST_CASE}`, "-recursive", "-directories", "-files"];
   const dry = spawnSync("node", [...args, DRY_RUN_FLAG], {
     encoding: "utf8",
   });

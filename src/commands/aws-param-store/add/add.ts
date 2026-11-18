@@ -4,7 +4,7 @@ import { type AwsRunner, createParameter, type ParameterType, readValueFromStdin
 // @description Add a new AWS Systems Manager Parameter Store value; the name must not exist yet
 
 // Literal on purpose: `hlpr help` scrapes "Usage:" lines from this source file.
-const USAGE = 'Usage: hlpr aws-param-store add -name <param name> [-type SecureString|String] [-value <value>]'
+const USAGE = 'Usage: hlpr aws-param-store add --name=<param name> [--type=SecureString|String] [--value=<value>]'
 
 export interface AddOptions {
   name: string
@@ -15,17 +15,19 @@ export interface AddOptions {
 
 export function parseAddArgs(args: string[]): AddOptions {
   const values: Record<string, string> = {}
-  for (let index = 0; index < args.length; index += 2) {
-    const flag = args[index]
-    const value = args[index + 1]
+  for (const arg of args) {
+    const match = arg.match(/^--([a-z-]+)=(.*)$/s)
+    if (!match) throw new Error(USAGE)
+    const flag = `-${match[1]}`
+    const value = match[2]
     if (!['-name', '-type', '-value'].includes(flag) || values[flag] !== undefined || value === undefined) throw new Error(USAGE)
     if (value.startsWith('-') && flag !== '-value') throw new Error(USAGE)
     values[flag] = value
   }
   if (!values['-name']) throw new Error(USAGE)
   const type = values['-type'] ?? 'SecureString'
-  if (type !== 'SecureString' && type !== 'String') throw new Error('Invalid -type: use SecureString or String')
-  if (values['-value'] === '') throw new Error('Invalid -value: a parameter cannot be empty')
+  if (type !== 'SecureString' && type !== 'String') throw new Error('Invalid --type: use SecureString or String')
+  if (values['-value'] === '') throw new Error('Invalid --value: a parameter cannot be empty')
   return { name: validateParamName(values['-name']), type, value: values['-value'] }
 }
 
@@ -38,7 +40,7 @@ export function addParameter(options: AddOptions, value: string, aws: AwsRunner 
 async function main(): Promise<void> {
   const args = process.argv.slice(2)
   if (args.includes('-h') || args.includes('--help')) {
-    console.log(`${USAGE}\nCreates the parameter as SecureString (the default) or String. The value is read from stdin unless -value is given. Refuses a name that already exists, so an existing value is never overwritten.`)
+    console.log(`${USAGE}\nCreates the parameter as SecureString (the default) or String. The value is read from stdin unless --value is given. Refuses a name that already exists, so an existing value is never overwritten.`)
     return
   }
   const options = parseAddArgs(args)

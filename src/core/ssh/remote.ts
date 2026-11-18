@@ -2,6 +2,7 @@ import { spawn } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
+import { parseFlags } from '../args.js'
 import { hasHostAlias, hostAliasesFor } from './config.js'
 
 // What the user typed: the host name as written in ~/.ssh/config (HostName) and the remote file.
@@ -20,18 +21,12 @@ export type RemoteRun = (sshConfig: string, command: string, input?: Buffer) => 
 
 // Parses `-host <hostname> -path <path>`. Literal usage comes from the caller so `hlpr help` can scrape it.
 export function parseRemoteFileArgs(args: string[], usage: string): RemoteFileArgs {
-  const values: Record<string, string> = {}
-  for (let index = 0; index < args.length; index++) {
-    const arg = args[index]
-    if (!['-path', '-host'].includes(arg) || values[arg] !== undefined) throw new Error(usage)
-    const value = args[index + 1]
-    if (value === undefined || value.startsWith('-')) throw new Error(usage)
-    values[arg] = value
-    index++
-  }
+  let values: Record<string, string | true>
+  try { values = parseFlags(args, ['-path', '-host']) }
+  catch { throw new Error(usage) }
   const remotePath = values['-path']
   const host = values['-host']
-  if (!remotePath || !host) throw new Error(usage)
+  if (typeof remotePath !== 'string' || typeof host !== 'string' || remotePath.startsWith('-') || host.startsWith('-')) throw new Error(usage)
   return { path: remotePath, host }
 }
 

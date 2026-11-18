@@ -44,14 +44,14 @@ const list = (): ProcessUsage[] => {
 if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
   const args = process.argv.slice(2)
   if (args.includes('--help') || args.includes('-h')) {
-    console.log('Usage: hlpr process status -name <name>')
-    console.log('Alias: hlpr process info -name <name>')
+    console.log('Usage: hlpr process status --name=<name>')
+    console.log('Alias: hlpr process info --name=<name>')
     console.log('Summarize CPU and resident memory for matching processes and their descendants.')
   } else {
     try {
-      if (args.length !== 2 || args[0] !== '-name' || !args[1] || args[1].startsWith('-')) throw new Error('Usage: hlpr process status -name <name>')
+      if (args.length !== 1 || !args[0].startsWith('--name=') || args[0].length === 7) throw new Error('Usage: hlpr process status --name=<name>')
       const rows = list()
-      const result = summarize(rows, args[1])
+      const result = summarize(rows, args[0].slice(7))
       console.log(`Processes: ${result.count}\nCPU: ${result.cpu.toFixed(1)}%\nMemory: ${(result.memory / 1024 / 1024).toFixed(1)} MiB`)
     } catch (error) {
       console.error(`Error: ${error instanceof Error ? error.message : error}`)

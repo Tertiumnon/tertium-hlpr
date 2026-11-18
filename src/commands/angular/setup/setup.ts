@@ -2,6 +2,7 @@
 import { execFileSync, spawnSync } from 'node:child_process'
 import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
+import { parseFlags } from '../../../core/args.js'
 import { envForCwd } from '../../../core/git/env.js'
 import { setupGitHooks } from '../../../core/git/hooks.js'
 import { ensureScripts } from '../../../core/npm/scripts.js'
@@ -113,10 +114,11 @@ export function setupAngular(cwd: string): void {
 if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
   const args = process.argv.slice(2)
   if (args.includes('-h') || args.includes('--help')) {
-    console.log('Usage: hlpr angular setup [projectPath]\nSets up an Angular project with bun, biome, @tertium/js, a pre-commit hook and changelog. Each step is committed.\nRequires a clean git working tree; checks out develop first.')
+    console.log('Usage: hlpr angular setup [--path=<projectPath>]\nSets up an Angular project with bun, biome, @tertium/js, a pre-commit hook and changelog. Each step is committed.\nRequires a clean git working tree; checks out develop first.')
   } else {
     try {
-      setupAngular(args[0] ?? process.cwd())
+      const values = parseFlags(args, ['-path'])
+      setupAngular(typeof values['-path'] === 'string' ? values['-path'] : process.cwd())
     } catch (error) {
       console.error(`Error: ${error instanceof Error ? error.message : error}`)
       process.exitCode = 1

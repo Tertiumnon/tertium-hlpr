@@ -6,9 +6,10 @@ import type { ProcessInfo } from '../list/list.utils.js'
 // @description Find running processes by name or ID
 
 export const parseTarget = (args: string[]): { name: string } | { id: number } => {
-  if (args.length !== 2 || !args[1] || args[1].startsWith('-') || !['-name', '-id'].includes(args[0])) throw new Error('Usage: hlpr process find (-name <name> | -id <id>)')
-  if (args[0] === '-id' && (!/^\d+$/.test(args[1]) || !Number.isSafeInteger(Number(args[1])) || Number(args[1]) < 1)) throw new Error('Invalid process ID; provide a positive integer')
-  return args[0] === '-id' ? { id: Number(args[1]) } : { name: args[1] }
+  const match = args.length === 1 ? args[0].match(/^--(name|id)=(.+)$/s) : undefined
+  if (!match) throw new Error('Usage: hlpr process find (--name=<name> | --id=<id>)')
+  if (match[1] === 'id' && (!/^\d+$/.test(match[2]) || !Number.isSafeInteger(Number(match[2])) || Number(match[2]) < 1)) throw new Error('Invalid process ID; provide a positive integer')
+  return match[1] === 'id' ? { id: Number(match[2]) } : { name: match[2] }
 }
 
 export const findProcesses = (processes: ProcessInfo[], target: { name: string } | { id: number }): ProcessInfo[] => {
@@ -20,8 +21,8 @@ export const findProcesses = (processes: ProcessInfo[], target: { name: string }
 if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, '/'))) {
   const args = process.argv.slice(2)
   if (args.includes('--help') || args.includes('-h')) {
-    console.log('Usage: hlpr process find (-name <name> | -id <id>)')
-    console.log('Alias: hlpr process search (-name <name> | -id <id>)')
+    console.log('Usage: hlpr process find (--name=<name> | --id=<id>)')
+    console.log('Alias: hlpr process search (--name=<name> | --id=<id>)')
     console.log('Find running processes by ID or case-insensitive name substring.')
   } else {
     try {

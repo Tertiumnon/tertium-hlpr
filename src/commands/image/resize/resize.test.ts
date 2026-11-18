@@ -9,42 +9,47 @@ const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR
 
 describe('parseResizeArgs', () => {
   test('reads the image from -path and the size in any order', () => {
-    expect(parseResizeArgs(['-size', '256', '-path', 'photo.png'])).toEqual({ image: 'photo.png', all: false, favicon: false, size: 256 })
+    expect(parseResizeArgs(['--size=256', '--path=photo.png'])).toEqual({ image: 'photo.png', all: false, favicon: false, size: 256 })
   })
 
-  test('reads --all and --favicon in any position', () => {
-    expect(parseResizeArgs(['--all', '-path', 'photo.png'])).toEqual({ image: 'photo.png', all: true, favicon: false })
-    expect(parseResizeArgs(['-path', 'photo.png', '--favicon'])).toEqual({ image: 'photo.png', all: false, favicon: true })
+  test('reads -all and -favicon in any position', () => {
+    expect(parseResizeArgs(['-all', '--path=photo.png'])).toEqual({ image: 'photo.png', all: true, favicon: false })
+    expect(parseResizeArgs(['--path=photo.png', '-favicon'])).toEqual({ image: 'photo.png', all: false, favicon: true })
+  })
+
+  test('rejects old syntax and repeated options', () => {
+    expect(() => parseResizeArgs(['-path', 'photo.png', '--size=256'])).toThrow()
+    expect(() => parseResizeArgs(['--path=photo.png', '--size=256', '--size=512'])).toThrow('Repeated flag')
   })
 
   test('rejects a missing image, a missing size, or a size that is not a positive whole number', () => {
-    expect(() => parseResizeArgs(['-size', '256'])).toThrow('Required')
-    expect(() => parseResizeArgs(['-path', 'photo.png'])).toThrow('Required')
-    expect(() => parseResizeArgs(['-path', 'photo.png', '-size', '0'])).toThrow('Required')
-    expect(() => parseResizeArgs(['-path', 'photo.png', '-size', '12.5'])).toThrow('Required')
+    expect(() => parseResizeArgs(['--size=256'])).toThrow('Required')
+    expect(() => parseResizeArgs(['--path=photo.png'])).toThrow('Required')
+    expect(() => parseResizeArgs(['--path=photo.png', '--size=0'])).toThrow('Required')
+    expect(() => parseResizeArgs(['--path=photo.png', '--size=12.5'])).toThrow('Required')
   })
 
   test('rejects a bare positional image', () => {
-    expect(() => parseResizeArgs(['photo.png', '-size', '256'])).toThrow('Unknown option: photo.png')
+    expect(() => parseResizeArgs(['photo.png', '--size=256'])).toThrow('Unknown or misplaced argument: photo.png')
   })
 
   test('reads -size <width>x<height> as a box, centered unless -align is given', () => {
-    expect(parseResizeArgs(['-path', 'photo.png', '-size', '1280x800'])).toEqual({ image: 'photo.png', all: false, favicon: false, box: { width: 1280, height: 800, align: 'center' } })
-    expect(parseResizeArgs(['-align', 'left', '-path', 'photo.png', '-size', '1280x800'])).toEqual({ image: 'photo.png', all: false, favicon: false, box: { width: 1280, height: 800, align: 'left' } })
+    expect(parseResizeArgs(['--path=photo.png', '--size=1280x800'])).toEqual({ image: 'photo.png', all: false, favicon: false, box: { width: 1280, height: 800, align: 'center' } })
+    expect(parseResizeArgs(['--align=left', '--path=photo.png', '--size=1280x800'])).toEqual({ image: 'photo.png', all: false, favicon: false, box: { width: 1280, height: 800, align: 'left' } })
   })
 
   test('rejects a bad box size, a bad -align, or -align without a box size', () => {
-    expect(() => parseResizeArgs(['-path', 'photo.png', '-size', '1280x0'])).toThrow('Required')
-    expect(() => parseResizeArgs(['-path', 'photo.png', '-size', '1280x'])).toThrow('Required')
-    expect(() => parseResizeArgs(['-path', 'photo.png', '-size', '1280x800', '-align', 'top'])).toThrow('Invalid -align')
-    expect(() => parseResizeArgs(['-path', 'photo.png', '-size', '256', '-align', 'left'])).toThrow('-align needs')
-    expect(() => parseResizeArgs(['-path', 'photo.png', '--all', '-align', 'left'])).toThrow('-align needs')
+    expect(() => parseResizeArgs(['--path=photo.png', '--size=1280x0'])).toThrow('Required')
+    expect(() => parseResizeArgs(['--path=photo.png', '--size=1280x'])).toThrow('Required')
+    expect(() => parseResizeArgs(['--path=photo.png', '--size=1280x800', '--align=top'])).toThrow('Invalid --align')
+    expect(() => parseResizeArgs(['--path=photo.png', '--size=256', '--align=left'])).toThrow('-align needs')
+    expect(() => parseResizeArgs(['--path=photo.png', '-all', '--align=left'])).toThrow('-align needs')
   })
 
-  test('rejects combining -size, --all, and --favicon', () => {
-    expect(() => parseResizeArgs(['-path', 'photo.png', '-size', '256', '--all'])).toThrow('Use only one')
-    expect(() => parseResizeArgs(['-path', 'photo.png', '--all', '--favicon'])).toThrow('Use only one')
-    expect(() => parseResizeArgs(['-path', 'photo.png', '-size', '256', '--favicon'])).toThrow('Use only one')
+  test('rejects combining -size, -all, and -favicon', () => {
+    expect(() => parseResizeArgs(['--path=photo.png', '--size=256', '-all'])).toThrow('Use only one')
+    expect(() => parseResizeArgs(['--path=photo.png', '-all', '-favicon'])).toThrow('Use only one')
+    expect(() => parseResizeArgs(['--path=photo.png', '--size=256', '-favicon'])).toThrow('Use only one')
   })
 })
 

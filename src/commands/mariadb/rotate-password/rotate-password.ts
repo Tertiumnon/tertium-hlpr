@@ -7,7 +7,7 @@ import { type DestinationDeps, destinationFor, sshTargetFromFlags } from '../../
 // @description Change a database user's password: the database and the SSM parameter that holds DATABASE_URL
 
 // Literal on purpose: `hlpr help` scrapes "Usage:" lines from this source file.
-const USAGE = 'Usage: hlpr mariadb rotate-password -ssm-param <name> [-ssh-host <host>] [-ssh-user <user>] [-dry-run]'
+const USAGE = 'Usage: hlpr mariadb rotate-password --ssm-param=<name> [--ssh-host=<host>] [--ssh-user=<user>] [-dry-run]'
 
 export function parseRotateArgs(args: string[], deps: DestinationDeps = {}): RotateOptions {
   const values = parseFlags(args, ['-ssh-host', '-ssh-user', '-ssm-param'], ['-dry-run'])
@@ -15,7 +15,7 @@ export function parseRotateArgs(args: string[], deps: DestinationDeps = {}): Rot
   if (typeof ssm !== 'string') throw new Error(USAGE)
   return {
     sshConfig: destinationFor(sshTargetFromFlags(values), deps),
-    paramName: validateParamName(ssm, '-ssm-param'),
+    paramName: validateParamName(ssm, '--ssm-param'),
     dryRun: values['-dry-run'] === true,
   }
 }

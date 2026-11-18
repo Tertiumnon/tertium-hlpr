@@ -15,9 +15,11 @@ test('finds matching file names recursively from the current directory', () => {
     expect(findFiles(root, 'REPORT')).toEqual([path.join('.hidden', 'report final.md'), 'Report.txt'])
     expect(findFiles(root, 'missing')).toEqual([])
     const script = path.join(import.meta.dir, 'find.ts')
-    const found = spawnSync(process.execPath, [script, '-name', 'report'], { cwd: root, encoding: 'utf8' })
+    const found = spawnSync(process.execPath, [script, '--name=report'], { cwd: root, encoding: 'utf8' })
     expect(found.status).toBe(0)
     expect(found.stdout.trim().split(/\r?\n/)).toEqual([path.join('.hidden', 'report final.md'), 'Report.txt'])
+    const multiword = spawnSync(process.execPath, [script, '--name=report final'], { cwd: root, encoding: 'utf8' })
+    expect(multiword.stdout.trim()).toBe(path.join('.hidden', 'report final.md'))
     const invalid = spawnSync(process.execPath, [script, '-name'], { cwd: root, encoding: 'utf8' })
     expect(invalid.status).toBe(1)
   } finally {

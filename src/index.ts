@@ -36,12 +36,15 @@ const args = process.argv.slice(2);
 let forceFlag = false;
 let commandArgs: string[] = [];
 
-// Check for -f flag
-if (args[0] === "-f") {
+// Check for -force flag
+if (args[0] === "-force") {
   forceFlag = true;
   commandArgs = args.slice(1);
 } else {
   commandArgs = args;
+}
+if (commandArgs[0] === 'help' && commandArgs.length > 1) {
+  commandArgs = [...commandArgs.slice(1), '--help'];
 }
 
 // Create readline interface for user input (only for non-help commands)
@@ -222,15 +225,19 @@ async function showHelp() {
 
 async function main() {
   const startedAt = performance.now();
+  if (commandArgs[0] !== 'help' && args[0] !== 'help' && args.some(arg => ['--help', '-h', '/help', '/h', '/?'].includes(arg))) {
+    console.error('Help is a command: use hlpr help [domain] [command]');
+    process.exit(1);
+  }
   // Check for version flag
-  if (commandArgs[0] === "--version" || commandArgs[0] === "-version" || commandArgs[0] === "-v") {
+  if (commandArgs[0] === "-version" || commandArgs[0] === "-v") {
     const version = await getVersion();
     console.log(`hlpr version ${version}`);
     process.exit(0);
   }
 
   // Check for help flag or no arguments
-  if (commandArgs.length === 0 || commandArgs[0] === "help" || commandArgs[0] === "--help" || commandArgs[0] === "-h" || commandArgs[0] === "/help" || commandArgs[0] === "/h" || commandArgs[0] === "/?") {
+  if (commandArgs.length === 0 || commandArgs[0] === "help") {
     if (commandArgs.length === 0) {
       const logo = HLPR_LOGO.split('\n');
       logo[5] += ` v${await getVersion()}`;
@@ -329,9 +336,9 @@ async function main() {
       if (restArgs.length > 0 && restArgs[0] && scriptPath) {
         const subcategory = resolveSubcommandAlias(category, restArgs[0]);
         const isNested = path.basename(scriptPath) === `${subcategory}.js` && path.basename(path.dirname(scriptPath)) === subcategory;
-        tsArgs = isNested ? process.argv.slice(4) : process.argv.slice(3);
+        tsArgs = isNested ? commandArgs.slice(2) : commandArgs.slice(1);
       } else {
-        tsArgs = process.argv.slice(3);
+        tsArgs = commandArgs.slice(1);
       }
 
       // Use node to run built JavaScript files

@@ -29,7 +29,7 @@ export function destinationFor(target: SshTarget, deps: DestinationDeps = {}): s
   const resolve = deps.resolve ?? resolveSshHost;
   const flagHost = target.sshHost;
   const flagUser = target.sshUser;
-  if (flagHost?.includes('@')) throw new Error('Invalid -ssh-host: give the user with -ssh-user')
+  if (flagHost?.includes('@')) throw new Error('Invalid --ssh-host: give the user with --ssh-user')
   if (flagUser !== undefined) validateSshUser(flagUser);
 
   // The host comes from -ssh-host, or else from the parameter. The parameter's user is only used together with its own
@@ -38,11 +38,11 @@ export function destinationFor(target: SshTarget, deps: DestinationDeps = {}): s
   let user = flagUser;
   if (host === undefined && target.ssmParam !== undefined) {
     const readParameter = deps.readParameter ?? readSsmParameter;
-    const fromParam = sshHostAndUserFromEnv(readParameter(validateParamName(target.ssmParam, '-ssm-param')));
+    const fromParam = sshHostAndUserFromEnv(readParameter(validateParamName(target.ssmParam, '--ssm-param')));
     host = fromParam.host;
     user ??= fromParam.user;
   }
-  if (host === undefined) throw new Error('Give -ssh-host, or -ssm-param whose value names DB_SSH_HOST or DEPLOY_HOST');
+  if (host === undefined) throw new Error('Give --ssh-host, or --ssm-param whose value names DB_SSH_HOST or DEPLOY_HOST');
 
   const alias = resolve(host);
   validateSshHost(alias);
@@ -50,12 +50,12 @@ export function destinationFor(target: SshTarget, deps: DestinationDeps = {}): s
 }
 
 export function validateSshHost(host: string): string {
-  if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]*$/.test(host)) throw new Error('Invalid -ssh-host: use a HostName or Host alias from ~/.ssh/config');
+  if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]*$/.test(host)) throw new Error('Invalid --ssh-host: use a HostName or Host alias from ~/.ssh/config');
   return host;
 }
 
 export function validateSshUser(user: string): string {
-  if (!/^[A-Za-z_][A-Za-z0-9_.-]*$/.test(user)) throw new Error('Invalid -ssh-user: use a login name');
+  if (!/^[A-Za-z_][A-Za-z0-9_.-]*$/.test(user)) throw new Error('Invalid --ssh-user: use a login name');
   return user;
 }
 

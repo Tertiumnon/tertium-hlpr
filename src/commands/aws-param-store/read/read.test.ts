@@ -6,13 +6,13 @@ const fakeAws = (value: string): AwsRunner => () => JSON.stringify({ Parameter: 
 
 describe('aws-param-store read', () => {
   test('parses -name, with an optional -key', () => {
-    expect(parseReadArgs(['-name', '/env/app/env.dev'])).toEqual({ name: '/env/app/env.dev', key: undefined })
-    expect(parseReadArgs(['-key', 'DB_PASSWORD', '-name', '/env/app/env.dev'])).toEqual({ name: '/env/app/env.dev', key: 'DB_PASSWORD' })
+    expect(parseReadArgs(['--name=/env/app/env.dev'])).toEqual({ name: '/env/app/env.dev', key: undefined })
+    expect(parseReadArgs(['--key=DB_PASSWORD', '--name=/env/app/env.dev'])).toEqual({ name: '/env/app/env.dev', key: 'DB_PASSWORD' })
     expect(() => parseReadArgs(['/env/app/env.dev'])).toThrow('Usage: hlpr aws-param-store read')
     expect(() => parseReadArgs(['-name'])).toThrow('Usage: hlpr aws-param-store read')
-    expect(() => parseReadArgs(['-name', '/env/app/env.dev', 'extra'])).toThrow('Usage: hlpr aws-param-store read')
-    expect(() => parseReadArgs(['-name', 'env/app'])).toThrow('Invalid -name')
-    expect(() => parseReadArgs(['-name', '/env/app/env.dev', '-key', 'DB-PASSWORD'])).toThrow('Invalid -key')
+    expect(() => parseReadArgs(['--name=/env/app/env.dev', 'extra'])).toThrow('Usage: hlpr aws-param-store read')
+    expect(() => parseReadArgs(['--name=env/app'])).toThrow('Invalid --name')
+    expect(() => parseReadArgs(['--name=/env/app/env.dev', '--key=DB-PASSWORD'])).toThrow('Invalid --key')
   })
 
   test('returns the value exactly as stored', () => {

@@ -6,7 +6,7 @@ available capacity for each volume. Sizes use binary units (GiB, TiB).
 ```sh
 hlpr disk info
 hlpr disk status
-hlpr disk info --help
+hlpr help disk info
 ```
 
 Uses PowerShell/CIM on Windows and `df -kP` on Linux/macOS. Lists mounted volumes,

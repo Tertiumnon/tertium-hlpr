@@ -5,7 +5,7 @@ import { type WorkflowName, WORKFLOW_NAMES, setupDeployWorkflow, setupPublishWor
 // @description Set up GitHub Actions workflows: npm publish (trusted publishing) and SSH deploy
 
 // Literal on purpose: `hlpr help` scrapes "Usage:" lines from this source file.
-const USAGE = 'Usage: hlpr gh setup -workflow <publish|deploy> [projectPath] [-force]'
+const USAGE = 'Usage: hlpr gh setup --workflow=<publish|deploy> [--path=<projectPath>] [-force]'
 
 const SETUP: Record<WorkflowName, (projectPath: string, options: { force?: boolean }) => void | Promise<void>> = {
   publish: setupPublishWorkflow,

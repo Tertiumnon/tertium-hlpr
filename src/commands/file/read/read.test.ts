@@ -8,7 +8,7 @@ describe('file read', () => {
       calls.push(`${sshConfig}|${command}`)
       return Buffer.from('hello')
     }
-    expect(parseReadArgs(['-host', '10.0.0.5', '-path', '~/app.env'])).toEqual({ host: '10.0.0.5', path: '~/app.env' })
+    expect(parseReadArgs(['--host=10.0.0.5', '--path=~/app.env'])).toEqual({ host: '10.0.0.5', path: '~/app.env' })
     const content = await readRemoteFile({ path: '~/app.env', sshConfig: 'web' }, run)
     expect(content.toString()).toBe('hello')
     expect(calls).toEqual(["web|cat -- ~/'app.env'"])

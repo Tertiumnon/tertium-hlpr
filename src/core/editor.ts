@@ -9,7 +9,7 @@ const EDITOR_COMMANDS = new Map([
 // Command for the -editor value. Throws for anything else.
 export function editorFlagCommand(choice: string): string {
   const command = EDITOR_COMMANDS.get(choice)
-  if (command === undefined) throw new Error('Invalid -editor: use code, edit, nano or vi')
+  if (command === undefined) throw new Error('Invalid --editor: use code, edit, nano or vi')
   return command
 }
 

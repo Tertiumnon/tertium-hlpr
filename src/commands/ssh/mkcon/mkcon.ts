@@ -17,7 +17,10 @@ chmod 700 "$HOME/.ssh"
 touch "$file"
 chmod 600 "$file"
 IFS= read -r key
-grep -qxF "$key" "$file" || printf '%s\\n' "$key" >> "$file"
+if ! grep -qxF "$key" "$file"; then
+  if [ -n "$(tail -c 1 "$file")" ]; then printf '\\n' >> "$file"; fi
+  printf '%s\\n' "$key" >> "$file"
+fi
 `
 
 async function addConnection(): Promise<void> {

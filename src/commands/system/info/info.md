@@ -5,7 +5,7 @@ Show a table grouped by M/B, BIOS, expansion, CPU, RAM, GPU, disks, OS, and upti
 ```sh
 hlpr system info
 hlpr system status
-hlpr system info --help
+hlpr help system info
 ```
 
 Windows shows motherboard and BIOS details, CPU socket, reported PCI slots, physical CPU cores,

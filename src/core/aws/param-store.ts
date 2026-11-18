@@ -23,7 +23,7 @@ export const runAws: AwsRunner = args => {
   return result.stdout
 }
 
-export function validateParamName(name: string, flag = '-name'): string {
+export function validateParamName(name: string, flag = '--name'): string {
   if (!/^\/[A-Za-z0-9_./-]+$/.test(name)) throw new Error(`Invalid ${flag}: use a parameter name such as /env/app/env.dev`)
   return name
 }
@@ -72,6 +72,6 @@ export function deleteParameter(name: string, aws: AwsRunner = runAws): void {
 
 // The new value from stdin, without its last line break, so it stays off the command line.
 export function readValueFromStdin(): string {
-  if (process.stdin.isTTY) throw new Error('No -value given: pipe the value on stdin, or pass -value');
+  if (process.stdin.isTTY) throw new Error('No --value given: pipe the value on stdin, or pass --value=<value>');
   return readFileSync(0, 'utf-8').replace(/\r?\n$/, '');
 }

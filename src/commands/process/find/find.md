@@ -1,8 +1,8 @@
 # process find
 
 ```sh
-hlpr process find -name <name>
-hlpr process find -id <id>
+hlpr process find --name=<name>
+hlpr process find --id=<id>
 ```
 
 Find running processes by a case-insensitive substring of their executable name

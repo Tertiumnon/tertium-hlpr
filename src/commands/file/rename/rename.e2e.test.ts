@@ -33,7 +33,7 @@ describe('rename e2e', () => {
     expect(build.status).toBe(0)
 
     // dry run
-    const dry = spawnSync('node', ['bin/index.js', 'file', 'rename', '-dir', tmpDir, '-style', 'kebab', '-r', '-d', '-f', '--dry'], { encoding: 'utf8' })
+    const dry = spawnSync('node', ['bin/index.js', 'file', 'rename', `--dir=${tmpDir}`, '--style=kebab', '-recursive', '-directories', '-files', '-dry'], { encoding: 'utf8' })
     expect(dry.status).toBe(0)
     expect(dry.stdout).toContain('Dry run - would rename')
 
@@ -42,7 +42,7 @@ describe('rename e2e', () => {
     expect(fs.existsSync(path.join(tmpDir, 'Nested Dir', 'Deep File.testdata.js'))).toBe(true)
 
     // Apply
-    const actual = spawnSync('node', ['bin/index.js', 'file', 'rename', '-dir', tmpDir, '-style', 'kebab', '-r', '-d', '-f'], { encoding: 'utf8' })
+    const actual = spawnSync('node', ['bin/index.js', 'file', 'rename', `--dir=${tmpDir}`, '--style=kebab', '-recursive', '-directories', '-files'], { encoding: 'utf8' })
     expect(actual.status).toBe(0)
     expect(actual.stdout).toContain('Renamed')
 

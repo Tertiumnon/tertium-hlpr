@@ -3,17 +3,17 @@
 Edit one AWS Systems Manager Parameter Store value in your editor:
 
 ```sh
-hlpr aws-param-store edit -name <param name> [-editor code|edit|nano|vi]
+hlpr aws-param-store edit --name=<param name> [--editor=code|edit|nano|vi]
 ```
 
 Examples:
 
 ```sh
-hlpr aws-param-store edit -name /env/app/env.dev
-hlpr aws-param-store edit -name /env/app/env.dev -editor code
+hlpr aws-param-store edit --name=/env/app/env.dev
+hlpr aws-param-store edit --name=/env/app/env.dev --editor=code
 ```
 
-- The value is copied into a private temp file, which opens in the `-editor` choice (`code` waits for the tab to close,
+- The value is copied into a private temp file, which opens in the `--editor` choice (`code` waits for the tab to close,
   `edit`, `nano` or `vi`), else `$VISUAL`, then `$EDITOR`, then `edit` on Windows or `vi` elsewhere. The command waits until the editor closes.
 - If the file is unchanged, nothing is written. If it changed, the new value is written back with the
   parameter's current type (a SecureString stays a SecureString) and the new version is printed.

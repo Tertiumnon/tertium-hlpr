@@ -5,7 +5,7 @@ Run a small full-screen terminal app.
 ## Usage
 
 ```bash
-hlpr tui run <explorer> [folder]
+hlpr tui run --name=explorer [--path=<folder>]
 ```
 
 - `explorer` - a two-panel file manager, like a small Midnight Commander. Both panels start in the given folder, or the current folder. Folders are listed first.

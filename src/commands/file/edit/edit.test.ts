@@ -32,9 +32,9 @@ describe('file edit', () => {
 
 describe('file edit args', () => {
   test('takes an optional -editor, validated against code, edit, nano and vi', () => {
-    expect(parseEditArgs(['-host', 'web', '-path', '/etc/app.conf', '-editor', 'code'])).toEqual({ host: 'web', path: '/etc/app.conf', editor: 'code' })
-    expect(parseEditArgs(['-host', 'web', '-path', '/etc/app.conf'])).toEqual({ host: 'web', path: '/etc/app.conf' })
-    expect(() => parseEditArgs(['-host', 'web', '-path', '/a', '-editor', 'notepad'])).toThrow('Invalid -editor')
-    expect(() => parseEditArgs(['-host', 'web', '-path', '/a', '-editor'])).toThrow('Usage: hlpr file edit')
+    expect(parseEditArgs(['--host=web', '--path=/etc/app.conf', '--editor=code'])).toEqual({ host: 'web', path: '/etc/app.conf', editor: 'code' })
+    expect(parseEditArgs(['--host=web', '--path=/etc/app.conf'])).toEqual({ host: 'web', path: '/etc/app.conf' })
+    expect(() => parseEditArgs(['--host=web', '--path=/a', '--editor=notepad'])).toThrow('Invalid --editor')
+    expect(() => parseEditArgs(['--host=web', '--path=/a', '-editor'])).toThrow('Usage: hlpr file edit')
   })
 })

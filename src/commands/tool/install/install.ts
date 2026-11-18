@@ -4,6 +4,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import readline from 'node:readline'
+import { parseFlags } from '../../../core/args.js'
 
 // @description Install Docker, htop, fastfetch, Starship, Claude CLI, Codex CLI, Copilot CLI, or another supported tool
 
@@ -48,15 +49,9 @@ function isNpmTool(value: string): value is NpmTool {
   return Object.keys(npmTools).includes(value)
 }
 
-// Accepts "claude-cli" or "-name claude-cli" / "-n claude-cli". Other dash-prefixed arguments are rejected.
-export function toolArgs(args: string[]): { value?: string; extra: string[] } {
-  const [first, second, ...rest] = args
-  if (first === '-n' || first === '-name') {
-    if (!second) throw new Error('Missing tool name after -name')
-    return { value: second, extra: rest }
-  }
-  if (first?.startsWith('-')) throw new Error(`Unknown option: ${first}`)
-  return { value: first, extra: args.slice(1) }
+export function toolArgs(args: string[]): string | undefined {
+  const values = parseFlags(args, ['-name'])
+  return typeof values['-name'] === 'string' ? values['-name'] : undefined
 }
 
 function npmInstallCommand(pkg: string, platform: string): InstallCommand {
@@ -203,14 +198,12 @@ async function selectTool(value?: string): Promise<Tool | undefined> {
 
 async function main(): Promise<void> {
   if (process.argv.slice(2).some(arg => arg === '--help' || arg === '-h')) {
-    console.log('Usage: hlpr tool install [name]')
-    console.log('Install Docker, htop, fastfetch, Starship, Claude CLI, Codex CLI, Copilot CLI, or another supported tool. Run without a name to choose from a keyboard menu. Also accepts -name <name>.')
+    console.log('Usage: hlpr tool install [--name=<name>]')
+    console.log('Install Docker, htop, fastfetch, Starship, Claude CLI, Codex CLI, Copilot CLI, or another supported tool. Run without a name to choose from a keyboard menu.')
     return
   }
-  const { value, extra } = toolArgs(process.argv.slice(2))
-  const tool = await selectTool(value)
+  const tool = await selectTool(toolArgs(process.argv.slice(2)))
   if (!tool) return
-  if (extra.length) throw new Error(`${tool} does not accept extra arguments`)
 
   if (tool === 'docker') {
     const platform = process.platform

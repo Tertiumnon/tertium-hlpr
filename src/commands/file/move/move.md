@@ -9,41 +9,41 @@ binary files are skipped automatically.
 ## Usage
 
 ```bash
-hlpr file move <oldPath> <newPath> [--root <dir>] [--dry|-n] [--force] [--no-update-content]
+hlpr file move --from=<oldPath> --to=<newPath> [--root=<dir>] [-dry] [-force] [-no-update-content]
 ```
 
 ### Arguments
 
-- `<oldPath>` - Path to the existing file
-- `<newPath>` - New path or filename. If it has no directory separators, the file is renamed
+- `--from=<oldPath>` - Path to the existing file
+- `--to=<newPath>` - New path or filename. If it has no directory separators, the file is renamed
   in place (kept in the same directory as `<oldPath>`); otherwise it's treated as a full path
   and the file is moved there (missing directories are created).
-- `--root <dir>` - Directory to scan for references. If omitted, defaults to the nearest
+- `--root=<dir>` - Directory to scan for references. If omitted, defaults to the nearest
   ancestor of `<oldPath>` containing a `.git` folder (i.e. its git repo root), or `<oldPath>`'s
   own directory if no repo is found. **Not** your shell's current working directory — this
   matters for the globally-installed `hlpr` binary, since your terminal's cwd may have nothing
   to do with the file you're renaming.
-- `--dry` or `-n` - Preview changes without applying them
-- `--force` - Overwrite the destination file if it already exists
-- `--no-update-content` - Skip updating references in other files (only rename/move the file)
+- `-dry` - Preview changes without applying them
+- `-force` - Overwrite the destination file if it already exists
+- `-no-update-content` - Skip updating references in other files (only rename/move the file)
 
 ## Examples
 
 ```bash
 # Rename a markdown file in place and fix every link to it
-hlpr file move docs/old-name.md new-name.md
+hlpr file move --from=docs/old-name.md --to=new-name.md
 
 # Preview what would change first
-hlpr file move docs/old-name.md new-name.md --dry
+hlpr file move --from=docs/old-name.md --to=new-name.md -dry
 
 # Move a file into another folder
-hlpr file move docs/old-name.md docs/archive/old-name.md
+hlpr file move --from=docs/old-name.md --to=docs/archive/old-name.md
 
 # Only scan a specific subtree for references
-hlpr file move docs/old-name.md new-name.md --root docs
+hlpr file move --from=docs/old-name.md --to=new-name.md --root=docs
 
 # Overwrite an existing destination file
-hlpr file move docs/old-name.md docs/existing.md --force
+hlpr file move --from=docs/old-name.md --to=docs/existing.md -force
 ```
 
 ## What Gets Updated
@@ -69,9 +69,9 @@ touched.
 
 ## Safety
 
-- Errors out if the destination already exists, unless `--force` is passed.
+- Errors out if the destination already exists, unless `-force` is passed.
 - Handles case-only renames correctly on case-insensitive filesystems (Windows/macOS).
-- `--dry` reports exactly what would be renamed and which files would be updated (and how many
+- `-dry` reports exactly what would be renamed and which files would be updated (and how many
   references in each), without touching disk.
 - Skips `.git` and `node_modules` when scanning for references.
 - Always prints which directory it scanned (`Scanned for references under: ...`), so a

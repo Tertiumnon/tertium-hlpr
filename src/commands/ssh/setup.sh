@@ -1,6 +1,12 @@
 #!/bin/bash
 # @description Create ~/.ssh with the permissions SSH requires
 
+if [[ "$1" == "--help" && $# -eq 1 ]]; then
+  echo "Usage: hlpr ssh setup"
+  echo "Create ~/.ssh and its config and known_hosts files with SSH permissions."
+  exit 0
+fi
+
 if [[ $# -ne 0 ]]; then
   echo "Usage: hlpr ssh setup" >&2
   exit 1

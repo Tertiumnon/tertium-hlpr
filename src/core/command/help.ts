@@ -35,7 +35,7 @@ export function renderHelp(commands: HelpCommand[], version: string, color = pro
   const lines = [
     paint('1;36', `hlpr v${version}`),
     `${paint('1', 'Usage')}  hlpr [options] <domain> <command> [params...]`,
-    `${paint('1', 'Options')}  -f force  ·  -v, --version  ·  help, -h, --help, /h, /help, /?`,
+    `${paint('1', 'Options')}  -force  ·  -v, -version  ·  help [domain] [command]`,
   ]
 
   const categories = [...new Set(commands.map(command => command.category))].sort()

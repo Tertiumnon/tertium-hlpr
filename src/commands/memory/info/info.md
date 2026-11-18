@@ -5,7 +5,7 @@ Show total, used, and free physical memory.
 ```sh
 hlpr memory info
 hlpr memory status
-hlpr memory info --help
+hlpr help memory info
 ```
 
 Free memory is the value reported by the operating system; it can include memory

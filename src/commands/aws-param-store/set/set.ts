@@ -5,7 +5,7 @@ import { setEnvKey, validateEnvKey } from '../../../core/env-file.js'
 // @description Replace one KEY=value line in a .env value stored in AWS Parameter Store
 
 // Literal on purpose: `hlpr help` scrapes "Usage:" lines from this source file.
-const USAGE = 'Usage: hlpr aws-param-store set -name <param name> -key <variable> [-value <value>]'
+const USAGE = 'Usage: hlpr aws-param-store set --name=<param name> --key=<variable> [--value=<value>]'
 
 export interface SetOptions {
   name: string
@@ -15,9 +15,11 @@ export interface SetOptions {
 
 export function parseSetArgs(args: string[]): SetOptions {
   const values: Record<string, string> = {}
-  for (let index = 0; index < args.length; index += 2) {
-    const flag = args[index]
-    const value = args[index + 1]
+  for (const arg of args) {
+    const match = arg.match(/^--([a-z-]+)=(.*)$/s)
+    if (!match) throw new Error(USAGE)
+    const flag = `-${match[1]}`
+    const value = match[2]
     if (!['-name', '-key', '-value'].includes(flag) || values[flag] !== undefined || value === undefined) throw new Error(USAGE)
     if (value.startsWith('-') && flag !== '-value') throw new Error(USAGE)
     values[flag] = value
@@ -38,7 +40,7 @@ export function setParameterKey(name: string, key: string, value: string, aws: A
 async function main(): Promise<void> {
   const args = process.argv.slice(2)
   if (args.includes('-h') || args.includes('--help')) {
-    console.log(`${USAGE}\nReplaces the value of one KEY=value line in the stored .env value, and keeps every other line. The parameter keeps its type. The new value is read from stdin unless -value is given. Refuses a missing or repeated key.`)
+    console.log(`${USAGE}\nReplaces the value of one KEY=value line in the stored .env value, and keeps every other line. The parameter keeps its type. The new value is read from stdin unless --value is given. Refuses a missing or repeated key.`)
     return
   }
   const options = parseSetArgs(args)

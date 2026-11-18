@@ -1,21 +1,22 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process'
+import { parseFlags } from '../../../core/args.js'
 
-// @description Rename the default branch of the current GitHub repository with gh: -default-branch <name> -to <new name>
+// @description Rename the default branch of the current GitHub repository with gh: --default-branch=<name> --to=<new name>
 
 // Literal on purpose: `hlpr help` scrapes "Usage:" lines from this source file.
-const USAGE = 'Usage: hlpr gh change -default-branch <name> -to <new name>'
+const USAGE = 'Usage: hlpr gh change --default-branch=<name> --to=<new name>'
 
 export function parseChangeArgs(args: string[]): { defaultBranch: string; to: string } {
-  const branchIndex = args.indexOf('-default-branch')
-  const toIndex = args.indexOf('-to')
-  const defaultBranch = branchIndex === -1 ? undefined : args[branchIndex + 1]
-  const to = toIndex === -1 ? undefined : args[toIndex + 1]
-  const unknown = args.find((arg, index) => arg.startsWith('-') && index !== branchIndex && index !== toIndex)
-  if (unknown) throw new Error(`Unknown option ${unknown}. ${USAGE}`)
-  if (!defaultBranch || !to) throw new Error(USAGE)
+  let values: Record<string, string | true>
+  try { values = parseFlags(args, ['-default-branch', '-to']) }
+  catch (error) { throw new Error(`${error instanceof Error ? error.message : error}\n${USAGE}`) }
+  const defaultBranch = values['-default-branch']
+  const to = values['-to']
+  if (typeof defaultBranch !== 'string' || typeof to !== 'string') throw new Error(USAGE)
   if (/\s/.test(defaultBranch) || /\s/.test(to)) throw new Error(`Branch names cannot contain spaces. ${USAGE}`)
-  if (defaultBranch === to) throw new Error(`-to must differ from -default-branch. ${USAGE}`)
+  if (defaultBranch.startsWith('-') || to.startsWith('-')) throw new Error(`Branch names cannot start with a dash. ${USAGE}`)
+  if (defaultBranch === to) throw new Error(`--to must differ from --default-branch. ${USAGE}`)
   return { defaultBranch, to }
 }
 
@@ -29,7 +30,7 @@ function gh(args: string[]): string {
 async function main(): Promise<void> {
   const args = process.argv.slice(2)
   if (args.includes('-h') || args.includes('--help')) {
-    console.log(`${USAGE}\nRenames the default branch of the repository in the current directory and GitHub switches the default to the new name.\nRefuses to run unless the repository's current default branch is -default-branch.\nRequires the GitHub CLI (gh), logged in with push rights to the repository.`)
+    console.log(`${USAGE}\nRenames the default branch of the repository in the current directory and GitHub switches the default to the new name.\nRefuses to run unless the repository's current default branch is --default-branch.\nRequires the GitHub CLI (gh), logged in with push rights to the repository.`)
     return
   }
   const { defaultBranch, to } = parseChangeArgs(args)

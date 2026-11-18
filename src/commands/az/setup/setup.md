@@ -3,8 +3,8 @@
 Writes `azure-pipelines.yml`, which deploys to a production server over SSH from Azure Pipelines whenever a `v*` tag is pushed.
 
 ```bash
-hlpr az setup -workflow deploy [projectPath]
-hlpr az setup -workflow deploy -force
+hlpr az setup --workflow=deploy [--path=<projectPath>]
+hlpr az setup --workflow=deploy -force
 ```
 
 The command asks for the project name, target environment, whether the project uses Prisma, the SSH service connection name, and the deploy path. Defaults come from `.env.{environment}` (or `.env`):

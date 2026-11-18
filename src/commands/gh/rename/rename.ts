@@ -1,21 +1,21 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process'
+import { parseFlags } from '../../../core/args.js'
 
-// @description Rename a GitHub repository with gh: -repo <owner/repo> -to <new name>
+// @description Rename a GitHub repository with gh: --repo=<owner/repo> --to=<new name>
 
 // Literal on purpose: `hlpr help` scrapes "Usage:" lines from this source file.
-const USAGE = 'Usage: hlpr gh rename -repo <owner/repo> -to <new repo name>'
+const USAGE = 'Usage: hlpr gh rename --repo=<owner/repo> --to=<new repo name>'
 
 export function parseRenameArgs(args: string[]): { repo: string; to: string } {
-  const repoIndex = args.indexOf('-repo')
-  const toIndex = args.indexOf('-to')
-  const repo = repoIndex === -1 ? undefined : args[repoIndex + 1]
-  const to = toIndex === -1 ? undefined : args[toIndex + 1]
-  const unknown = args.find((arg, index) => arg.startsWith('-') && index !== repoIndex && index !== toIndex)
-  if (unknown) throw new Error(`Unknown option ${unknown}. ${USAGE}`)
-  if (!repo || !to) throw new Error(USAGE)
-  if (!/^[^/\s]+\/[^/\s]+$/.test(repo)) throw new Error(`-repo must be OWNER/REPO, got "${repo}". ${USAGE}`)
-  if (/[/\s]/.test(to)) throw new Error(`-to must be the new name without an owner, got "${to}". ${USAGE}`)
+  let values: Record<string, string | true>
+  try { values = parseFlags(args, ['-repo', '-to']) }
+  catch (error) { throw new Error(`${error instanceof Error ? error.message : error}\n${USAGE}`) }
+  const repo = values['-repo']
+  const to = values['-to']
+  if (typeof repo !== 'string' || typeof to !== 'string') throw new Error(USAGE)
+  if (repo.startsWith('-') || !/^[^/\s]+\/[^/\s]+$/.test(repo)) throw new Error(`--repo must be OWNER/REPO, got "${repo}". ${USAGE}`)
+  if (to.startsWith('-') || /[/\s]/.test(to)) throw new Error(`--to must be the new name without an owner, got "${to}". ${USAGE}`)
   return { repo, to }
 }
 

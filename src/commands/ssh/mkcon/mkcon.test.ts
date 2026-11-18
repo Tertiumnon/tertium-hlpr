@@ -36,19 +36,19 @@ test('creates a local backup even when SSH config did not exist', async () => {
   } finally { await rm(dir, { recursive: true, force: true }) }
 })
 
-test.skipIf(process.platform === 'win32')('backs up remote authorized_keys before installing a key', async () => {
+test('backs up remote authorized_keys and separates a key when the file has no final newline', async () => {
   const dir = await mkdtemp(path.join(os.tmpdir(), 'hlpr-ssh-'))
   try {
     const sshDir = path.join(dir, '.ssh')
     await mkdir(sshDir)
-    await writeFile(path.join(sshDir, 'authorized_keys'), 'existing-key\n')
+    await writeFile(path.join(sshDir, 'authorized_keys'), 'existing-key')
     const key = 'ssh-ed25519 AAAAtest test@example'
     const run = spawnSync('sh', ['-c', remoteAuthorizationCommand], { env: { ...process.env, HOME: dir }, input: `${key}\n`, encoding: 'utf8' })
     expect(run.status).toBe(0)
     const backup = run.stdout.match(/Remote backup: (.+)/)?.[1]
     expect(backup).toBeDefined()
     if (!backup) throw new Error(run.stderr)
-    expect(await readFile(backup, 'utf8')).toBe('existing-key\n')
+    expect(await readFile(path.join(sshDir, path.posix.basename(backup)), 'utf8')).toBe('existing-key')
     expect(await readFile(path.join(sshDir, 'authorized_keys'), 'utf8')).toBe(`existing-key\n${key}\n`)
   } finally { await rm(dir, { recursive: true, force: true }) }
 })

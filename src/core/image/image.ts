@@ -17,7 +17,7 @@ const windowsSize = `$ErrorActionPreference = 'Stop'; Add-Type -AssemblyName Sys
 export const parseBox = (size: string, align: string | undefined): Box | undefined => {
   const match = size.match(/^([1-9]\d*)x([1-9]\d*)$/)
   if (!match) return undefined
-  if (align !== undefined && !aligns.includes(align as Box['align'])) throw new Error(`Invalid -align "${align}". Use one of: ${aligns.join(', ')}`)
+  if (align !== undefined && !aligns.includes(align as Box['align'])) throw new Error(`Invalid --align "${align}". Use one of: ${aligns.join(', ')}`)
   return { width: Number(match[1]), height: Number(match[2]), align: (align ?? 'center') as Box['align'] }
 }
 

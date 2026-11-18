@@ -1,7 +1,7 @@
 #!/bin/bash
 # @description Fix permissions of ~/.ssh and its files for the current user
 
-usage="Usage: hlpr ssh fix --permissions"
+usage="Usage: hlpr ssh fix -permissions"
 
 case "${1:-}" in
   -h|--help)
@@ -11,7 +11,7 @@ case "${1:-}" in
     ;;
 esac
 
-if [[ $# -ne 1 || "$1" != "--permissions" ]]; then
+if [[ $# -ne 1 || "$1" != "-permissions" ]]; then
   echo "$usage" >&2
   exit 1
 fi

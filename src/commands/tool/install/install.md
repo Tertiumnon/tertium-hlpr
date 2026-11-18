@@ -4,20 +4,20 @@ Install Docker, htop, fastfetch, Starship, Claude CLI, Codex CLI, Copilot CLI, o
 
 ```bash
 hlpr tool install
-hlpr tool install starship
-hlpr tool install psreadline
-hlpr tool install pstop
-hlpr tool install tldr
-hlpr tool install docker
-hlpr tool install oh-my-zsh
-hlpr tool install htop
-hlpr tool install fastfetch
-hlpr tool install claude-cli
-hlpr tool install -name codex-cli
-hlpr tool install -n copilot-cli
+hlpr tool install --name=starship
+hlpr tool install --name=psreadline
+hlpr tool install --name=pstop
+hlpr tool install --name=tldr
+hlpr tool install --name=docker
+hlpr tool install --name=oh-my-zsh
+hlpr tool install --name=htop
+hlpr tool install --name=fastfetch
+hlpr tool install --name=claude-cli
+hlpr tool install --name=codex-cli
+hlpr tool install --name=copilot-cli
 ```
 
-The menu uses ↑/↓, Enter or Space to install, and Esc to cancel. Name a tool as `hlpr tool install claude-cli` or with `-name claude-cli` (`-n` also works). Extra arguments are rejected. For Node.js, Python, Bun, Rust, and Go, use [`hlpr runtime install`](../../runtime/install/install.md).
+The menu uses ↑/↓, Enter or Space to install, and Esc to cancel. Name a tool as `hlpr tool install --name=claude-cli`. Extra arguments are rejected. For Node.js, Python, Bun, Rust, and Go, use [`hlpr runtime install`](../../runtime/install/install.md).
 
 | Tool | Supported environment |
 | --- | --- |
